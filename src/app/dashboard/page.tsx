@@ -187,17 +187,46 @@ export default function DashboardPage() {
     });
   };
 
-  const handleMainImg = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 1. 메인 이미지 업로드 함수 (사진 창고로 바로 쏘기)
+    const handleMainImg = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) set("mainImage", await fileToBase64(file));
+    if (!file) return;
+
+    const fileName = `${Date.now()}-${file.name}`; // 중복 방지용 이름
+    
+    // Supabase 사진 창고에 업로드
+    const { error } = await supabase.storage.from('wedding-photos').upload(fileName, file);
+    if (error) {
+      alert('사진 업로드 실패: ' + error.message);
+      return;
+    }
+
+    // 업로드된 사진의 짧은 주소만 가져와서 화면에 적용
+    const { data: urlData } = supabase.storage.from('wedding-photos').getPublicUrl(fileName);
+    set("mainImage", urlData.publicUrl);
     e.target.value = "";
   };
 
+  // 2. 갤러리 사진 여러 장 업로드 함수
   const handlePhotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
-    const b64s = await Promise.all(files.map(fileToBase64));
-    setData((prev) => ({ ...prev, photos: [...(prev.photos ?? []), ...b64s] }));
+
+    const uploadedUrls = [];
+
+    // 사진을 한 장씩 창고에 넣고 주소를 받아옴
+    for (const file of files) {
+      const fileName = `${Date.now()}-${file.name}`;
+      const { error } = await supabase.storage.from('wedding-photos').upload(fileName, file);
+      
+      if (!error) {
+        const { data: urlData } = supabase.storage.from('wedding-photos').getPublicUrl(fileName);
+        uploadedUrls.push(urlData.publicUrl);
+      }
+    }
+
+    // 기존 사진 주소들에 새 주소들 이어붙이기
+    setData((prev) => ({ ...prev, photos: [...(prev.photos ?? []), ...uploadedUrls] }));
     e.target.value = "";
   };
 
