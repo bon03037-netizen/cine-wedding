@@ -6,6 +6,7 @@ import {
   useScroll,
   useTransform,
   AnimatePresence,
+  useInView,
 } from "framer-motion";
 import { X, Copy, Check, MapPin, Calendar, ChevronDown } from "lucide-react";
 
@@ -25,6 +26,7 @@ export interface ParentInfo {
 }
 
 export interface TransportInfo {
+  subway?: string;
   bus?: string;
   car?: string;
 }
@@ -47,27 +49,28 @@ export interface WeddingData {
   transport?: TransportInfo;
 }
 
-// ── Film Perforations ─────────────────────────────────────────────────────────
+// ── Shared Atoms ──────────────────────────────────────────────────────────────
 
-function Perforations() {
+function Perforations({ count = 10 }: { count?: number }) {
   return (
     <div
       style={{
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: "6px 6px",
+        padding: "5px 8px",
+        background: "#090909",
       }}
     >
-      {Array.from({ length: 8 }).map((_, i) => (
+      {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
           style={{
-            width: 7,
-            height: 5,
-            background: "#111",
-            border: "0.5px solid #2a2a2a",
-            borderRadius: 1,
+            width: 9,
+            height: 6,
+            background: "#141414",
+            border: "0.5px solid #1e1e1e",
+            borderRadius: 1.5,
             flexShrink: 0,
           }}
         />
@@ -76,7 +79,88 @@ function Perforations() {
   );
 }
 
-// ── Film Card ─────────────────────────────────────────────────────────────────
+function FilmGrain() {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        opacity: 0.11,
+        pointerEvents: "none",
+        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")`,
+        mixBlendMode: "screen",
+      }}
+    />
+  );
+}
+
+function FadeIn({
+  children,
+  delay = 0,
+  style,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  style?: React.CSSProperties;
+}) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.18 });
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 20 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 1.1, delay, ease: [0.22, 1, 0.36, 1] }}
+      style={style}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// ── Copy Button ───────────────────────────────────────────────────────────────
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2200);
+  };
+  return (
+    <button
+      onClick={handleCopy}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 5,
+        padding: "7px 13px",
+        border: "1px solid #262626",
+        borderRadius: 999,
+        background: "none",
+        color: copied ? "#6ee7b7" : "#555",
+        cursor: "pointer",
+        fontSize: 11,
+        flexShrink: 0,
+        transition: "color 0.2s",
+        fontFamily: "monospace",
+        letterSpacing: "0.04em",
+      }}
+    >
+      {copied ? (
+        <>
+          <Check size={10} /> 복사됨
+        </>
+      ) : (
+        <>
+          <Copy size={10} /> 복사
+        </>
+      )}
+    </button>
+  );
+}
+
+// ── Film Card (for 3D drum modal) ─────────────────────────────────────────────
 
 function FilmCard({
   src,
@@ -92,22 +176,20 @@ function FilmCard({
       style={{
         width: 240,
         height: 340,
-        background: "#0c0c0c",
-        borderRadius: 4,
+        background: "#0a0a0a",
+        borderRadius: 3,
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
-        boxShadow: "0 0 0 1px #1f1f1f, 0 16px 60px rgba(0,0,0,0.95)",
+        boxShadow: "0 0 0 1px #1e1e1e, 0 18px 70px rgba(0,0,0,0.97)",
       }}
     >
-      <Perforations />
-
-      {/* Photo — 3:4 */}
+      <Perforations count={8} />
       <div
         style={{
           flex: 1,
           margin: "0 8px",
-          background: "#1a1a1a",
+          background: "#111",
           overflow: "hidden",
           position: "relative",
         }}
@@ -130,37 +212,51 @@ function FilmCard({
               gap: 8,
             }}
           >
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2e2e2e" strokeWidth="1.2">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2a2a2a" strokeWidth="1.1">
               <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
               <circle cx="12" cy="13" r="4" />
             </svg>
-            <span style={{ fontFamily: "monospace", fontSize: 9, color: "#2e2e2e" }}>
+            <span style={{ fontFamily: "monospace", fontSize: 8, color: "#252525" }}>
               {String(index + 1).padStart(2, "0")}
             </span>
           </div>
         )}
+        <FilmGrain />
       </div>
-
-      <Perforations />
-
+      <Perforations count={8} />
+      {/* Kodak edge */}
       <div
         style={{
-          padding: "0 8px 5px",
-          textAlign: "right",
+          padding: "0 9px 4px",
+          display: "flex",
+          justifyContent: "space-between",
           fontFamily: "monospace",
-          fontSize: 8,
-          color: "#252525",
+          fontSize: 7,
+          color: "rgba(255,160,0,0.18)",
+          letterSpacing: "0.15em",
         }}
       >
-        {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+        <span>○ {String(index + 1).padStart(2, "0")}</span>
+        <span>KODAK 400TX</span>
+        <span>{String(index + 1).padStart(2, "0")}/{String(total).padStart(2, "0")} ▷</span>
       </div>
     </div>
   );
 }
 
-// ── Film Album (3D Drum) ──────────────────────────────────────────────────────
+// ── Film Album Modal (3D Drum) ─────────────────────────────────────────────────
 
-function FilmAlbum({ photos, onClose }: { photos: string[]; onClose: () => void }) {
+function FilmAlbum({
+  photos,
+  groom,
+  bride,
+  onClose,
+}: {
+  photos: string[];
+  groom: string;
+  bride: string;
+  onClose: () => void;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const N = Math.max(photos.length, 1);
   const ANGLE_PER = 360 / N;
@@ -189,30 +285,54 @@ function FilmAlbum({ photos, onClose }: { photos: string[]; onClose: () => void 
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "16px 20px",
-          borderBottom: "1px solid #181818",
+          padding: "16px 22px",
+          borderBottom: "1px solid #141414",
         }}
       >
-        <span
-          style={{
-            fontFamily: "monospace",
-            fontSize: 10,
-            letterSpacing: "0.35em",
-            color: "#3a3a3a",
-            textTransform: "uppercase",
-          }}
-        >
-          Our Story
-        </span>
+        <div>
+          <p
+            style={{
+              fontFamily: "monospace",
+              fontSize: 9,
+              letterSpacing: "0.45em",
+              color: "#2e2e2e",
+              textTransform: "uppercase",
+              marginBottom: 4,
+            }}
+          >
+            Our Story
+          </p>
+          <p
+            style={{
+              fontFamily: "var(--font-serif-kr), serif",
+              fontSize: 12,
+              color: "#303030",
+              letterSpacing: "0.18em",
+            }}
+          >
+            {groom} · {bride}
+          </p>
+        </div>
         <button
           onClick={onClose}
-          style={{ color: "#444", background: "none", border: "none", cursor: "pointer", display: "flex" }}
+          style={{
+            color: "#444",
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid #1e1e1e",
+            borderRadius: "50%",
+            width: 36,
+            height: 36,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+          }}
         >
-          <X size={18} />
+          <X size={15} />
         </button>
       </div>
 
-      {/* Scrollable container */}
+      {/* 3D Drum scroll */}
       <div ref={containerRef} style={{ flex: 1, overflowY: "scroll", position: "relative" }}>
         <div style={{ height: `${N * 720}px` }}>
           <div
@@ -228,7 +348,6 @@ function FilmAlbum({ photos, onClose }: { photos: string[]; onClose: () => void 
               overflow: "hidden",
             }}
           >
-            {/* 3D Drum */}
             <motion.div
               style={{
                 rotateX: drumRotateX,
@@ -254,7 +373,6 @@ function FilmAlbum({ photos, onClose }: { photos: string[]; onClose: () => void 
               ))}
             </motion.div>
 
-            {/* Scroll hint */}
             <motion.div
               style={{
                 position: "absolute",
@@ -265,13 +383,13 @@ function FilmAlbum({ photos, onClose }: { photos: string[]; onClose: () => void 
                 flexDirection: "column",
                 alignItems: "center",
                 gap: 4,
-                color: "#2e2e2e",
+                color: "#242424",
                 pointerEvents: "none",
               }}
               animate={{ y: [0, 6, 0] }}
               transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
             >
-              <ChevronDown size={15} />
+              <ChevronDown size={14} />
               <span style={{ fontFamily: "monospace", fontSize: 8, letterSpacing: "0.35em" }}>
                 SCROLL
               </span>
@@ -280,44 +398,6 @@ function FilmAlbum({ photos, onClose }: { photos: string[]; onClose: () => void 
         </div>
       </div>
     </motion.div>
-  );
-}
-
-// ── Copy Button ───────────────────────────────────────────────────────────────
-
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <button
-      onClick={handleCopy}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 5,
-        padding: "6px 12px",
-        border: "1px solid #252525",
-        borderRadius: 999,
-        background: "none",
-        color: copied ? "#6ee7b7" : "#555",
-        cursor: "pointer",
-        fontSize: 11,
-        flexShrink: 0,
-        transition: "color 0.2s",
-      }}
-    >
-      {copied ? (
-        <><Check size={10} /> 복사됨</>
-      ) : (
-        <><Copy size={10} /> 복사</>
-      )}
-    </button>
   );
 }
 
@@ -336,18 +416,16 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
   const sans = "Pretendard, -apple-system, BlinkMacSystemFont, sans-serif";
   const mono = "monospace";
 
-  const divider: React.CSSProperties = { borderTop: "1px solid #181818" };
-  const sectionPad: React.CSSProperties = {
-    padding: preview ? "20px 20px" : "56px 28px",
-  };
-  const sectionLabel: React.CSSProperties = {
+  const divider: React.CSSProperties = { borderTop: "1px solid #161616" };
+  const sp: React.CSSProperties = { padding: preview ? "20px 18px" : "56px 28px" };
+  const slabel: React.CSSProperties = {
+    fontFamily: mono,
     fontSize: 9,
-    letterSpacing: "0.35em",
-    color: "#303030",
+    letterSpacing: "0.45em",
+    color: "#282828",
     textTransform: "uppercase",
     textAlign: "center",
-    marginBottom: preview ? 14 : 28,
-    fontFamily: mono,
+    marginBottom: preview ? 12 : 26,
   };
 
   return (
@@ -360,105 +438,183 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         position: "relative",
       }}
     >
-      {/* ── HERO ─────────────────────────────────────────────── */}
+      {/* ── § 1  HERO ────────────────────────────────────────────────────── */}
       <section
         style={{
           position: "relative",
           height: preview ? 260 : "100svh",
           display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "center",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "flex-end",
           overflow: "hidden",
         }}
       >
-        {/* BG */}
+        {/* Film perforations — top */}
+        {!preview && (
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 3 }}>
+            <Perforations count={12} />
+          </div>
+        )}
+
+        {/* Background */}
         {data.mainImage ? (
           <img
             src={data.mainImage}
             alt=""
             style={{
-              position: "absolute", inset: 0,
-              width: "100%", height: "100%",
-              objectFit: "cover", opacity: 0.5,
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              opacity: 0.52,
             }}
           />
         ) : (
           <div
             style={{
-              position: "absolute", inset: 0,
-              background: "linear-gradient(155deg, #181818 0%, #0c0c0c 55%, #111 100%)",
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(158deg, #1a1a18 0%, #0c0c0a 55%, #111 100%)",
             }}
           />
         )}
+
         {/* Vignette */}
         <div
           style={{
-            position: "absolute", inset: 0,
-            background: "radial-gradient(ellipse at center, transparent 20%, rgba(0,0,0,0.8) 100%)",
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(ellipse at center, transparent 18%, rgba(0,0,0,0.84) 100%)",
           }}
         />
 
-        {/* Content */}
+        {/* Film grain */}
+        <FilmGrain />
+
+        {/* Film edge numbers */}
+        {!preview && (
+          <>
+            <div
+              style={{
+                position: "absolute",
+                top: 36,
+                left: 18,
+                zIndex: 2,
+                fontFamily: mono,
+                fontSize: 8,
+                color: "#1e1e1e",
+                letterSpacing: "0.22em",
+              }}
+            >
+              KODAK · 400TX
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                top: 36,
+                right: 18,
+                zIndex: 2,
+                fontFamily: mono,
+                fontSize: 8,
+                color: "#1e1e1e",
+                letterSpacing: "0.22em",
+              }}
+            >
+              ▷ 01
+            </div>
+          </>
+        )}
+
+        {/* Hero content */}
         <div
           style={{
-            position: "relative", zIndex: 1,
+            position: "relative",
+            zIndex: 2,
             textAlign: "center",
-            padding: preview ? "0 16px 20px" : "0 28px 90px",
+            padding: preview ? "0 16px 20px" : "0 28px 88px",
+            width: "100%",
           }}
         >
-          <p style={{ fontSize: 9, letterSpacing: "0.45em", color: "#3a3a3a", textTransform: "uppercase", marginBottom: 14, fontFamily: mono }}>
+          <p
+            style={{
+              fontFamily: mono,
+              fontSize: 8,
+              letterSpacing: "0.55em",
+              color: "#242424",
+              textTransform: "uppercase",
+              marginBottom: preview ? 10 : 18,
+            }}
+          >
             Wedding Invitation
           </p>
           <h1
             style={{
-              fontSize: preview ? 20 : 34,
-              fontWeight: 300,
-              letterSpacing: "0.18em",
-              color: "#efefef",
               fontFamily: serif,
+              fontSize: preview ? 21 : 38,
+              fontWeight: 300,
+              letterSpacing: "0.2em",
+              color: "#f0f0f0",
               margin: 0,
-              lineHeight: 1.3,
+              lineHeight: 1.25,
             }}
           >
             {data.groomName || "신랑"}
-            <span style={{ color: "#3a3a3a", margin: "0 10px", fontWeight: 200 }}>&</span>
-            {data.brideName || "신부"}
-          </h1>
-          <p style={{ fontSize: preview ? 10 : 12, color: "#555", marginTop: 12, letterSpacing: "0.2em" }}>
-            {data.date}
-          </p>
-          <p style={{ fontSize: preview ? 9 : 11, color: "#383838", marginTop: 4, letterSpacing: "0.12em" }}>
-            {data.venue}
-          </p>
-
-          {photos.length > 0 && !preview && (
-            <motion.button
-              onClick={() => setAlbumOpen(true)}
-              whileHover={{ scale: 1.04, borderColor: "#666", color: "#bbb" }}
-              whileTap={{ scale: 0.97 }}
+            <span
               style={{
-                marginTop: 32,
-                padding: "10px 26px",
-                border: "1px solid #2e2e2e",
-                borderRadius: 999,
-                background: "none",
-                color: "#888",
-                fontSize: 12,
-                letterSpacing: "0.2em",
-                cursor: "pointer",
-                fontFamily: sans,
-                transition: "border-color 0.2s, color 0.2s",
+                color: "#282828",
+                margin: "0 8px",
+                fontSize: "0.72em",
+                fontWeight: 200,
               }}
             >
-              우리들의 이야기
-            </motion.button>
-          )}
+              ·
+            </span>
+            {data.brideName || "신부"}
+          </h1>
+
+          {/* Gold line */}
+          <div
+            style={{
+              width: 26,
+              height: 1,
+              background: "rgba(184,146,42,0.45)",
+              margin: preview ? "9px auto" : "16px auto",
+            }}
+          />
+
+          <p
+            style={{
+              fontFamily: serif,
+              fontSize: preview ? 10 : 13,
+              color: "#484848",
+              letterSpacing: "0.2em",
+            }}
+          >
+            {data.date}
+          </p>
         </div>
 
-        {/* Scroll arrow */}
+        {/* Film perforations — bottom */}
+        {!preview && (
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 3 }}>
+            <Perforations count={12} />
+          </div>
+        )}
+
+        {/* Scroll hint */}
         {!preview && (
           <motion.div
-            style={{ position: "absolute", bottom: 28, left: "50%", x: "-50%", color: "#2e2e2e" }}
+            style={{
+              position: "absolute",
+              bottom: 30,
+              left: "50%",
+              x: "-50%",
+              color: "#242424",
+              zIndex: 4,
+            }}
             animate={{ y: [0, 6, 0] }}
             transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
           >
@@ -467,199 +623,815 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         )}
       </section>
 
-      {/* ── GREETING ─────────────────────────────────────────── */}
-      <section style={{ ...divider, ...sectionPad, textAlign: "center" }}>
-        <p
-          style={{
-            fontSize: preview ? 11 : 14,
-            lineHeight: 2.4,
-            color: "#888",
-            whiteSpace: "pre-line",
-            fontFamily: serif,
-            fontWeight: 300,
-          }}
-        >
-          {data.greeting || "두 사람이 하나가 되는 날,\n소중한 자리에 함께해 주세요."}
-        </p>
-      </section>
-
-      {/* ── COUPLE INFO ──────────────────────────────────────── */}
-      <section style={{ ...divider, ...sectionPad }}>
-        <p style={sectionLabel}>The Couple</p>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, textAlign: "center" }}>
-          {(["groom", "bride"] as const).map((side) => {
-            const name = side === "groom" ? data.groomName : data.brideName;
-            const parents = side === "groom" ? data.groomParents : data.brideParents;
-            const relation = side === "groom" ? "아들" : "딸";
-            return (
-              <div key={side}>
-                <p style={{ fontSize: 9, color: "#383838", marginBottom: 5, letterSpacing: "0.1em", fontFamily: mono }}>
-                  {side === "groom" ? "신랑" : "신부"}
-                </p>
-                <p
-                  style={{
-                    fontSize: preview ? 14 : 18,
-                    fontWeight: 300,
-                    fontFamily: serif,
-                    letterSpacing: "0.12em",
-                    color: "#d0d0d0",
-                  }}
-                >
-                  {name}
-                </p>
-                {parents && (
-                  <div style={{ marginTop: 8 }}>
-                    {parents.fatherName && (
-                      <p style={{ fontSize: 10, color: "#404040", lineHeight: 1.9 }}>
-                        {parents.isFatherDeceased && <span style={{ color: "#505050", marginRight: 3 }}>故</span>}
-                        {parents.fatherName}의 {relation}
-                      </p>
-                    )}
-                    {parents.motherName && (
-                      <p style={{ fontSize: 10, color: "#404040", lineHeight: 1.9 }}>
-                        {parents.isMotherDeceased && <span style={{ color: "#505050", marginRight: 3 }}>故</span>}
-                        {parents.motherName}의 {relation}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* ── VENUE ────────────────────────────────────────────── */}
-      <section style={{ ...divider, ...sectionPad }}>
-        <p style={sectionLabel}>Venue</p>
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-            <Calendar size={13} color="#383838" style={{ marginTop: 2, flexShrink: 0 }} />
-            <div>
-              <p style={{ fontSize: 13, color: "#c0c0c0" }}>{data.date}</p>
-              <p style={{ fontSize: 11, color: "#505050", marginTop: 3 }}>{data.time}</p>
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-            <MapPin size={13} color="#383838" style={{ marginTop: 2, flexShrink: 0 }} />
-            <div>
-              <p style={{ fontSize: 13, color: "#c0c0c0" }}>{data.venue}</p>
-              <p style={{ fontSize: 11, color: "#505050", marginTop: 3 }}>{data.address}</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── MAP ──────────────────────────────────────────────── */}
-      <section style={divider}>
-        <p style={{ ...sectionLabel, padding: preview ? "16px 0 12px" : "40px 0 20px", marginBottom: 0 }}>
-          오시는 길
-        </p>
-        {data.mapEmbedUrl ? (
-          <iframe
-            src={data.mapEmbedUrl}
-            style={{
-              width: "100%",
-              height: preview ? 130 : 220,
-              border: "none",
-              display: "block",
-              filter: "grayscale(1) invert(0.9) brightness(0.85)",
-            }}
-            loading="lazy"
-          />
-        ) : (
+      {/* ── § 2  BRIEF INTRO ────────────────────────────────────────────── */}
+      <section
+        style={{
+          ...divider,
+          padding: preview ? "16px 18px" : "44px 28px",
+          textAlign: "center",
+        }}
+      >
+        <FadeIn>
+          <p style={slabel}>Date & Venue</p>
           <div
             style={{
-              margin: "0 20px",
-              marginBottom: preview ? 16 : 32,
-              height: preview ? 110 : 180,
-              background: "#111",
-              borderRadius: 8,
-              display: "flex",
+              display: "inline-flex",
+              flexDirection: "column",
+              gap: preview ? 7 : 12,
               alignItems: "center",
-              justifyContent: "center",
-              color: "#2a2a2a",
-              fontSize: 11,
-              fontFamily: mono,
-              letterSpacing: "0.1em",
             }}
           >
-            지도 미등록
+            <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+              <Calendar size={preview ? 10 : 12} color="#323232" />
+              <span
+                style={{
+                  fontFamily: serif,
+                  fontSize: preview ? 11 : 14,
+                  color: "#c0c0c0",
+                  letterSpacing: "0.1em",
+                }}
+              >
+                {data.date}&nbsp;&nbsp;{data.time}
+              </span>
+            </div>
+            <div style={{ width: 1, height: preview ? 8 : 14, background: "#1e1e1e" }} />
+            <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+              <MapPin size={preview ? 10 : 12} color="#323232" />
+              <span
+                style={{
+                  fontFamily: serif,
+                  fontSize: preview ? 11 : 14,
+                  color: "#787878",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                {data.venue}
+              </span>
+            </div>
           </div>
-        )}
+        </FadeIn>
       </section>
 
-      {/* ── TRANSPORT ────────────────────────────────────────── */}
-      {(data.transport?.bus || data.transport?.car) && (
-        <section style={{ ...divider, ...sectionPad }}>
-          <p style={sectionLabel}>오시는 방법</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {data.transport.bus && (
-              <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-                <span style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }}>🚌</span>
-                <p style={{ fontSize: 12, color: "#606060", lineHeight: 1.8 }}>{data.transport.bus}</p>
-              </div>
-            )}
-            {data.transport.car && (
-              <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-                <span style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }}>🚗</span>
-                <p style={{ fontSize: 12, color: "#606060", lineHeight: 1.8 }}>{data.transport.car}</p>
-              </div>
-            )}
+      {/* ── § 3  GREETING ────────────────────────────────────────────────── */}
+      <section style={{ ...divider, ...sp, textAlign: "center" }}>
+        <FadeIn>
+          <p style={slabel}>Greeting</p>
+          {/* Decorative top flourish */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              justifyContent: "center",
+              marginBottom: preview ? 12 : 22,
+            }}
+          >
+            <div style={{ flex: 1, maxWidth: 48, height: 1, background: "rgba(184,146,42,0.2)" }} />
+            <span style={{ color: "rgba(184,146,42,0.4)", fontSize: preview ? 10 : 13 }}>✦</span>
+            <div style={{ flex: 1, maxWidth: 48, height: 1, background: "rgba(184,146,42,0.2)" }} />
           </div>
-        </section>
-      )}
 
-      {/* ── ACCOUNTS ─────────────────────────────────────────── */}
-      {(data.groomAccount || data.brideAccount) && (
-        <section style={{ ...divider, ...sectionPad }}>
-          <p style={sectionLabel}>마음 전하기</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {[
-              { account: data.groomAccount, label: "신랑측" },
-              { account: data.brideAccount, label: "신부측" },
-            ].map(
-              ({ account, label }) =>
-                account && (
+          <p
+            style={{
+              fontFamily: serif,
+              fontSize: preview ? 11 : 15,
+              lineHeight: preview ? 2.2 : 2.6,
+              color: "#747474",
+              whiteSpace: "pre-line",
+              fontWeight: 300,
+              letterSpacing: "0.05em",
+            }}
+          >
+            {data.greeting || "두 사람이 하나가 되는 날,\n소중한 자리에 함께해 주세요."}
+          </p>
+
+          {/* Decorative bottom flourish */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              justifyContent: "center",
+              marginTop: preview ? 12 : 22,
+            }}
+          >
+            <div style={{ flex: 1, maxWidth: 48, height: 1, background: "rgba(184,146,42,0.2)" }} />
+            <span style={{ color: "rgba(184,146,42,0.4)", fontSize: preview ? 10 : 13 }}>✦</span>
+            <div style={{ flex: 1, maxWidth: 48, height: 1, background: "rgba(184,146,42,0.2)" }} />
+          </div>
+        </FadeIn>
+      </section>
+
+      {/* ── § 4  COUPLE INFO ─────────────────────────────────────────────── */}
+      <section style={{ ...divider, ...sp }}>
+        <FadeIn>
+          <p style={slabel}>The Couple</p>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr auto 1fr",
+              gap: 0,
+              alignItems: "start",
+            }}
+          >
+            {/* Groom */}
+            <div style={{ textAlign: "center" }}>
+              <p
+                style={{
+                  fontFamily: mono,
+                  fontSize: 8,
+                  color: "#242424",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  marginBottom: preview ? 5 : 8,
+                }}
+              >
+                신랑
+              </p>
+              <p
+                style={{
+                  fontFamily: serif,
+                  fontSize: preview ? 14 : 20,
+                  fontWeight: 300,
+                  letterSpacing: "0.18em",
+                  color: "#d4d4d4",
+                  marginBottom: preview ? 5 : 10,
+                }}
+              >
+                {data.groomName}
+              </p>
+              {data.groomParents && (
+                <div>
+                  {data.groomParents.fatherName && (
+                    <p
+                      style={{
+                        fontFamily: serif,
+                        fontSize: preview ? 9 : 11,
+                        color: "#333",
+                        lineHeight: preview ? 1.8 : 2.1,
+                      }}
+                    >
+                      {data.groomParents.isFatherDeceased && (
+                        <span style={{ color: "#383838" }}>故 </span>
+                      )}
+                      {data.groomParents.fatherName}의 아들
+                    </p>
+                  )}
+                  {data.groomParents.motherName && (
+                    <p
+                      style={{
+                        fontFamily: serif,
+                        fontSize: preview ? 9 : 11,
+                        color: "#333",
+                        lineHeight: preview ? 1.8 : 2.1,
+                      }}
+                    >
+                      {data.groomParents.isMotherDeceased && (
+                        <span style={{ color: "#383838" }}>故 </span>
+                      )}
+                      {data.groomParents.motherName}의 아들
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Center divider */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: `${preview ? 14 : 22}px 14px 0`,
+              }}
+            >
+              <div style={{ width: 1, height: preview ? 18 : 26, background: "#1e1e1e" }} />
+              <span
+                style={{
+                  fontFamily: serif,
+                  color: "#303030",
+                  fontSize: preview ? 13 : 18,
+                  margin: "5px 0",
+                }}
+              >
+                ∞
+              </span>
+              <div style={{ width: 1, height: preview ? 18 : 26, background: "#1e1e1e" }} />
+            </div>
+
+            {/* Bride */}
+            <div style={{ textAlign: "center" }}>
+              <p
+                style={{
+                  fontFamily: mono,
+                  fontSize: 8,
+                  color: "#242424",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  marginBottom: preview ? 5 : 8,
+                }}
+              >
+                신부
+              </p>
+              <p
+                style={{
+                  fontFamily: serif,
+                  fontSize: preview ? 14 : 20,
+                  fontWeight: 300,
+                  letterSpacing: "0.18em",
+                  color: "#d4d4d4",
+                  marginBottom: preview ? 5 : 10,
+                }}
+              >
+                {data.brideName}
+              </p>
+              {data.brideParents && (
+                <div>
+                  {data.brideParents.fatherName && (
+                    <p
+                      style={{
+                        fontFamily: serif,
+                        fontSize: preview ? 9 : 11,
+                        color: "#333",
+                        lineHeight: preview ? 1.8 : 2.1,
+                      }}
+                    >
+                      {data.brideParents.isFatherDeceased && (
+                        <span style={{ color: "#383838" }}>故 </span>
+                      )}
+                      {data.brideParents.fatherName}의 딸
+                    </p>
+                  )}
+                  {data.brideParents.motherName && (
+                    <p
+                      style={{
+                        fontFamily: serif,
+                        fontSize: preview ? 9 : 11,
+                        color: "#333",
+                        lineHeight: preview ? 1.8 : 2.1,
+                      }}
+                    >
+                      {data.brideParents.isMotherDeceased && (
+                        <span style={{ color: "#383838" }}>故 </span>
+                      )}
+                      {data.brideParents.motherName}의 딸
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </FadeIn>
+      </section>
+
+      {/* ── § 5  VENUE & MAP ──────────────────────────────────────────────── */}
+      <section style={{ ...divider, ...sp }}>
+        <FadeIn>
+          <p style={slabel}>Ceremony</p>
+
+          {/* Date + Time + Venue big display */}
+          <div
+            style={{
+              textAlign: "center",
+              marginBottom: preview ? 14 : 28,
+            }}
+          >
+            <p
+              style={{
+                fontFamily: serif,
+                fontSize: preview ? 13 : 19,
+                color: "#c4c4c4",
+                letterSpacing: "0.14em",
+                fontWeight: 300,
+                marginBottom: 4,
+              }}
+            >
+              {data.date}
+            </p>
+            <p
+              style={{
+                fontFamily: serif,
+                fontSize: preview ? 11 : 14,
+                color: "#4e4e4e",
+                letterSpacing: "0.12em",
+                marginBottom: preview ? 10 : 20,
+              }}
+            >
+              {data.time}
+            </p>
+
+            {/* Gold rule */}
+            <div
+              style={{
+                width: 24,
+                height: 1,
+                background: "rgba(184,146,42,0.35)",
+                margin: "0 auto",
+                marginBottom: preview ? 10 : 20,
+              }}
+            />
+
+            <p
+              style={{
+                fontFamily: serif,
+                fontSize: preview ? 13 : 18,
+                color: "#b0b0b0",
+                letterSpacing: "0.12em",
+                marginBottom: 5,
+              }}
+            >
+              {data.venue}
+            </p>
+            <p
+              style={{
+                fontFamily: sans,
+                fontSize: preview ? 10 : 12,
+                color: "#3a3a3a",
+                letterSpacing: "0.04em",
+              }}
+            >
+              {data.address}
+            </p>
+          </div>
+
+          {/* Map embed or placeholder */}
+          {data.mapEmbedUrl ? (
+            <iframe
+              src={data.mapEmbedUrl}
+              style={{
+                width: "100%",
+                height: preview ? 120 : 200,
+                border: "none",
+                display: "block",
+                borderRadius: 8,
+                filter: "grayscale(1) invert(0.88) brightness(0.78)",
+              }}
+              loading="lazy"
+            />
+          ) : (
+            <div
+              style={{
+                height: preview ? 90 : 160,
+                background: "#0f0f0f",
+                borderRadius: 8,
+                border: "1px solid #181818",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#1e1e1e",
+                fontSize: 10,
+                fontFamily: mono,
+                letterSpacing: "0.14em",
+              }}
+            >
+              지도 미등록
+            </div>
+          )}
+
+          {/* Naver + Kakao navigation buttons */}
+          {!preview && (
+            <div style={{ display: "flex", gap: 9, marginTop: 13 }}>
+              <a
+                href={`https://map.naver.com/v5/search/${encodeURIComponent(
+                  data.venue || data.address
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  padding: "12px 0",
+                  background: "#03C75A",
+                  borderRadius: 10,
+                  color: "#fff",
+                  fontSize: 13,
+                  fontFamily: sans,
+                  textDecoration: "none",
+                  letterSpacing: "0.04em",
+                  fontWeight: 500,
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                </svg>
+                네이버 지도
+              </a>
+              <a
+                href={`https://map.kakao.com/?q=${encodeURIComponent(
+                  data.venue || data.address
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  padding: "12px 0",
+                  background: "#FEE500",
+                  borderRadius: 10,
+                  color: "#3C1E1E",
+                  fontSize: 13,
+                  fontFamily: sans,
+                  textDecoration: "none",
+                  letterSpacing: "0.04em",
+                  fontWeight: 500,
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#3C1E1E">
+                  <path d="M12 3C6.48 3 2 6.92 2 11.77c0 3.1 1.73 5.83 4.37 7.49-.19.65-.68 2.34-.78 2.7-.12.44.16.44.34.32.14-.1 1.89-1.24 2.66-1.74.78.1 1.58.16 2.41.16 5.52 0 10-3.92 10-8.77C22 6.92 17.52 3 12 3z" />
+                </svg>
+                카카오내비
+              </a>
+            </div>
+          )}
+        </FadeIn>
+      </section>
+
+      {/* ── § 6  TRANSPORT ───────────────────────────────────────────────── */}
+      {(data.transport?.subway || data.transport?.bus || data.transport?.car) && (
+        <section style={{ ...divider, ...sp }}>
+          <FadeIn>
+            <p style={slabel}>오 시 는 길</p>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: preview ? 10 : 16,
+              }}
+            >
+              {data.transport?.subway && (
+                <div style={{ display: "flex", gap: 13, alignItems: "flex-start" }}>
                   <div
-                    key={label}
                     style={{
+                      width: preview ? 28 : 36,
+                      height: preview ? 28 : 36,
+                      flexShrink: 0,
+                      background: "#0f0f0f",
+                      border: "1px solid #1c1c1c",
+                      borderRadius: 9,
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "space-between",
-                      background: "#111",
-                      borderRadius: 12,
-                      padding: "12px 14px",
+                      justifyContent: "center",
+                      fontSize: preview ? 13 : 17,
                     }}
                   >
-                    <div>
-                      <p style={{ fontSize: 9, color: "#383838", marginBottom: 4, fontFamily: mono, letterSpacing: "0.1em" }}>
-                        {label}
-                      </p>
-                      <p style={{ fontSize: 12, color: "#b0b0b0" }}>
-                        {account.bank} {account.number}
-                      </p>
-                      <p style={{ fontSize: 10, color: "#454545", marginTop: 3 }}>{account.holder}</p>
-                    </div>
-                    <CopyButton text={account.number} />
+                    🚇
                   </div>
-                )
-            )}
-          </div>
+                  <div>
+                    <p
+                      style={{
+                        fontFamily: mono,
+                        fontSize: 8,
+                        color: "#262626",
+                        letterSpacing: "0.15em",
+                        textTransform: "uppercase",
+                        marginBottom: 5,
+                      }}
+                    >
+                      지하철
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: sans,
+                        fontSize: preview ? 10 : 12,
+                        color: "#525252",
+                        lineHeight: 1.85,
+                      }}
+                    >
+                      {data.transport.subway}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {data.transport?.bus && (
+                <div style={{ display: "flex", gap: 13, alignItems: "flex-start" }}>
+                  <div
+                    style={{
+                      width: preview ? 28 : 36,
+                      height: preview ? 28 : 36,
+                      flexShrink: 0,
+                      background: "#0f0f0f",
+                      border: "1px solid #1c1c1c",
+                      borderRadius: 9,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: preview ? 13 : 17,
+                    }}
+                  >
+                    🚌
+                  </div>
+                  <div>
+                    <p
+                      style={{
+                        fontFamily: mono,
+                        fontSize: 8,
+                        color: "#262626",
+                        letterSpacing: "0.15em",
+                        textTransform: "uppercase",
+                        marginBottom: 5,
+                      }}
+                    >
+                      버스
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: sans,
+                        fontSize: preview ? 10 : 12,
+                        color: "#525252",
+                        lineHeight: 1.85,
+                      }}
+                    >
+                      {data.transport.bus}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {data.transport?.car && (
+                <div style={{ display: "flex", gap: 13, alignItems: "flex-start" }}>
+                  <div
+                    style={{
+                      width: preview ? 28 : 36,
+                      height: preview ? 28 : 36,
+                      flexShrink: 0,
+                      background: "#0f0f0f",
+                      border: "1px solid #1c1c1c",
+                      borderRadius: 9,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: preview ? 13 : 17,
+                    }}
+                  >
+                    🚗
+                  </div>
+                  <div>
+                    <p
+                      style={{
+                        fontFamily: mono,
+                        fontSize: 8,
+                        color: "#262626",
+                        letterSpacing: "0.15em",
+                        textTransform: "uppercase",
+                        marginBottom: 5,
+                      }}
+                    >
+                      자가용
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: sans,
+                        fontSize: preview ? 10 : 12,
+                        color: "#525252",
+                        lineHeight: 1.85,
+                      }}
+                    >
+                      {data.transport.car}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </FadeIn>
         </section>
       )}
 
-      {/* ── FOOTER ───────────────────────────────────────────── */}
-      <footer style={{ ...divider, padding: "28px 0", textAlign: "center" }}>
-        <p style={{ fontSize: 9, color: "#202020", letterSpacing: "0.45em", textTransform: "uppercase", fontFamily: mono }}>
+      {/* ── § 7  GALLERY ─────────────────────────────────────────────────── */}
+      <section style={{ ...divider, ...sp, textAlign: "center" }}>
+        <FadeIn>
+          <p style={slabel}>Our Story</p>
+
+          {/* Mini film strip preview (full mode only) */}
+          {!preview && photos.length > 0 && (
+            <div
+              style={{
+                position: "relative",
+                width: 170,
+                margin: "0 auto",
+                marginBottom: 22,
+                overflow: "hidden",
+                border: "1px solid #191919",
+              }}
+            >
+              {/* Top/bottom fade mask */}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background:
+                    "linear-gradient(to bottom, #0c0c0c 0%, transparent 22%, transparent 78%, #0c0c0c 100%)",
+                  zIndex: 2,
+                  pointerEvents: "none",
+                }}
+              />
+              {photos.slice(0, 3).map((src, i) => (
+                <div key={i}>
+                  <Perforations count={6} />
+                  <div
+                    style={{
+                      position: "relative",
+                      aspectRatio: "3/4",
+                      margin: "0 7px",
+                      overflow: "hidden",
+                      background: "#111",
+                    }}
+                  >
+                    <img
+                      src={src}
+                      alt=""
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                    <FilmGrain />
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: 4,
+                        right: 6,
+                        fontFamily: mono,
+                        fontSize: 7,
+                        color: "rgba(255,255,255,0.22)",
+                        letterSpacing: "0.1em",
+                      }}
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </div>
+                  </div>
+                  <Perforations count={6} />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* "우리들의 이야기" button */}
+          {!preview ? (
+            <motion.button
+              onClick={() => setAlbumOpen(true)}
+              whileHover={{ scale: 1.03, borderColor: "#444", color: "#c0c0c0" }}
+              whileTap={{ scale: 0.97 }}
+              style={{
+                padding: "13px 30px",
+                border: "1px solid #282828",
+                borderRadius: 999,
+                background: "none",
+                color: "#707070",
+                fontSize: 13,
+                letterSpacing: "0.22em",
+                cursor: "pointer",
+                fontFamily: serif,
+                transition: "border-color 0.25s, color 0.25s",
+              }}
+            >
+              우리들의 이야기
+            </motion.button>
+          ) : (
+            <p
+              style={{
+                fontFamily: serif,
+                fontSize: 11,
+                color: "#282828",
+                letterSpacing: "0.18em",
+              }}
+            >
+              {photos.length > 0 ? `${photos.length}장의 이야기` : "— 사진을 추가해 주세요 —"}
+            </p>
+          )}
+        </FadeIn>
+      </section>
+
+      {/* ── § 8  ACCOUNTS ────────────────────────────────────────────────── */}
+      {(data.groomAccount || data.brideAccount) && (
+        <section style={{ ...divider, ...sp }}>
+          <FadeIn>
+            <p style={slabel}>마음 전하실 곳</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {[
+                { account: data.groomAccount, label: "신랑측" },
+                { account: data.brideAccount, label: "신부측" },
+              ].map(
+                ({ account, label }) =>
+                  account && (
+                    <div
+                      key={label}
+                      style={{
+                        background: "#0f0f0f",
+                        borderRadius: 12,
+                        border: "1px solid #181818",
+                        padding: preview ? "12px 14px" : "16px 18px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <div>
+                          <p
+                            style={{
+                              fontFamily: mono,
+                              fontSize: 8,
+                              color: "#242424",
+                              letterSpacing: "0.18em",
+                              textTransform: "uppercase",
+                              marginBottom: 6,
+                            }}
+                          >
+                            {label}
+                          </p>
+                          <p
+                            style={{
+                              fontFamily: serif,
+                              fontSize: preview ? 11 : 14,
+                              color: "#a8a8a8",
+                              letterSpacing: "0.06em",
+                              marginBottom: 3,
+                            }}
+                          >
+                            {account.bank}
+                          </p>
+                          <p
+                            style={{
+                              fontFamily: mono,
+                              fontSize: preview ? 10 : 13,
+                              color: "#787878",
+                              letterSpacing: "0.05em",
+                              marginBottom: 3,
+                            }}
+                          >
+                            {account.number}
+                          </p>
+                          <p
+                            style={{
+                              fontFamily: serif,
+                              fontSize: preview ? 9 : 11,
+                              color: "#383838",
+                            }}
+                          >
+                            {account.holder}
+                          </p>
+                        </div>
+                        {!preview && <CopyButton text={account.number} />}
+                      </div>
+                    </div>
+                  )
+              )}
+            </div>
+          </FadeIn>
+        </section>
+      )}
+
+      {/* ── FOOTER ───────────────────────────────────────────────────────── */}
+      <footer
+        style={{
+          ...divider,
+          padding: preview ? "18px 0" : "36px 0",
+          textAlign: "center",
+        }}
+      >
+        <p
+          style={{
+            fontFamily: mono,
+            fontSize: 8,
+            color: "#1a1a1a",
+            letterSpacing: "0.55em",
+            textTransform: "uppercase",
+          }}
+        >
           Toast Wedding
         </p>
+        {!preview && (
+          <p
+            style={{
+              fontFamily: serif,
+              fontSize: 11,
+              color: "#1e1e1e",
+              letterSpacing: "0.12em",
+              marginTop: 7,
+            }}
+          >
+            {data.groomName} · {data.brideName}
+          </p>
+        )}
       </footer>
 
-      {/* ── FILM ALBUM MODAL ─────────────────────────────────── */}
+      {/* ── FILM ALBUM MODAL ─────────────────────────────────────────────── */}
       <AnimatePresence>
         {albumOpen && (
-          <FilmAlbum photos={photos} onClose={() => setAlbumOpen(false)} />
+          <FilmAlbum
+            photos={photos}
+            groom={data.groomName}
+            bride={data.brideName}
+            onClose={() => setAlbumOpen(false)}
+          />
         )}
       </AnimatePresence>
     </div>

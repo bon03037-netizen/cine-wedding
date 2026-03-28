@@ -34,8 +34,8 @@ interface DateState {
 }
 
 const INIT_DATE: DateState = {
-  year: "2026", month: "5", day: "23",
-  ampm: "오후", hour: "2", minute: "00",
+  year: "2026", month: "6", day: "20",
+  ampm: "오후", hour: "1", minute: "00",
 };
 
 function buildDate(d: DateState) {
@@ -50,21 +50,22 @@ function buildTime(d: DateState) {
 // ── Default Data ──────────────────────────────────────────────────────────────
 
 const DEFAULT: WeddingData = {
-  groomName: "김호진",
-  brideName: "이나리",
-  groomParents: { fatherName: "김철수", motherName: "박영희" },
-  brideParents: { fatherName: "이상훈", motherName: "최미영" },
+  groomName: "이호진",
+  brideName: "차나리",
+  groomParents: { fatherName: "이창영", motherName: "정경란" },
+  brideParents: { fatherName: "차강호", motherName: "길복동" },
   date: buildDate(INIT_DATE),
   time: buildTime(INIT_DATE),
-  venue: "더파티움 서울",
-  address: "서울특별시 강남구 테헤란로 123",
+  venue: "그랜드 인터컨티넨탈 서울 파르나스",
+  address: "서울특별시 강남구 테헤란로 521 (삼성동)",
   greeting:
-    "서로를 바라보며 함께 걸어온 시간들,\n이제 하나의 길로 이어집니다.\n\n두 사람이 하나가 되는 날,\n소중한 자리에 함께해 주세요.",
-  groomAccount: { bank: "신한은행", number: "110-123-456789", holder: "김호진" },
-  brideAccount: { bank: "카카오뱅크", number: "3333-12-3456789", holder: "이나리" },
+    "저희 두 사람이 사랑을 맺어\n한 가정을 이루게 되었습니다.\n\n두 사람이 걸어온 길이 하나로 모여\n이제 함께 새로운 길을 걷고자 합니다.\n\n바쁘시더라도 자리를 빛내주시어\n저희의 첫 출발을 축복해 주시면\n더없는 기쁨이 되겠습니다.",
+  groomAccount: { bank: "국민은행", number: "123-456-78-901234", holder: "이호진" },
+  brideAccount: { bank: "신한은행", number: "110-123-456789", holder: "차나리" },
   transport: {
-    bus: "강남역 2번 출구 → 버스 146번 → 테헤란로 정류장 하차",
-    car: "강남구 테헤란로 123 주차장 이용 (2시간 무료)",
+    subway: "2호선 삼성역 5·6번 출구에서 도보 5분",
+    bus: "145 · 148 · 341번 삼성역 하차 후 도보 3분",
+    car: "건물 내 무료 주차 · 웨딩 참석 시 3시간 무료",
   },
   photos: [],
 };
@@ -591,6 +592,15 @@ export default function DashboardPage() {
             {/* 교통 안내 */}
             <AccSection id="transport" title="교통 안내" icon="🚌" openMap={open} onToggle={toggleSection}>
               <div className="mt-2 space-y-3">
+                <Field label="지하철">
+                  <textarea
+                    value={data.transport?.subway ?? ""}
+                    onChange={(e) => set("transport", { ...data.transport, subway: e.target.value })}
+                    rows={2}
+                    className={`${inputCls} resize-none`}
+                    placeholder="지하철 노선 및 출구 안내"
+                  />
+                </Field>
                 <Field label="버스">
                   <textarea
                     value={data.transport?.bus ?? ""}

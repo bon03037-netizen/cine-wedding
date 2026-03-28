@@ -1,3 +1,4 @@
+
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import FilmTheme, { WeddingData } from "@/components/templates/FilmTheme";
