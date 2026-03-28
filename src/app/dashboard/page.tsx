@@ -1,5 +1,6 @@
 "use client";
 
+import { supabase } from '@/lib/supabase';
 import { useRef, useState, useCallback } from "react";
 import { Heart, ChevronDown, Upload, X, Plus } from "lucide-react";
 import FilmTheme, { WeddingData } from "@/components/templates/FilmTheme";
@@ -203,6 +204,30 @@ export default function DashboardPage() {
   const removePhoto = (i: number) =>
     setData((prev) => ({ ...prev, photos: (prev.photos ?? []).filter((_, idx) => idx !== i) }));
 
+  const handleSave = async () => {
+      // 1. 고유한 임시 주소 생성 (중복 방지를 위해 현재 시간 숫자 사용)
+      const tempSlug = "toast-" + Date.now();
+
+      // 2. 현재 화면의 상태(state)를 그대로 모아서 데이터 만들기
+      const invitationData = {
+        slug: tempSlug,
+        theme: currentTheme,
+        content: data, // 에디터에서 입력한 모든 데이터(data 상태)를 통째로 JSON으로 넣습니다.
+        image_urls: data.photos || []
+      };
+
+      // 3. Supabase에 전송
+      const { error } = await supabase
+        .from('invitations')
+        .insert([invitationData]);
+
+      if (error) {
+        alert('저장 실패: ' + error.message);
+      } else {
+        alert('성공적으로 저장되었습니다!\n나의 고유 주소: ' + tempSlug);
+      }
+    };
+
   return (
     <div className="min-h-screen bg-gray-50" style={{ fontFamily: "Pretendard, -apple-system, sans-serif" }}>
 
@@ -225,7 +250,8 @@ export default function DashboardPage() {
           <button className="px-4 py-1.5 text-[13px] text-gray-600 border border-gray-200 rounded-full hover:bg-gray-50 transition-colors">
             미리보기
           </button>
-          <button className="px-4 py-1.5 text-[13px] bg-gray-900 text-white rounded-full hover:bg-black transition-colors">
+          <button onClick={handleSave}
+            className="px-4 py-1.5 text-[13px] bg-gray-900 text-white rounded-full hover:bg-black transition-colors">
             저장 및 공유
           </button>
         </div>
