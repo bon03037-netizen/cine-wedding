@@ -89,7 +89,11 @@ function FilmGrain() {
         pointerEvents: "none",
         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")`,
         mixBlendMode: "screen",
-      }}
+        animationName: "filmGrainAnim",
+        animationDuration: "0.45s",
+        animationTimingFunction: "steps(1)",
+        animationIterationCount: "infinite",
+      } as React.CSSProperties}
     />
   );
 }
@@ -267,9 +271,10 @@ function FilmAlbum({
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial={{ opacity: 0, scale: 0.985 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.985 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
       style={{
         position: "fixed",
         inset: 0,
@@ -277,7 +282,11 @@ function FilmAlbum({
         background: "#000",
         display: "flex",
         flexDirection: "column",
-      }}
+        animationName: "filmFlicker",
+        animationDuration: "6s",
+        animationTimingFunction: "linear",
+        animationIterationCount: "infinite",
+      } as React.CSSProperties}
     >
       {/* Header */}
       <div
@@ -1053,7 +1062,143 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         </FadeIn>
       </section>
 
-      {/* ── § 6  TRANSPORT ───────────────────────────────────────────────── */}
+      {/* ── § 6  GALLERY ─────────────────────────────────────────────────── */}
+      <section style={{ ...divider, ...sp, textAlign: "center" }}>
+        <FadeIn>
+          <p style={slabel}>Our Story</p>
+
+          {/* Mini film strip — full mode: animated scroll strip, preview: static thumbnail */}
+          {photos.length > 0 && (
+            <div
+              style={{
+                position: "relative",
+                width: preview ? 120 : 170,
+                margin: "0 auto",
+                marginBottom: preview ? 14 : 22,
+                overflow: "hidden",
+                border: "1px solid #191919",
+              }}
+            >
+              {/* Top/bottom fade mask */}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background:
+                    "linear-gradient(to bottom, #0c0c0c 0%, transparent 22%, transparent 78%, #0c0c0c 100%)",
+                  zIndex: 2,
+                  pointerEvents: "none",
+                }}
+              />
+              {/* Scrolling film strip wrapper (full mode only) */}
+              <div
+                style={
+                  !preview
+                    ? {
+                        animationName: "filmStripScroll",
+                        animationDuration: `${Math.max(photos.length * 4, 8)}s`,
+                        animationTimingFunction: "linear",
+                        animationIterationCount: "infinite",
+                      }
+                    : {}
+                }
+              >
+                {(preview ? photos.slice(0, 2) : [...photos, ...photos]).map((src, i) => (
+                  <div key={i}>
+                    <Perforations count={preview ? 5 : 6} />
+                    <div
+                      style={{
+                        position: "relative",
+                        aspectRatio: "3/4",
+                        margin: preview ? "0 5px" : "0 7px",
+                        overflow: "hidden",
+                        background: "#111",
+                      }}
+                    >
+                      <img
+                        src={src}
+                        alt=""
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                      <FilmGrain />
+                      <div
+                        style={{
+                          position: "absolute",
+                          bottom: 4,
+                          right: 5,
+                          fontFamily: mono,
+                          fontSize: 7,
+                          color: "rgba(255,255,255,0.22)",
+                          letterSpacing: "0.1em",
+                          animationName: "filmCounterBlink",
+                          animationDuration: "3.5s",
+                          animationTimingFunction: "linear",
+                          animationIterationCount: "infinite",
+                          animationDelay: `${i * 0.4}s`,
+                        } as React.CSSProperties}
+                      >
+                        {String((i % photos.length) + 1).padStart(2, "0")}
+                      </div>
+                    </div>
+                    <Perforations count={preview ? 5 : 6} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* "우리들의 이야기" button / preview badge */}
+          {!preview ? (
+            <motion.button
+              onClick={() => setAlbumOpen(true)}
+              whileHover={{ scale: 1.03, borderColor: "#444", color: "#c0c0c0" }}
+              whileTap={{ scale: 0.97 }}
+              style={{
+                padding: "13px 30px",
+                border: "1px solid #282828",
+                borderRadius: 999,
+                background: "none",
+                color: "#707070",
+                fontSize: 13,
+                letterSpacing: "0.22em",
+                cursor: "pointer",
+                fontFamily: serif,
+                transition: "border-color 0.25s, color 0.25s",
+              }}
+            >
+              우리들의 이야기
+            </motion.button>
+          ) : (
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 7,
+                padding: "7px 14px",
+                border: "1px solid #1e1e1e",
+                borderRadius: 999,
+                background: "#0f0f0f",
+              }}
+            >
+              <span style={{ fontFamily: mono, fontSize: 8, color: "#2e2e2e", letterSpacing: "0.18em" }}>
+                🎞
+              </span>
+              <span
+                style={{
+                  fontFamily: serif,
+                  fontSize: 10,
+                  color: "#363636",
+                  letterSpacing: "0.18em",
+                }}
+              >
+                {photos.length > 0 ? `우리들의 이야기 · ${photos.length}장` : "우리들의 이야기"}
+              </span>
+            </div>
+          )}
+        </FadeIn>
+      </section>
+
+      {/* ── § 7  TRANSPORT ───────────────────────────────────────────────── */}
       {(data.transport?.subway || data.transport?.bus || data.transport?.car) && (
         <section style={{ ...divider, ...sp }}>
           <FadeIn>
@@ -1203,108 +1348,6 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
           </FadeIn>
         </section>
       )}
-
-      {/* ── § 7  GALLERY ─────────────────────────────────────────────────── */}
-      <section style={{ ...divider, ...sp, textAlign: "center" }}>
-        <FadeIn>
-          <p style={slabel}>Our Story</p>
-
-          {/* Mini film strip preview (full mode only) */}
-          {!preview && photos.length > 0 && (
-            <div
-              style={{
-                position: "relative",
-                width: 170,
-                margin: "0 auto",
-                marginBottom: 22,
-                overflow: "hidden",
-                border: "1px solid #191919",
-              }}
-            >
-              {/* Top/bottom fade mask */}
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  background:
-                    "linear-gradient(to bottom, #0c0c0c 0%, transparent 22%, transparent 78%, #0c0c0c 100%)",
-                  zIndex: 2,
-                  pointerEvents: "none",
-                }}
-              />
-              {photos.slice(0, 3).map((src, i) => (
-                <div key={i}>
-                  <Perforations count={6} />
-                  <div
-                    style={{
-                      position: "relative",
-                      aspectRatio: "3/4",
-                      margin: "0 7px",
-                      overflow: "hidden",
-                      background: "#111",
-                    }}
-                  >
-                    <img
-                      src={src}
-                      alt=""
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    />
-                    <FilmGrain />
-                    <div
-                      style={{
-                        position: "absolute",
-                        bottom: 4,
-                        right: 6,
-                        fontFamily: mono,
-                        fontSize: 7,
-                        color: "rgba(255,255,255,0.22)",
-                        letterSpacing: "0.1em",
-                      }}
-                    >
-                      {String(i + 1).padStart(2, "0")}
-                    </div>
-                  </div>
-                  <Perforations count={6} />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* "우리들의 이야기" button */}
-          {!preview ? (
-            <motion.button
-              onClick={() => setAlbumOpen(true)}
-              whileHover={{ scale: 1.03, borderColor: "#444", color: "#c0c0c0" }}
-              whileTap={{ scale: 0.97 }}
-              style={{
-                padding: "13px 30px",
-                border: "1px solid #282828",
-                borderRadius: 999,
-                background: "none",
-                color: "#707070",
-                fontSize: 13,
-                letterSpacing: "0.22em",
-                cursor: "pointer",
-                fontFamily: serif,
-                transition: "border-color 0.25s, color 0.25s",
-              }}
-            >
-              우리들의 이야기
-            </motion.button>
-          ) : (
-            <p
-              style={{
-                fontFamily: serif,
-                fontSize: 11,
-                color: "#282828",
-                letterSpacing: "0.18em",
-              }}
-            >
-              {photos.length > 0 ? `${photos.length}장의 이야기` : "— 사진을 추가해 주세요 —"}
-            </p>
-          )}
-        </FadeIn>
-      </section>
 
       {/* ── § 8  ACCOUNTS ────────────────────────────────────────────────── */}
       {(data.groomAccount || data.brideAccount) && (

@@ -510,8 +510,8 @@ export default function DashboardPage() {
               </div>
             </AccSection>
 
-            {/* 사진 앨범 */}
-            <AccSection id="photos" title="사진 앨범" icon="📷" openMap={open} onToggle={toggleSection}>
+            {/* 우리들의 이야기 (갤러리) */}
+            <AccSection id="photos" title="우리들의 이야기 (갤러리)" icon="🎞️" openMap={open} onToggle={toggleSection}>
               <div className="mt-2">
                 <input ref={photosRef} type="file" accept="image/*" multiple onChange={handlePhotos} className="hidden" />
                 <div className="grid grid-cols-3 gap-2">
@@ -535,7 +535,7 @@ export default function DashboardPage() {
                   </button>
                 </div>
                 <p className="text-[11px] text-gray-300 mt-2.5 font-mono">
-                  사진은 3:4 비율로 필름 프레임에 표시됩니다
+                  3:4 비율 권장 · 방문자 페이지에서 3D 필름 드럼으로 표시됩니다
                 </p>
               </div>
             </AccSection>
