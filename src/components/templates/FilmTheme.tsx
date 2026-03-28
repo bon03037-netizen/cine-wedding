@@ -3,8 +3,6 @@
 import { useRef, useState } from "react";
 import {
   motion,
-  useScroll,
-  useTransform,
   AnimatePresence,
   useInView,
 } from "framer-motion";
@@ -185,7 +183,7 @@ function FilmCard({
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
-        boxShadow: "0 0 0 1px #1e1e1e, 0 18px 70px rgba(0,0,0,0.97)",
+        boxShadow: "0 0 0 1px #2a2a2a, 0 0 18px rgba(255,255,255,0.05), 0 0 40px rgba(212,175,55,0.08), 0 18px 70px rgba(0,0,0,0.97)",
       }}
     >
       <Perforations count={8} />
@@ -261,13 +259,7 @@ function FilmAlbum({
   bride: string;
   onClose: () => void;
 }) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const N = Math.max(photos.length, 1);
-  const ANGLE_PER = 360 / N;
-  const RADIUS = 310;
-
-  const { scrollYProgress } = useScroll({ container: containerRef });
-  const drumRotateX = useTransform(scrollYProgress, [0, 1], [0, -(N - 1) * ANGLE_PER]);
 
   return (
     <motion.div
@@ -282,11 +274,7 @@ function FilmAlbum({
         background: "#000",
         display: "flex",
         flexDirection: "column",
-        animationName: "filmFlicker",
-        animationDuration: "6s",
-        animationTimingFunction: "linear",
-        animationIterationCount: "infinite",
-      } as React.CSSProperties}
+      }}
     >
       {/* Header */}
       <div
@@ -295,7 +283,7 @@ function FilmAlbum({
           alignItems: "center",
           justifyContent: "space-between",
           padding: "16px 22px",
-          borderBottom: "1px solid #141414",
+          borderBottom: "1px solid #1c1c1c",
         }}
       >
         <div>
@@ -304,7 +292,7 @@ function FilmAlbum({
               fontFamily: "monospace",
               fontSize: 9,
               letterSpacing: "0.45em",
-              color: "#2e2e2e",
+              color: "#505050",
               textTransform: "uppercase",
               marginBottom: 4,
             }}
@@ -315,7 +303,7 @@ function FilmAlbum({
             style={{
               fontFamily: "var(--font-serif-kr), serif",
               fontSize: 12,
-              color: "#303030",
+              color: "#A0A0A0",
               letterSpacing: "0.18em",
             }}
           >
@@ -325,9 +313,9 @@ function FilmAlbum({
         <button
           onClick={onClose}
           style={{
-            color: "#444",
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid #1e1e1e",
+            color: "#888",
+            background: "rgba(255,255,255,0.05)",
+            border: "1px solid #2a2a2a",
             borderRadius: "50%",
             width: 36,
             height: 36,
@@ -341,70 +329,53 @@ function FilmAlbum({
         </button>
       </div>
 
-      {/* 3D Drum scroll */}
-      <div ref={containerRef} style={{ flex: 1, overflowY: "scroll", position: "relative" }}>
-        <div style={{ height: `${N * 720}px` }}>
-          <div
-            style={{
-              position: "sticky",
-              top: 0,
-              height: "100dvh",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              perspective: "1100px",
-              perspectiveOrigin: "50% 50%",
-              overflow: "hidden",
+      {/* Horizontal swipe gallery */}
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          overflowX: "scroll",
+          scrollSnapType: "x mandatory",
+          WebkitOverflowScrolling: "touch" as React.CSSProperties["WebkitOverflowScrolling"],
+          scrollbarWidth: "none" as React.CSSProperties["scrollbarWidth"],
+          padding: "0 calc(50% - 120px)",
+          gap: 20,
+        } as React.CSSProperties}
+      >
+        {Array.from({ length: N }).map((_, i) => (
+          <motion.div
+            key={i}
+            style={{ scrollSnapAlign: "center", flexShrink: 0 }}
+            animate={{
+              x: [0, -0.35, 0.4, -0.25, 0.5, -0.3, 0.2, 0],
+              y: [0, 0.5, -0.3, 0.55, 0.2, -0.4, 0.35, 0],
+              rotate: [0, 0.012, -0.018, 0.008, -0.014, 0.02, -0.01, 0],
+            }}
+            transition={{
+              duration: 1.1 + (i % 4) * 0.15,
+              repeat: Infinity,
+              ease: "linear",
             }}
           >
-            <motion.div
-              style={{
-                rotateX: drumRotateX,
-                transformStyle: "preserve-3d",
-                width: 240,
-                height: 340,
-                position: "relative",
-              }}
-            >
-              {Array.from({ length: N }).map((_, i) => (
-                <div
-                  key={i}
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    transform: `rotateX(${i * ANGLE_PER}deg) translateZ(${RADIUS}px)`,
-                    backfaceVisibility: "hidden",
-                    WebkitBackfaceVisibility: "hidden",
-                  } as React.CSSProperties}
-                >
-                  <FilmCard src={photos[i]} index={i} total={N} />
-                </div>
-              ))}
-            </motion.div>
+            <FilmCard src={photos[i]} index={i} total={N} />
+          </motion.div>
+        ))}
+      </div>
 
-            <motion.div
-              style={{
-                position: "absolute",
-                bottom: 28,
-                left: "50%",
-                x: "-50%",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 4,
-                color: "#242424",
-                pointerEvents: "none",
-              }}
-              animate={{ y: [0, 6, 0] }}
-              transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
-            >
-              <ChevronDown size={14} />
-              <span style={{ fontFamily: "monospace", fontSize: 8, letterSpacing: "0.35em" }}>
-                SCROLL
-              </span>
-            </motion.div>
-          </div>
-        </div>
+      {/* Swipe hint */}
+      <div
+        style={{
+          textAlign: "center",
+          padding: "12px 0 24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 12,
+          color: "#383838",
+        }}
+      >
+        <span style={{ fontFamily: "monospace", fontSize: 10, letterSpacing: "0.3em" }}>← SWIPE →</span>
       </div>
     </motion.div>
   );
@@ -431,7 +402,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
     fontFamily: mono,
     fontSize: 9,
     letterSpacing: "0.45em",
-    color: "#282828",
+    color: "#505050",
     textTransform: "uppercase",
     textAlign: "center",
     marginBottom: preview ? 12 : 26,
@@ -441,10 +412,12 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
     <div
       style={{
         background: "#0c0c0c",
-        color: "#d8d8d8",
+        color: "#F0F0F0",
         fontFamily: sans,
         minHeight: "100%",
         position: "relative",
+        lineHeight: 1.7,
+        letterSpacing: "0.03em",
       }}
     >
       {/* ── § 1  HERO ────────────────────────────────────────────────────── */}
@@ -552,7 +525,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               fontFamily: mono,
               fontSize: 8,
               letterSpacing: "0.55em",
-              color: "#242424",
+              color: "#484848",
               textTransform: "uppercase",
               marginBottom: preview ? 10 : 18,
             }}
@@ -565,7 +538,8 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               fontSize: preview ? 21 : 38,
               fontWeight: 300,
               letterSpacing: "0.2em",
-              color: "#f0f0f0",
+              color: "#D4AF37",
+              textShadow: "0 0 18px rgba(212,175,55,0.25), 0 0 40px rgba(212,175,55,0.1)",
               margin: 0,
               lineHeight: 1.25,
             }}
@@ -573,7 +547,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             {data.groomName || "신랑"}
             <span
               style={{
-                color: "#282828",
+                color: "#404040",
                 margin: "0 8px",
                 fontSize: "0.72em",
                 fontWeight: 200,
@@ -598,7 +572,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             style={{
               fontFamily: serif,
               fontSize: preview ? 10 : 13,
-              color: "#484848",
+              color: "#909090",
               letterSpacing: "0.2em",
             }}
           >
@@ -651,26 +625,26 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-              <Calendar size={preview ? 10 : 12} color="#323232" />
+              <Calendar size={preview ? 10 : 12} color="#606060" />
               <span
                 style={{
                   fontFamily: serif,
                   fontSize: preview ? 11 : 14,
-                  color: "#c0c0c0",
+                  color: "#DCDCDC",
                   letterSpacing: "0.1em",
                 }}
               >
                 {data.date}&nbsp;&nbsp;{data.time}
               </span>
             </div>
-            <div style={{ width: 1, height: preview ? 8 : 14, background: "#1e1e1e" }} />
+            <div style={{ width: 1, height: preview ? 8 : 14, background: "#282828" }} />
             <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-              <MapPin size={preview ? 10 : 12} color="#323232" />
+              <MapPin size={preview ? 10 : 12} color="#606060" />
               <span
                 style={{
                   fontFamily: serif,
                   fontSize: preview ? 11 : 14,
-                  color: "#787878",
+                  color: "#A0A0A0",
                   letterSpacing: "0.08em",
                 }}
               >
@@ -684,6 +658,14 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       {/* ── § 3  GREETING ────────────────────────────────────────────────── */}
       <section style={{ ...divider, ...sp, textAlign: "center" }}>
         <FadeIn>
+          <div style={{
+            background: "rgba(20,20,20,0.6)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            borderRadius: 14,
+            padding: preview ? "14px 16px" : "32px 28px",
+            border: "1px solid rgba(255,255,255,0.04)",
+          } as React.CSSProperties}>
           <p style={slabel}>Greeting</p>
           {/* Decorative top flourish */}
           <div
@@ -705,7 +687,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               fontFamily: serif,
               fontSize: preview ? 11 : 15,
               lineHeight: preview ? 2.2 : 2.6,
-              color: "#747474",
+              color: "#B8B8B8",
               whiteSpace: "pre-line",
               fontWeight: 300,
               letterSpacing: "0.05em",
@@ -724,9 +706,10 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               marginTop: preview ? 12 : 22,
             }}
           >
-            <div style={{ flex: 1, maxWidth: 48, height: 1, background: "rgba(184,146,42,0.2)" }} />
-            <span style={{ color: "rgba(184,146,42,0.4)", fontSize: preview ? 10 : 13 }}>✦</span>
-            <div style={{ flex: 1, maxWidth: 48, height: 1, background: "rgba(184,146,42,0.2)" }} />
+            <div style={{ flex: 1, maxWidth: 48, height: 1, background: "rgba(184,146,42,0.25)" }} />
+            <span style={{ color: "rgba(184,146,42,0.5)", fontSize: preview ? 10 : 13 }}>✦</span>
+            <div style={{ flex: 1, maxWidth: 48, height: 1, background: "rgba(184,146,42,0.25)" }} />
+          </div>
           </div>
         </FadeIn>
       </section>
@@ -749,7 +732,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                 style={{
                   fontFamily: mono,
                   fontSize: 8,
-                  color: "#242424",
+                  color: "#505050",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   marginBottom: preview ? 5 : 8,
@@ -763,7 +746,8 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                   fontSize: preview ? 14 : 20,
                   fontWeight: 300,
                   letterSpacing: "0.18em",
-                  color: "#d4d4d4",
+                  color: "#D4AF37",
+                  textShadow: "0 0 14px rgba(212,175,55,0.2)",
                   marginBottom: preview ? 5 : 10,
                 }}
               >
@@ -776,7 +760,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: serif,
                         fontSize: preview ? 9 : 11,
-                        color: "#333",
+                        color: "#606060",
                         lineHeight: preview ? 1.8 : 2.1,
                       }}
                     >
@@ -791,7 +775,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: serif,
                         fontSize: preview ? 9 : 11,
-                        color: "#333",
+                        color: "#606060",
                         lineHeight: preview ? 1.8 : 2.1,
                       }}
                     >
@@ -835,7 +819,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                 style={{
                   fontFamily: mono,
                   fontSize: 8,
-                  color: "#242424",
+                  color: "#505050",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   marginBottom: preview ? 5 : 8,
@@ -849,7 +833,8 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                   fontSize: preview ? 14 : 20,
                   fontWeight: 300,
                   letterSpacing: "0.18em",
-                  color: "#d4d4d4",
+                  color: "#D4AF37",
+                  textShadow: "0 0 14px rgba(212,175,55,0.2)",
                   marginBottom: preview ? 5 : 10,
                 }}
               >
@@ -862,7 +847,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: serif,
                         fontSize: preview ? 9 : 11,
-                        color: "#333",
+                        color: "#606060",
                         lineHeight: preview ? 1.8 : 2.1,
                       }}
                     >
@@ -877,7 +862,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: serif,
                         fontSize: preview ? 9 : 11,
-                        color: "#333",
+                        color: "#606060",
                         lineHeight: preview ? 1.8 : 2.1,
                       }}
                     >
@@ -904,13 +889,20 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             style={{
               textAlign: "center",
               marginBottom: preview ? 14 : 28,
-            }}
+              background: "rgba(20,20,20,0.6)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              borderRadius: 14,
+              padding: preview ? "14px 16px" : "28px 24px",
+              border: "1px solid rgba(255,255,255,0.04)",
+            } as React.CSSProperties}
           >
             <p
               style={{
                 fontFamily: serif,
                 fontSize: preview ? 13 : 19,
-                color: "#c4c4c4",
+                color: "#D4AF37",
+                textShadow: "0 0 16px rgba(212,175,55,0.2)",
                 letterSpacing: "0.14em",
                 fontWeight: 300,
                 marginBottom: 4,
@@ -922,7 +914,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               style={{
                 fontFamily: serif,
                 fontSize: preview ? 11 : 14,
-                color: "#4e4e4e",
+                color: "#888888",
                 letterSpacing: "0.12em",
                 marginBottom: preview ? 10 : 20,
               }}
@@ -935,7 +927,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               style={{
                 width: 24,
                 height: 1,
-                background: "rgba(184,146,42,0.35)",
+                background: "rgba(212,175,55,0.4)",
                 margin: "0 auto",
                 marginBottom: preview ? 10 : 20,
               }}
@@ -945,7 +937,8 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               style={{
                 fontFamily: serif,
                 fontSize: preview ? 13 : 18,
-                color: "#b0b0b0",
+                color: "#D4AF37",
+                textShadow: "0 0 12px rgba(212,175,55,0.15)",
                 letterSpacing: "0.12em",
                 marginBottom: 5,
               }}
@@ -956,7 +949,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               style={{
                 fontFamily: sans,
                 fontSize: preview ? 10 : 12,
-                color: "#3a3a3a",
+                color: "#777777",
                 letterSpacing: "0.04em",
               }}
             >
@@ -1067,50 +1060,65 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         <FadeIn>
           <p style={slabel}>Our Story</p>
 
-          {/* Mini film strip — full mode: animated scroll strip, preview: static thumbnail */}
+          {/* Mini film strip — horizontal infinite scroll */}
           {photos.length > 0 && (
             <div
               style={{
                 position: "relative",
-                width: preview ? 120 : 170,
-                margin: "0 auto",
+                width: "100%",
+                height: preview ? 110 : 150,
                 marginBottom: preview ? 14 : 22,
                 overflow: "hidden",
-                border: "1px solid #191919",
+                border: "1px solid #222",
+                boxShadow: "0 0 20px rgba(255,255,255,0.03), 0 0 40px rgba(212,175,55,0.05)",
               }}
             >
-              {/* Top/bottom fade mask */}
+              {/* Left/right fade mask */}
               <div
                 style={{
                   position: "absolute",
                   inset: 0,
                   background:
-                    "linear-gradient(to bottom, #0c0c0c 0%, transparent 22%, transparent 78%, #0c0c0c 100%)",
+                    "linear-gradient(to right, #0c0c0c 0%, transparent 12%, transparent 88%, #0c0c0c 100%)",
                   zIndex: 2,
                   pointerEvents: "none",
                 }}
               />
-              {/* Scrolling film strip wrapper (full mode only) */}
+              {/* Scrolling film strip wrapper — horizontal */}
               <div
-                style={
-                  !preview
-                    ? {
-                        animationName: "filmStripScroll",
-                        animationDuration: `${Math.max(photos.length * 4, 8)}s`,
-                        animationTimingFunction: "linear",
-                        animationIterationCount: "infinite",
-                      }
-                    : {}
-                }
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  height: "100%",
+                  ...(
+                    !preview
+                      ? {
+                          animationName: "filmStripScroll",
+                          animationDuration: `${Math.max(photos.length * 5, 10)}s`,
+                          animationTimingFunction: "linear",
+                          animationIterationCount: "infinite",
+                        }
+                      : {}
+                  ),
+                } as React.CSSProperties}
               >
-                {(preview ? photos.slice(0, 2) : [...photos, ...photos]).map((src, i) => (
-                  <div key={i}>
-                    <Perforations count={preview ? 5 : 6} />
+                {(preview ? photos.slice(0, 4) : [...photos, ...photos]).map((src, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      flexShrink: 0,
+                      display: "flex",
+                      flexDirection: "column",
+                      width: preview ? 72 : 96,
+                      height: "100%",
+                    }}
+                  >
+                    <Perforations count={preview ? 4 : 5} />
                     <div
                       style={{
                         position: "relative",
-                        aspectRatio: "3/4",
-                        margin: preview ? "0 5px" : "0 7px",
+                        flex: 1,
+                        margin: "0 4px",
                         overflow: "hidden",
                         background: "#111",
                       }}
@@ -1124,10 +1132,10 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       <div
                         style={{
                           position: "absolute",
-                          bottom: 4,
-                          right: 5,
+                          bottom: 3,
+                          right: 4,
                           fontFamily: mono,
-                          fontSize: 7,
+                          fontSize: 6,
                           color: "rgba(255,255,255,0.22)",
                           letterSpacing: "0.1em",
                           animationName: "filmCounterBlink",
@@ -1140,7 +1148,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                         {String((i % photos.length) + 1).padStart(2, "0")}
                       </div>
                     </div>
-                    <Perforations count={preview ? 5 : 6} />
+                    <Perforations count={preview ? 4 : 5} />
                   </div>
                 ))}
               </div>
@@ -1155,10 +1163,10 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               whileTap={{ scale: 0.97 }}
               style={{
                 padding: "13px 30px",
-                border: "1px solid #282828",
+                border: "1px solid #383838",
                 borderRadius: 999,
-                background: "none",
-                color: "#707070",
+                background: "rgba(20,20,20,0.5)",
+                color: "#A0A0A0",
                 fontSize: 13,
                 letterSpacing: "0.22em",
                 cursor: "pointer",
@@ -1180,14 +1188,14 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                 background: "#0f0f0f",
               }}
             >
-              <span style={{ fontFamily: mono, fontSize: 8, color: "#2e2e2e", letterSpacing: "0.18em" }}>
+              <span style={{ fontFamily: mono, fontSize: 8, color: "#606060", letterSpacing: "0.18em" }}>
                 🎞
               </span>
               <span
                 style={{
                   fontFamily: serif,
                   fontSize: 10,
-                  color: "#363636",
+                  color: "#707070",
                   letterSpacing: "0.18em",
                 }}
               >
@@ -1208,7 +1216,13 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                 display: "flex",
                 flexDirection: "column",
                 gap: preview ? 10 : 16,
-              }}
+                background: "rgba(20,20,20,0.6)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                borderRadius: 14,
+                padding: preview ? "14px 16px" : "24px 22px",
+                border: "1px solid rgba(255,255,255,0.04)",
+              } as React.CSSProperties}
             >
               {data.transport?.subway && (
                 <div style={{ display: "flex", gap: 13, alignItems: "flex-start" }}>
@@ -1217,8 +1231,8 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       width: preview ? 28 : 36,
                       height: preview ? 28 : 36,
                       flexShrink: 0,
-                      background: "#0f0f0f",
-                      border: "1px solid #1c1c1c",
+                      background: "#141414",
+                      border: "1px solid #282828",
                       borderRadius: 9,
                       display: "flex",
                       alignItems: "center",
@@ -1233,7 +1247,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: mono,
                         fontSize: 8,
-                        color: "#262626",
+                        color: "#505050",
                         letterSpacing: "0.15em",
                         textTransform: "uppercase",
                         marginBottom: 5,
@@ -1245,7 +1259,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: sans,
                         fontSize: preview ? 10 : 12,
-                        color: "#525252",
+                        color: "#A0A0A0",
                         lineHeight: 1.85,
                       }}
                     >
@@ -1262,8 +1276,8 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       width: preview ? 28 : 36,
                       height: preview ? 28 : 36,
                       flexShrink: 0,
-                      background: "#0f0f0f",
-                      border: "1px solid #1c1c1c",
+                      background: "#141414",
+                      border: "1px solid #282828",
                       borderRadius: 9,
                       display: "flex",
                       alignItems: "center",
@@ -1278,7 +1292,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: mono,
                         fontSize: 8,
-                        color: "#262626",
+                        color: "#505050",
                         letterSpacing: "0.15em",
                         textTransform: "uppercase",
                         marginBottom: 5,
@@ -1290,7 +1304,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: sans,
                         fontSize: preview ? 10 : 12,
-                        color: "#525252",
+                        color: "#A0A0A0",
                         lineHeight: 1.85,
                       }}
                     >
@@ -1307,8 +1321,8 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       width: preview ? 28 : 36,
                       height: preview ? 28 : 36,
                       flexShrink: 0,
-                      background: "#0f0f0f",
-                      border: "1px solid #1c1c1c",
+                      background: "#141414",
+                      border: "1px solid #282828",
                       borderRadius: 9,
                       display: "flex",
                       alignItems: "center",
@@ -1323,7 +1337,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: mono,
                         fontSize: 8,
-                        color: "#262626",
+                        color: "#505050",
                         letterSpacing: "0.15em",
                         textTransform: "uppercase",
                         marginBottom: 5,
@@ -1335,7 +1349,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: sans,
                         fontSize: preview ? 10 : 12,
-                        color: "#525252",
+                        color: "#A0A0A0",
                         lineHeight: 1.85,
                       }}
                     >
@@ -1364,9 +1378,9 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                     <div
                       key={label}
                       style={{
-                        background: "#0f0f0f",
+                        background: "rgba(18,18,18,0.85)",
                         borderRadius: 12,
-                        border: "1px solid #181818",
+                        border: "1px solid #242424",
                         padding: preview ? "12px 14px" : "16px 18px",
                       }}
                     >
@@ -1382,7 +1396,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                             style={{
                               fontFamily: mono,
                               fontSize: 8,
-                              color: "#242424",
+                              color: "#505050",
                               letterSpacing: "0.18em",
                               textTransform: "uppercase",
                               marginBottom: 6,
@@ -1394,7 +1408,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                             style={{
                               fontFamily: serif,
                               fontSize: preview ? 11 : 14,
-                              color: "#a8a8a8",
+                              color: "#C8C8C8",
                               letterSpacing: "0.06em",
                               marginBottom: 3,
                             }}
@@ -1405,7 +1419,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                             style={{
                               fontFamily: mono,
                               fontSize: preview ? 10 : 13,
-                              color: "#787878",
+                              color: "#A0A0A0",
                               letterSpacing: "0.05em",
                               marginBottom: 3,
                             }}
@@ -1416,7 +1430,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                             style={{
                               fontFamily: serif,
                               fontSize: preview ? 9 : 11,
-                              color: "#383838",
+                              color: "#666666",
                             }}
                           >
                             {account.holder}
@@ -1444,7 +1458,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
           style={{
             fontFamily: mono,
             fontSize: 8,
-            color: "#1a1a1a",
+            color: "#404040",
             letterSpacing: "0.55em",
             textTransform: "uppercase",
           }}
@@ -1456,7 +1470,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             style={{
               fontFamily: serif,
               fontSize: 11,
-              color: "#1e1e1e",
+              color: "#404040",
               letterSpacing: "0.12em",
               marginTop: 7,
             }}
