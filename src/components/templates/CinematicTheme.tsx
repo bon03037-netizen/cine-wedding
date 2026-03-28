@@ -147,7 +147,7 @@ function GalleryOverlay({
         <FilmGallery
           photos={photos}
           preview={false}
-          scrollContainerRef={scrollRef}
+          scrollContainerRef={scrollRef as any}
         />
       </div>
     </motion.div>
