@@ -212,7 +212,7 @@ export default function DashboardPage() {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
 
-    const uploadedUrls = [];
+    const uploadedUrls: string[] = [];
 
     // 사진을 한 장씩 창고에 넣고 주소를 받아옴
     for (const file of files) {
