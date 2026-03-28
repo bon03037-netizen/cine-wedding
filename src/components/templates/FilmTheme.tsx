@@ -451,7 +451,11 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               height: "100%",
               objectFit: "cover",
               opacity: 0.52,
-            }}
+              animationName: preview ? undefined : "filmJitter",
+              animationDuration: "2.2s",
+              animationTimingFunction: "linear",
+              animationIterationCount: "infinite",
+            } as React.CSSProperties}
           />
         ) : (
           <div
@@ -459,7 +463,11 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               position: "absolute",
               inset: 0,
               background: "linear-gradient(158deg, #1a1a18 0%, #0c0c0a 55%, #111 100%)",
-            }}
+              animationName: preview ? undefined : "filmJitter",
+              animationDuration: "2.2s",
+              animationTimingFunction: "linear",
+              animationIterationCount: "infinite",
+            } as React.CSSProperties}
           />
         )}
 
@@ -1138,12 +1146,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                           fontSize: 6,
                           color: "rgba(255,255,255,0.22)",
                           letterSpacing: "0.1em",
-                          animationName: "filmCounterBlink",
-                          animationDuration: "3.5s",
-                          animationTimingFunction: "linear",
-                          animationIterationCount: "infinite",
-                          animationDelay: `${i * 0.4}s`,
-                        } as React.CSSProperties}
+                        }}
                       >
                         {String((i % photos.length) + 1).padStart(2, "0")}
                       </div>

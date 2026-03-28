@@ -60,17 +60,3 @@ body {
   100% { transform: translateX(-50%); }
 }
 
-@keyframes filmSprocketPulse {
-  0%,100% { opacity: 0.35; transform: scaleY(1);    }
-  50%      { opacity: 0.55; transform: scaleY(1.04); }
-}
-
-@keyframes filmVignetteBreath {
-  0%,100% { opacity: 1;    }
-  50%      { opacity: 0.88; }
-}
-
-@keyframes filmCounterBlink {
-  0%,94%,100% { opacity: 1;   }
-  95%,99%     { opacity: 0.3; }
-}
