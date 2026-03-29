@@ -20,21 +20,30 @@ export default function KakaoMap({ address }: Props) {
 
     const scriptId = "kakao-map-sdk";
 
-    const initMap = () => {
-      if (!mapRef.current || !window.kakao?.maps) return;
-      window.kakao.maps.load(() => {
-        const geocoder = new window.kakao.maps.services.Geocoder();
+      const initMap = () => {
+      // 1. window.kakao 대신 (window as any).kakao 사용
+      if (!mapRef.current || !(window as any).kakao?.maps) return;
+      
+      // 2. 여기도 (window as any) 적용
+      (window as any).kakao.maps.load(() => {
+        
+        // 3. new 할 때도 (window as any) 적용
+        const geocoder = new (window as any).kakao.maps.services.Geocoder();
+        
         geocoder.addressSearch(address, (result: any[], status: string) => {
-          if (status !== window.kakao.maps.services.Status.OK) return;
-          const coords = new window.kakao.maps.LatLng(
-            result[0].y,
-            result[0].x
-          );
-          const map = new window.kakao.maps.Map(mapRef.current!, {
-            center: coords,
-            level: 4,
-          });
-          new window.kakao.maps.Marker({ position: coords, map });
+          if (status === (window as any).kakao.maps.services.Status.OK) {
+            const coords = new (window as any).kakao.maps.LatLng(result[0].y, result[0].x);
+            
+            const map = new (window as any).kakao.maps.Map(mapRef.current, {
+              center: coords,
+              level: 3,
+            });
+
+            new (window as any).kakao.maps.Marker({
+              map: map,
+              position: coords,
+            });
+          }
         });
       });
     };
