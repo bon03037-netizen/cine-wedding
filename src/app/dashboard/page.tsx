@@ -166,26 +166,39 @@ function Field({ label, children, className = "" }: { label: string; children: R
 }
 
 function PersonRow({
-  label, name, isDeceased, onName, onDeceased,
+  label, lastName, firstName, isDeceased, onLastName, onFirstName, onDeceased,
 }: {
-  label: string; name: string; isDeceased: boolean;
-  onName: (v: string) => void; onDeceased: (v: boolean) => void;
+  label: string;
+  lastName: string;
+  firstName: string;
+  isDeceased: boolean;
+  onLastName: (v: string) => void;
+  onFirstName: (v: string) => void;
+  onDeceased: (v: boolean) => void;
 }) {
   return (
     <div className="flex items-center gap-2">
       <span className="text-[11px] text-gray-400 w-7 shrink-0">{label}</span>
-      <div
-        className="flex-1 flex items-center border border-gray-200 rounded-lg bg-gray-50 overflow-hidden focus-within:ring-2 focus-within:ring-neutral-300 focus-within:border-transparent transition-all"
-      >
-        {isDeceased && (
-          <span className="pl-3 text-xs text-gray-400 shrink-0 select-none">故</span>
-        )}
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => onName(e.target.value)}
-          className={`bg-transparent w-full text-sm text-gray-700 focus:outline-none py-2 ${isDeceased ? "pl-1 text-gray-400" : "px-3"}`}
-        />
+      <div className="flex items-center gap-1.5 flex-1 min-w-0">
+        {isDeceased && <span className="text-xs text-gray-400 shrink-0 select-none">故</span>}
+        <div className="border border-gray-200 rounded-lg bg-gray-50 overflow-hidden focus-within:ring-2 focus-within:ring-neutral-300 focus-within:border-transparent transition-all" style={{ width: 44 }}>
+          <input
+            type="text"
+            value={lastName}
+            onChange={(e) => onLastName(e.target.value)}
+            placeholder="성"
+            className="bg-transparent w-full text-sm text-gray-700 focus:outline-none py-2 px-2 text-center"
+          />
+        </div>
+        <div className="flex-1 border border-gray-200 rounded-lg bg-gray-50 overflow-hidden focus-within:ring-2 focus-within:ring-neutral-300 focus-within:border-transparent transition-all">
+          <input
+            type="text"
+            value={firstName}
+            onChange={(e) => onFirstName(e.target.value)}
+            placeholder="이름"
+            className="bg-transparent w-full text-sm text-gray-700 focus:outline-none py-2 px-3"
+          />
+        </div>
       </div>
       <label className="flex items-center gap-1.5 shrink-0 cursor-pointer">
         <input
@@ -196,6 +209,40 @@ function PersonRow({
         />
         <span className="text-[11px] text-gray-400">고인</span>
       </label>
+    </div>
+  );
+}
+
+// ── Sortable Section Item (DnD) ───────────────────────────────────────────────
+
+function SortableItem({
+  id, label, visible, onToggle,
+}: {
+  id: string; label: string; visible: boolean; onToggle: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
+      className="flex items-center gap-2.5 bg-white border border-gray-100 rounded-lg px-3 py-2.5"
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        className="text-gray-300 cursor-grab active:cursor-grabbing touch-none"
+      >
+        <GripVertical size={13} />
+      </button>
+      <span className="flex-1 text-[13px] text-gray-600">{label}</span>
+      <button
+        onClick={onToggle}
+        className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${visible ? "bg-gray-900" : "bg-gray-200"}`}
+      >
+        <span
+          className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${visible ? "left-[18px]" : "left-0.5"}`}
+        />
+      </button>
     </div>
   );
 }
@@ -212,7 +259,7 @@ export default function DashboardPage() {
   const [dp, setDp] = useState<DateState>(INIT_DATE);
   const [currentTheme, setCurrentTheme] = useState<Theme>("film");
   const [open, setOpen] = useState<Record<string, boolean>>({
-    greeting: true, couple: false, datetime: false,
+    sections: false, greeting: true, couple: false, datetime: false,
     venue: false, photos: false, accounts: false, transport: false,
   });
   const [introPreviewKey, setIntroPreviewKey] = useState(0);
@@ -223,6 +270,23 @@ export default function DashboardPage() {
 
   const toggleSection = (id: string) =>
     setOpen((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setData((prev) => {
+        const order = prev.sectionsOrder ?? [...DEFAULT_SECTIONS_ORDER];
+        const oldIdx = order.indexOf(active.id as SectionId);
+        const newIdx = order.indexOf(over.id as SectionId);
+        return { ...prev, sectionsOrder: arrayMove(order, oldIdx, newIdx) };
+      });
+    }
+  };
 
   const set = useCallback(<K extends keyof WeddingData>(key: K, val: WeddingData[K]) =>
     setData((prev) => ({ ...prev, [key]: val })), []);
@@ -411,6 +475,36 @@ export default function DashboardPage() {
               </div>
             </div>
 
+            {/* 섹션 관리 */}
+            <AccSection id="sections" title="섹션 관리" icon="🗂️" openMap={open} onToggle={toggleSection}>
+              <div className="mt-2">
+                <p className="text-[11px] text-gray-300 mb-3 font-mono">드래그로 순서 변경 · 토글로 섹션 ON/OFF</p>
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                  <SortableContext
+                    items={data.sectionsOrder ?? DEFAULT_SECTIONS_ORDER}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="space-y-1.5">
+                      {(data.sectionsOrder ?? DEFAULT_SECTIONS_ORDER).map((id) => (
+                        <SortableItem
+                          key={id}
+                          id={id}
+                          label={SECTION_LABELS[id]}
+                          visible={data[SECTION_VISIBILITY_KEY[id]] !== false}
+                          onToggle={() =>
+                            set(
+                              SECTION_VISIBILITY_KEY[id],
+                              data[SECTION_VISIBILITY_KEY[id]] !== false ? false : true,
+                            )
+                          }
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
+              </div>
+            </AccSection>
+
             {/* 초대 문구 */}
             <AccSection id="greeting" title="초대 문구" icon="✉️" openMap={open} onToggle={toggleSection}>
               <Field label="인삿말" className="mt-2">
@@ -445,16 +539,20 @@ export default function DashboardPage() {
                   <div className="mt-3 space-y-2">
                     <PersonRow
                       label="부친"
-                      name={data.groomParents?.fatherName ?? ""}
+                      lastName={data.groomParents?.fatherLastName ?? ""}
+                      firstName={data.groomParents?.fatherFirstName ?? ""}
                       isDeceased={!!data.groomParents?.isFatherDeceased}
-                      onName={(v) => set("groomParents", { ...data.groomParents, fatherName: v })}
+                      onLastName={(v) => set("groomParents", { ...data.groomParents, fatherLastName: v })}
+                      onFirstName={(v) => set("groomParents", { ...data.groomParents, fatherFirstName: v })}
                       onDeceased={(v) => set("groomParents", { ...data.groomParents, isFatherDeceased: v })}
                     />
                     <PersonRow
                       label="모친"
-                      name={data.groomParents?.motherName ?? ""}
+                      lastName={data.groomParents?.motherLastName ?? ""}
+                      firstName={data.groomParents?.motherFirstName ?? ""}
                       isDeceased={!!data.groomParents?.isMotherDeceased}
-                      onName={(v) => set("groomParents", { ...data.groomParents, motherName: v })}
+                      onLastName={(v) => set("groomParents", { ...data.groomParents, motherLastName: v })}
+                      onFirstName={(v) => set("groomParents", { ...data.groomParents, motherFirstName: v })}
                       onDeceased={(v) => set("groomParents", { ...data.groomParents, isMotherDeceased: v })}
                     />
                   </div>
@@ -478,16 +576,20 @@ export default function DashboardPage() {
                   <div className="mt-3 space-y-2">
                     <PersonRow
                       label="부친"
-                      name={data.brideParents?.fatherName ?? ""}
+                      lastName={data.brideParents?.fatherLastName ?? ""}
+                      firstName={data.brideParents?.fatherFirstName ?? ""}
                       isDeceased={!!data.brideParents?.isFatherDeceased}
-                      onName={(v) => set("brideParents", { ...data.brideParents, fatherName: v })}
+                      onLastName={(v) => set("brideParents", { ...data.brideParents, fatherLastName: v })}
+                      onFirstName={(v) => set("brideParents", { ...data.brideParents, fatherFirstName: v })}
                       onDeceased={(v) => set("brideParents", { ...data.brideParents, isFatherDeceased: v })}
                     />
                     <PersonRow
                       label="모친"
-                      name={data.brideParents?.motherName ?? ""}
+                      lastName={data.brideParents?.motherLastName ?? ""}
+                      firstName={data.brideParents?.motherFirstName ?? ""}
                       isDeceased={!!data.brideParents?.isMotherDeceased}
-                      onName={(v) => set("brideParents", { ...data.brideParents, motherName: v })}
+                      onLastName={(v) => set("brideParents", { ...data.brideParents, motherLastName: v })}
+                      onFirstName={(v) => set("brideParents", { ...data.brideParents, motherFirstName: v })}
                       onDeceased={(v) => set("brideParents", { ...data.brideParents, isMotherDeceased: v })}
                     />
                   </div>

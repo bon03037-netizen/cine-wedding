@@ -53,6 +53,7 @@ export interface WeddingData {
   groomAccount?: AccountInfo;
   brideAccount?: AccountInfo;
   transport?: TransportInfo;
+  mapEmbedUrl?: string;
   // Section visibility (undefined = true)
   showGreeting?: boolean;
   showCouple?: boolean;
