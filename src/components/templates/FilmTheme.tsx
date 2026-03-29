@@ -7,6 +7,7 @@ import {
   useInView,
 } from "framer-motion";
 import { X, Copy, Check, ChevronDown } from "lucide-react";
+import KakaoMap from "../KakaoMap";
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface AccountInfo {
@@ -975,9 +976,14 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             </p>
           </div>
 
+          {/* Kakao Map */}
+          {!preview && data.address && (
+            <KakaoMap address={data.address} />
+          )}
+
           {/* Naver + Kakao navigation buttons */}
           {!preview && (
-            <div style={{ display: "flex", gap: 9, marginTop: 13 }}>
+            <div style={{ display: "flex", gap: 9, marginTop: 0 }}>
               <a
                 href={`https://map.naver.com/v5/search/${encodeURIComponent(
                   data.venue || data.address

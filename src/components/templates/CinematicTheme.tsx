@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
 import { Calendar, MapPin, Copy, Check, X } from "lucide-react";
 import { WeddingData, DEFAULT_SECTIONS_ORDER, SectionId, parentsLine, fullName } from "./FilmTheme";
 import FilmGallery from "./sections/FilmGallery";
+import KakaoMap from "../KakaoMap";
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const C = {
@@ -312,9 +313,16 @@ export default function CinematicTheme({ data, preview = false }: Props) {
                 </p>
                 <p style={{ fontSize: 11, color: C.muted, marginTop: 5 }}>{data.address}</p>
 
+                {/* Kakao Map */}
+                {!preview && data.address && (
+                  <div style={{ marginTop: 16 }}>
+                    <KakaoMap address={data.address} />
+                  </div>
+                )}
+
                 {/* Naver + Kakao map buttons */}
                 {!preview && (
-                  <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+                  <div style={{ display: "flex", gap: 8, marginTop: 0 }}>
                     <a
                       href={`https://map.naver.com/v5/search/${encodeURIComponent(data.venue || data.address)}`}
                       target="_blank"
