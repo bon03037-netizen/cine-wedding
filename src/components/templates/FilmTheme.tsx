@@ -6,7 +6,7 @@ import {
   AnimatePresence,
   useInView,
 } from "framer-motion";
-import { X, Copy, Check, MapPin, Calendar, ChevronDown } from "lucide-react";
+import { X, Copy, Check, ChevronDown } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -77,13 +77,13 @@ function Perforations({ count = 10 }: { count?: number }) {
   );
 }
 
-function FilmGrain() {
+function FilmGrain({ strong = false }: { strong?: boolean }) {
   return (
     <div
       style={{
         position: "absolute",
         inset: 0,
-        opacity: 0.11,
+        opacity: strong ? 0.22 : 0.11,
         pointerEvents: "none",
         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")`,
         mixBlendMode: "screen",
@@ -110,9 +110,9 @@ function FadeIn({
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 45 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 1.1, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 1.3, delay, ease: [0.22, 1, 0.36, 1] }}
       style={style}
     >
       {children}
@@ -344,22 +344,12 @@ function FilmAlbum({
         } as React.CSSProperties}
       >
         {Array.from({ length: N }).map((_, i) => (
-          <motion.div
+          <div
             key={i}
             style={{ scrollSnapAlign: "center", flexShrink: 0 }}
-            animate={{
-              x: [0, -0.35, 0.4, -0.25, 0.5, -0.3, 0.2, 0],
-              y: [0, 0.5, -0.3, 0.55, 0.2, -0.4, 0.35, 0],
-              rotate: [0, 0.012, -0.018, 0.008, -0.014, 0.02, -0.01, 0],
-            }}
-            transition={{
-              duration: 1.1 + (i % 4) * 0.15,
-              repeat: Infinity,
-              ease: "linear",
-            }}
           >
             <FilmCard src={photos[i]} index={i} total={N} />
-          </motion.div>
+          </div>
         ))}
       </div>
 
@@ -392,7 +382,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
   const [albumOpen, setAlbumOpen] = useState(false);
   const photos = data.photos ?? [];
 
-  const serif = "var(--font-serif-kr), 'Apple SD Gothic Neo', serif";
+  const serif = "var(--font-nanum), var(--font-serif-kr), 'Apple SD Gothic Neo', serif";
   const sans = "Pretendard, -apple-system, BlinkMacSystemFont, sans-serif";
   const mono = "monospace";
 
@@ -401,11 +391,11 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
   const slabel: React.CSSProperties = {
     fontFamily: mono,
     fontSize: 9,
-    letterSpacing: "0.45em",
-    color: "#505050",
+    letterSpacing: "0.5em",
+    color: "#585858",
     textTransform: "uppercase",
     textAlign: "center",
-    marginBottom: preview ? 12 : 26,
+    marginBottom: preview ? 14 : 30,
   };
 
   return (
@@ -416,8 +406,8 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         fontFamily: sans,
         minHeight: "100%",
         position: "relative",
-        lineHeight: 1.7,
-        letterSpacing: "0.03em",
+        lineHeight: 1.85,
+        letterSpacing: "0.035em",
       }}
     >
       {/* ── § 1  HERO ────────────────────────────────────────────────────── */}
@@ -450,12 +440,8 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               width: "100%",
               height: "100%",
               objectFit: "cover",
-              opacity: 0.52,
-              animationName: preview ? undefined : "filmJitter",
-              animationDuration: "2.2s",
-              animationTimingFunction: "linear",
-              animationIterationCount: "infinite",
-            } as React.CSSProperties}
+              opacity: 0.9,
+            }}
           />
         ) : (
           <div
@@ -463,26 +449,30 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               position: "absolute",
               inset: 0,
               background: "linear-gradient(158deg, #1a1a18 0%, #0c0c0a 55%, #111 100%)",
-              animationName: preview ? undefined : "filmJitter",
-              animationDuration: "2.2s",
-              animationTimingFunction: "linear",
-              animationIterationCount: "infinite",
-            } as React.CSSProperties}
+            }}
           />
         )}
 
-        {/* Vignette */}
+        {/* Vignette — 세련된 빈티지 비네팅 */}
         <div
           style={{
             position: "absolute",
             inset: 0,
             background:
-              "radial-gradient(ellipse at center, transparent 18%, rgba(0,0,0,0.84) 100%)",
+              "radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.48) 100%)",
+          }}
+        />
+        {/* Bottom gradient for text readability */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.18) 45%, transparent 65%)",
           }}
         />
 
-        {/* Film grain */}
-        <FilmGrain />
+        {/* Film grain — Hero에서는 강한 노이즈 적용 */}
+        <FilmGrain strong />
 
         {/* Film edge numbers */}
         {!preview && (
@@ -528,60 +518,39 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             width: "100%",
           }}
         >
+          {/* Subtle label */}
           <p
             style={{
               fontFamily: mono,
-              fontSize: 8,
-              letterSpacing: "0.55em",
-              color: "#484848",
+              fontSize: preview ? 7 : 9,
+              letterSpacing: "0.65em",
+              color: "rgba(255,255,255,0.28)",
               textTransform: "uppercase",
-              marginBottom: preview ? 10 : 18,
+              marginBottom: preview ? 12 : 22,
             }}
           >
             Wedding Invitation
           </p>
-          <h1
-            style={{
-              fontFamily: serif,
-              fontSize: preview ? 21 : 38,
-              fontWeight: 300,
-              letterSpacing: "0.2em",
-              color: "#D4AF37",
-              textShadow: "0 0 18px rgba(212,175,55,0.25), 0 0 40px rgba(212,175,55,0.1)",
-              margin: 0,
-              lineHeight: 1.25,
-            }}
-          >
-            {data.groomName || "신랑"}
-            <span
-              style={{
-                color: "#404040",
-                margin: "0 8px",
-                fontSize: "0.72em",
-                fontWeight: 200,
-              }}
-            >
-              ·
-            </span>
-            {data.brideName || "신부"}
-          </h1>
 
-          {/* Gold line */}
+          {/* Gold decorative line */}
           <div
             style={{
-              width: 26,
+              width: 32,
               height: 1,
-              background: "rgba(184,146,42,0.45)",
-              margin: preview ? "9px auto" : "16px auto",
+              background: "rgba(212,175,55,0.5)",
+              margin: preview ? "0 auto 10px" : "0 auto 18px",
             }}
           />
 
+          {/* Date — 이름 대신 날짜로 사진 몰입감 강조 */}
           <p
             style={{
               fontFamily: serif,
-              fontSize: preview ? 10 : 13,
-              color: "#909090",
-              letterSpacing: "0.2em",
+              fontSize: preview ? 12 : 16,
+              fontWeight: 400,
+              color: "rgba(240,230,200,0.85)",
+              letterSpacing: "0.28em",
+              lineHeight: 1.6,
             }}
           >
             {data.date}
@@ -614,56 +583,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         )}
       </section>
 
-      {/* ── § 2  BRIEF INTRO ────────────────────────────────────────────── */}
-      <section
-        style={{
-          ...divider,
-          padding: preview ? "16px 18px" : "44px 28px",
-          textAlign: "center",
-        }}
-      >
-        <FadeIn>
-          <p style={slabel}>Date & Venue</p>
-          <div
-            style={{
-              display: "inline-flex",
-              flexDirection: "column",
-              gap: preview ? 7 : 12,
-              alignItems: "center",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-              <Calendar size={preview ? 10 : 12} color="#606060" />
-              <span
-                style={{
-                  fontFamily: serif,
-                  fontSize: preview ? 11 : 14,
-                  color: "#DCDCDC",
-                  letterSpacing: "0.1em",
-                }}
-              >
-                {data.date}&nbsp;&nbsp;{data.time}
-              </span>
-            </div>
-            <div style={{ width: 1, height: preview ? 8 : 14, background: "#282828" }} />
-            <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-              <MapPin size={preview ? 10 : 12} color="#606060" />
-              <span
-                style={{
-                  fontFamily: serif,
-                  fontSize: preview ? 11 : 14,
-                  color: "#A0A0A0",
-                  letterSpacing: "0.08em",
-                }}
-              >
-                {data.venue}
-              </span>
-            </div>
-          </div>
-        </FadeIn>
-      </section>
-
-      {/* ── § 3  GREETING ────────────────────────────────────────────────── */}
+      {/* ── § 2  GREETING ────────────────────────────────────────────────── */}
       <section style={{ ...divider, ...sp, textAlign: "center" }}>
         <FadeIn>
           <div style={{
@@ -693,12 +613,12 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
           <p
             style={{
               fontFamily: serif,
-              fontSize: preview ? 11 : 15,
-              lineHeight: preview ? 2.2 : 2.6,
-              color: "#B8B8B8",
+              fontSize: preview ? 12 : 16,
+              lineHeight: preview ? 2.3 : 2.8,
+              color: "#C8C8C8",
               whiteSpace: "pre-line",
-              fontWeight: 300,
-              letterSpacing: "0.05em",
+              fontWeight: 400,
+              letterSpacing: "0.06em",
             }}
           >
             {data.greeting || "두 사람이 하나가 되는 날,\n소중한 자리에 함께해 주세요."}
@@ -722,7 +642,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         </FadeIn>
       </section>
 
-      {/* ── § 4  COUPLE INFO ─────────────────────────────────────────────── */}
+      {/* ── § 3  COUPLE INFO (혼주소개) ──────────────────────────────────── */}
       <section style={{ ...divider, ...sp }}>
         <FadeIn>
           <p style={slabel}>The Couple</p>
@@ -751,11 +671,11 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               <p
                 style={{
                   fontFamily: serif,
-                  fontSize: preview ? 14 : 20,
-                  fontWeight: 300,
-                  letterSpacing: "0.18em",
+                  fontSize: preview ? 15 : 22,
+                  fontWeight: 400,
+                  letterSpacing: "0.2em",
                   color: "#D4AF37",
-                  textShadow: "0 0 14px rgba(212,175,55,0.2)",
+                  textShadow: "0 0 16px rgba(212,175,55,0.22)",
                   marginBottom: preview ? 5 : 10,
                 }}
               >
@@ -767,9 +687,9 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                     <p
                       style={{
                         fontFamily: serif,
-                        fontSize: preview ? 9 : 11,
-                        color: "#606060",
-                        lineHeight: preview ? 1.8 : 2.1,
+                        fontSize: preview ? 10 : 12,
+                        color: "#686868",
+                        lineHeight: preview ? 2.0 : 2.3,
                       }}
                     >
                       {data.groomParents.isFatherDeceased && (
@@ -782,9 +702,9 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                     <p
                       style={{
                         fontFamily: serif,
-                        fontSize: preview ? 9 : 11,
-                        color: "#606060",
-                        lineHeight: preview ? 1.8 : 2.1,
+                        fontSize: preview ? 10 : 12,
+                        color: "#686868",
+                        lineHeight: preview ? 2.0 : 2.3,
                       }}
                     >
                       {data.groomParents.isMotherDeceased && (
@@ -838,11 +758,11 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               <p
                 style={{
                   fontFamily: serif,
-                  fontSize: preview ? 14 : 20,
-                  fontWeight: 300,
-                  letterSpacing: "0.18em",
+                  fontSize: preview ? 15 : 22,
+                  fontWeight: 400,
+                  letterSpacing: "0.2em",
                   color: "#D4AF37",
-                  textShadow: "0 0 14px rgba(212,175,55,0.2)",
+                  textShadow: "0 0 16px rgba(212,175,55,0.22)",
                   marginBottom: preview ? 5 : 10,
                 }}
               >
@@ -854,9 +774,9 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                     <p
                       style={{
                         fontFamily: serif,
-                        fontSize: preview ? 9 : 11,
-                        color: "#606060",
-                        lineHeight: preview ? 1.8 : 2.1,
+                        fontSize: preview ? 10 : 12,
+                        color: "#686868",
+                        lineHeight: preview ? 2.0 : 2.3,
                       }}
                     >
                       {data.brideParents.isFatherDeceased && (
@@ -869,9 +789,9 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                     <p
                       style={{
                         fontFamily: serif,
-                        fontSize: preview ? 9 : 11,
-                        color: "#606060",
-                        lineHeight: preview ? 1.8 : 2.1,
+                        fontSize: preview ? 10 : 12,
+                        color: "#686868",
+                        lineHeight: preview ? 2.0 : 2.3,
                       }}
                     >
                       {data.brideParents.isMotherDeceased && (
@@ -887,183 +807,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         </FadeIn>
       </section>
 
-      {/* ── § 5  VENUE & MAP ──────────────────────────────────────────────── */}
-      <section style={{ ...divider, ...sp }}>
-        <FadeIn>
-          <p style={slabel}>Ceremony</p>
-
-          {/* Date + Time + Venue big display */}
-          <div
-            style={{
-              textAlign: "center",
-              marginBottom: preview ? 14 : 28,
-              background: "rgba(20,20,20,0.6)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-              borderRadius: 14,
-              padding: preview ? "14px 16px" : "28px 24px",
-              border: "1px solid rgba(255,255,255,0.04)",
-            } as React.CSSProperties}
-          >
-            <p
-              style={{
-                fontFamily: serif,
-                fontSize: preview ? 13 : 19,
-                color: "#D4AF37",
-                textShadow: "0 0 16px rgba(212,175,55,0.2)",
-                letterSpacing: "0.14em",
-                fontWeight: 300,
-                marginBottom: 4,
-              }}
-            >
-              {data.date}
-            </p>
-            <p
-              style={{
-                fontFamily: serif,
-                fontSize: preview ? 11 : 14,
-                color: "#888888",
-                letterSpacing: "0.12em",
-                marginBottom: preview ? 10 : 20,
-              }}
-            >
-              {data.time}
-            </p>
-
-            {/* Gold rule */}
-            <div
-              style={{
-                width: 24,
-                height: 1,
-                background: "rgba(212,175,55,0.4)",
-                margin: "0 auto",
-                marginBottom: preview ? 10 : 20,
-              }}
-            />
-
-            <p
-              style={{
-                fontFamily: serif,
-                fontSize: preview ? 13 : 18,
-                color: "#D4AF37",
-                textShadow: "0 0 12px rgba(212,175,55,0.15)",
-                letterSpacing: "0.12em",
-                marginBottom: 5,
-              }}
-            >
-              {data.venue}
-            </p>
-            <p
-              style={{
-                fontFamily: sans,
-                fontSize: preview ? 10 : 12,
-                color: "#777777",
-                letterSpacing: "0.04em",
-              }}
-            >
-              {data.address}
-            </p>
-          </div>
-
-          {/* Map embed or placeholder */}
-          {data.mapEmbedUrl ? (
-            <iframe
-              src={data.mapEmbedUrl}
-              style={{
-                width: "100%",
-                height: preview ? 120 : 200,
-                border: "none",
-                display: "block",
-                borderRadius: 8,
-                filter: "grayscale(1) invert(0.88) brightness(0.78)",
-              }}
-              loading="lazy"
-            />
-          ) : (
-            <div
-              style={{
-                height: preview ? 90 : 160,
-                background: "#0f0f0f",
-                borderRadius: 8,
-                border: "1px solid #181818",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#1e1e1e",
-                fontSize: 10,
-                fontFamily: mono,
-                letterSpacing: "0.14em",
-              }}
-            >
-              지도 미등록
-            </div>
-          )}
-
-          {/* Naver + Kakao navigation buttons */}
-          {!preview && (
-            <div style={{ display: "flex", gap: 9, marginTop: 13 }}>
-              <a
-                href={`https://map.naver.com/v5/search/${encodeURIComponent(
-                  data.venue || data.address
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 6,
-                  padding: "12px 0",
-                  background: "#03C75A",
-                  borderRadius: 10,
-                  color: "#fff",
-                  fontSize: 13,
-                  fontFamily: sans,
-                  textDecoration: "none",
-                  letterSpacing: "0.04em",
-                  fontWeight: 500,
-                }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                </svg>
-                네이버 지도
-              </a>
-              <a
-                href={`https://map.kakao.com/?q=${encodeURIComponent(
-                  data.venue || data.address
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 6,
-                  padding: "12px 0",
-                  background: "#FEE500",
-                  borderRadius: 10,
-                  color: "#3C1E1E",
-                  fontSize: 13,
-                  fontFamily: sans,
-                  textDecoration: "none",
-                  letterSpacing: "0.04em",
-                  fontWeight: 500,
-                }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#3C1E1E">
-                  <path d="M12 3C6.48 3 2 6.92 2 11.77c0 3.1 1.73 5.83 4.37 7.49-.19.65-.68 2.34-.78 2.7-.12.44.16.44.34.32.14-.1 1.89-1.24 2.66-1.74.78.1 1.58.16 2.41.16 5.52 0 10-3.92 10-8.77C22 6.92 17.52 3 12 3z" />
-                </svg>
-                카카오내비
-              </a>
-            </div>
-          )}
-        </FadeIn>
-      </section>
-
-      {/* ── § 6  GALLERY ─────────────────────────────────────────────────── */}
+      {/* ── § 4  GALLERY (우리들의 이야기) ──────────────────────────────── */}
       <section style={{ ...divider, ...sp, textAlign: "center" }}>
         <FadeIn>
           <p style={slabel}>Our Story</p>
@@ -1170,10 +914,11 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                 borderRadius: 999,
                 background: "rgba(20,20,20,0.5)",
                 color: "#A0A0A0",
-                fontSize: 13,
+                fontSize: 14,
                 letterSpacing: "0.22em",
                 cursor: "pointer",
                 fontFamily: serif,
+                fontWeight: 400,
                 transition: "border-color 0.25s, color 0.25s",
               }}
             >
@@ -1209,7 +954,184 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         </FadeIn>
       </section>
 
-      {/* ── § 7  TRANSPORT ───────────────────────────────────────────────── */}
+      {/* ── § 5  네이버 / 카카오 지도 ─────────────────────────────────────── */}
+      <section style={{ ...divider, ...sp }}>
+        <FadeIn>
+          <p style={slabel}>Ceremony</p>
+
+          {/* Date + Time + Venue big display */}
+          <div
+            style={{
+              textAlign: "center",
+              marginBottom: preview ? 14 : 28,
+              background: "rgba(20,20,20,0.6)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              borderRadius: 14,
+              padding: preview ? "14px 16px" : "28px 24px",
+              border: "1px solid rgba(255,255,255,0.04)",
+            } as React.CSSProperties}
+          >
+            <p
+              style={{
+                fontFamily: serif,
+                fontSize: preview ? 13 : 19,
+                color: "#D4AF37",
+                textShadow: "0 0 16px rgba(212,175,55,0.2)",
+                letterSpacing: "0.14em",
+                fontWeight: 400,
+                marginBottom: 4,
+              }}
+            >
+              {data.date}
+            </p>
+            <p
+              style={{
+                fontFamily: serif,
+                fontSize: preview ? 11 : 14,
+                color: "#888888",
+                letterSpacing: "0.12em",
+                marginBottom: preview ? 10 : 20,
+              }}
+            >
+              {data.time}
+            </p>
+
+            {/* Gold rule */}
+            <div
+              style={{
+                width: 24,
+                height: 1,
+                background: "rgba(212,175,55,0.4)",
+                margin: "0 auto",
+                marginBottom: preview ? 10 : 20,
+              }}
+            />
+
+            <p
+              style={{
+                fontFamily: serif,
+                fontSize: preview ? 13 : 18,
+                color: "#D4AF37",
+                textShadow: "0 0 12px rgba(212,175,55,0.15)",
+                letterSpacing: "0.12em",
+                fontWeight: 400,
+                marginBottom: 5,
+              }}
+            >
+              {data.venue}
+            </p>
+            <p
+              style={{
+                fontFamily: sans,
+                fontSize: preview ? 10 : 12,
+                color: "#777777",
+                letterSpacing: "0.04em",
+              }}
+            >
+              {data.address}
+            </p>
+          </div>
+
+          {/* Map embed or placeholder */}
+          {data.mapEmbedUrl ? (
+            <iframe
+              src={data.mapEmbedUrl}
+              style={{
+                width: "100%",
+                height: preview ? 120 : 200,
+                border: "none",
+                display: "block",
+                borderRadius: 8,
+                filter: "grayscale(1) invert(0.88) brightness(0.78)",
+              }}
+              loading="lazy"
+            />
+          ) : (
+            <div
+              style={{
+                height: preview ? 90 : 160,
+                background: "#0f0f0f",
+                borderRadius: 8,
+                border: "1px solid #181818",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#1e1e1e",
+                fontSize: 10,
+                fontFamily: mono,
+                letterSpacing: "0.14em",
+              }}
+            >
+              지도 미등록
+            </div>
+          )}
+
+          {/* Naver + Kakao navigation buttons */}
+          {!preview && (
+            <div style={{ display: "flex", gap: 9, marginTop: 13 }}>
+              <a
+                href={`https://map.naver.com/v5/search/${encodeURIComponent(
+                  data.venue || data.address
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  padding: "12px 0",
+                  background: "#03C75A",
+                  borderRadius: 10,
+                  color: "#fff",
+                  fontSize: 13,
+                  fontFamily: sans,
+                  textDecoration: "none",
+                  letterSpacing: "0.04em",
+                  fontWeight: 600,
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                </svg>
+                네이버 지도
+              </a>
+              <a
+                href={`https://map.kakao.com/?q=${encodeURIComponent(
+                  data.venue || data.address
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  padding: "12px 0",
+                  background: "#FEE500",
+                  borderRadius: 10,
+                  color: "#3C1E1E",
+                  fontSize: 13,
+                  fontFamily: sans,
+                  textDecoration: "none",
+                  letterSpacing: "0.04em",
+                  fontWeight: 600,
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#3C1E1E">
+                  <path d="M12 3C6.48 3 2 6.92 2 11.77c0 3.1 1.73 5.83 4.37 7.49-.19.65-.68 2.34-.78 2.7-.12.44.16.44.34.32.14-.1 1.89-1.24 2.66-1.74.78.1 1.58.16 2.41.16 5.52 0 10-3.92 10-8.77C22 6.92 17.52 3 12 3z" />
+                </svg>
+                카카오내비
+              </a>
+            </div>
+          )}
+        </FadeIn>
+      </section>
+
+      {/* ── § 6  오시는 길 (교통안내) ─────────────────────────────────────── */}
       {(data.transport?.subway || data.transport?.bus || data.transport?.car) && (
         <section style={{ ...divider, ...sp }}>
           <FadeIn>
@@ -1261,9 +1183,9 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                     <p
                       style={{
                         fontFamily: sans,
-                        fontSize: preview ? 10 : 12,
-                        color: "#A0A0A0",
-                        lineHeight: 1.85,
+                        fontSize: preview ? 11 : 13,
+                        color: "#ABABAB",
+                        lineHeight: 2.0,
                       }}
                     >
                       {data.transport.subway}
@@ -1306,9 +1228,9 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                     <p
                       style={{
                         fontFamily: sans,
-                        fontSize: preview ? 10 : 12,
-                        color: "#A0A0A0",
-                        lineHeight: 1.85,
+                        fontSize: preview ? 11 : 13,
+                        color: "#ABABAB",
+                        lineHeight: 2.0,
                       }}
                     >
                       {data.transport.bus}
@@ -1351,9 +1273,9 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                     <p
                       style={{
                         fontFamily: sans,
-                        fontSize: preview ? 10 : 12,
-                        color: "#A0A0A0",
-                        lineHeight: 1.85,
+                        fontSize: preview ? 11 : 13,
+                        color: "#ABABAB",
+                        lineHeight: 2.0,
                       }}
                     >
                       {data.transport.car}
@@ -1366,7 +1288,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         </section>
       )}
 
-      {/* ── § 8  ACCOUNTS ────────────────────────────────────────────────── */}
+      {/* ── § 7  축의금 안내 — Accounts ─────────────────────────────────── */}
       {(data.groomAccount || data.brideAccount) && (
         <section style={{ ...divider, ...sp }}>
           <FadeIn>

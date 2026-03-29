@@ -41,19 +41,6 @@ body {
   100% { transform: translate(0,   0);    opacity: 0.11; }
 }
 
-@keyframes filmJitter {
-  0%   { transform: translate(0px, 0px) rotate(0deg); }
-  10%  { transform: translate(-0.35px, 0.5px) rotate(0.012deg); }
-  20%  { transform: translate(0.4px, -0.3px) rotate(-0.018deg); }
-  30%  { transform: translate(-0.25px, 0.55px) rotate(0.008deg); }
-  40%  { transform: translate(0.5px, 0.2px) rotate(-0.014deg); }
-  50%  { transform: translate(-0.4px, -0.45px) rotate(0.02deg); }
-  60%  { transform: translate(0.3px, 0.5px) rotate(-0.01deg); }
-  70%  { transform: translate(-0.5px, -0.2px) rotate(0.016deg); }
-  80%  { transform: translate(0.2px, 0.4px) rotate(-0.012deg); }
-  90%  { transform: translate(-0.3px, -0.5px) rotate(0.007deg); }
-  100% { transform: translate(0px, 0px) rotate(0deg); }
-}
 
 @keyframes filmStripScroll {
   0%   { transform: translateX(0); }

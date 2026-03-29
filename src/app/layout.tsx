@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Noto_Serif_KR } from "next/font/google";
+import { Noto_Serif_KR, Nanum_Myeongjo } from "next/font/google";
 import "./globals.css";
 
 const notoSerifKR = Noto_Serif_KR({
@@ -7,6 +7,13 @@ const notoSerifKR = Noto_Serif_KR({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-serif-kr",
+});
+
+const nanumMyeongjo = Nanum_Myeongjo({
+  weight: ["400", "700", "800"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-nanum",
 });
 
 export const metadata: Metadata = {
@@ -27,7 +34,7 @@ export default function RootLayout({
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
         />
       </head>
-      <body className={`${notoSerifKR.variable} antialiased`}>
+      <body className={`${notoSerifKR.variable} ${nanumMyeongjo.variable} antialiased`}>
         {children}
       </body>
     </html>
