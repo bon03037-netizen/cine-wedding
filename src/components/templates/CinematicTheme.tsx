@@ -5,8 +5,6 @@ import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
 import { Calendar, MapPin, Copy, Check, X } from "lucide-react";
 import { WeddingData, DEFAULT_SECTIONS_ORDER, SectionId, parentsLine, fullName } from "./FilmTheme";
 import FilmGallery from "./sections/FilmGallery";
-import NaverMap from "@/components/NaverMap";
-
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const C = {
@@ -308,11 +306,51 @@ export default function CinematicTheme({ data, preview = false }: Props) {
             <div style={{ height: 1, background: C.divider }} />
             <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
               <MapPin size={12} color={C.faint} style={{ marginTop: 4, flexShrink: 0 }} />
-              <div>
+              <div style={{ flex: 1 }}>
                 <p style={{ fontSize: preview ? 13 : 16, color: C.text, fontFamily: C.serif, fontWeight: 100, letterSpacing: "0.12em", lineHeight: 1.4 }}>
                   {data.venue}
                 </p>
                 <p style={{ fontSize: 11, color: C.muted, marginTop: 5 }}>{data.address}</p>
+
+                {/* Naver + Kakao map buttons */}
+                {!preview && (
+                  <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+                    <a
+                      href={`https://map.naver.com/v5/search/${encodeURIComponent(data.venue || data.address)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
+                        gap: 6, padding: "10px 0",
+                        background: "#03C75A", borderRadius: 8,
+                        color: "#fff", fontSize: 12, fontFamily: C.sans,
+                        textDecoration: "none", letterSpacing: "0.04em", fontWeight: 600,
+                      }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="white">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                      </svg>
+                      네이버 지도
+                    </a>
+                    <a
+                      href={`https://map.kakao.com/?q=${encodeURIComponent(data.venue || data.address)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
+                        gap: 6, padding: "10px 0",
+                        background: "#FEE500", borderRadius: 8,
+                        color: "#3C1E1E", fontSize: 12, fontFamily: C.sans,
+                        textDecoration: "none", letterSpacing: "0.04em", fontWeight: 600,
+                      }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="#3C1E1E">
+                        <path d="M12 3C6.48 3 2 6.92 2 11.77c0 3.1 1.73 5.83 4.37 7.49-.19.65-.68 2.34-.78 2.7-.12.44.16.44.34.32.14-.1 1.89-1.24 2.66-1.74.78.1 1.58.16 2.41.16 5.52 0 10-3.92 10-8.77C22 6.92 17.52 3 12 3z" />
+                      </svg>
+                      카카오내비
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -443,9 +481,6 @@ export default function CinematicTheme({ data, preview = false }: Props) {
       <FadeIn preview={preview}>
         <section style={{ borderTop: `1px solid ${C.divider}` }}>
           <p style={{ ...S.label, padding: preview ? "20px 0 14px" : "72px 0 36px" }}>오시는 길</p>
-          <div style={{ margin: "0 22px", marginBottom: preview ? 18 : 48 }}>
-            <NaverMap address={data.address} preview={preview} dark />
-          </div>
           {(data.transport?.bus || data.transport?.car) && (
             <div style={{ padding: preview ? "14px 22px 18px" : "32px 48px 52px", display: "flex", flexDirection: "column", gap: 12 }}>
               {data.transport.bus && (

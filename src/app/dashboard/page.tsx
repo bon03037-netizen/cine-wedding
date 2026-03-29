@@ -2,6 +2,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { useRef, useState, useCallback } from "react";
+import DaumPostcode, { Address } from "react-daum-postcode";
 import { motion } from "framer-motion";
 import { Heart, ChevronDown, Upload, X, Plus, Film, GripVertical } from "lucide-react";
 import { WeddingData, SectionId, DEFAULT_SECTIONS_ORDER } from "@/components/templates/FilmTheme";
@@ -314,6 +315,9 @@ export default function DashboardPage() {
   const [introPreviewKey, setIntroPreviewKey] = useState(0);
   const [introPreviewActive, setIntroPreviewActive] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number } | null>(null);
+  const [roadAddress, setRoadAddress] = useState(DEFAULT.address);
+  const [detailAddress, setDetailAddress] = useState("");
+  const [postcodeOpen, setPostcodeOpen] = useState(false);
 
   const mainImgRef = useRef<HTMLInputElement>(null);
   const photosRef = useRef<HTMLInputElement>(null);
@@ -699,8 +703,36 @@ export default function DashboardPage() {
                 <Field label="예식장 이름">
                   <input type="text" value={data.venue} onChange={(e) => set("venue", e.target.value)} className={inputCls} />
                 </Field>
-                <Field label="주소">
-                  <input type="text" value={data.address} onChange={(e) => set("address", e.target.value)} className={inputCls} />
+                <Field label="도로명 주소">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={roadAddress}
+                      placeholder="주소 검색 버튼을 눌러주세요"
+                      className={`${inputCls} flex-1 cursor-default`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setPostcodeOpen(true)}
+                      className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 whitespace-nowrap transition-colors"
+                    >
+                      주소 검색
+                    </button>
+                  </div>
+                </Field>
+                <Field label="상세 주소">
+                  <input
+                    type="text"
+                    value={detailAddress}
+                    onChange={(e) => {
+                      const detail = e.target.value;
+                      setDetailAddress(detail);
+                      set("address", roadAddress + (detail ? " " + detail : ""));
+                    }}
+                    placeholder="예: 펠리스홀 3층"
+                    className={inputCls}
+                  />
                 </Field>
               </div>
             </AccSection>
@@ -961,6 +993,39 @@ export default function DashboardPage() {
         </div>
 
       </div>
+
+      {/* ── 다음(카카오) 주소 검색 모달 ─────────────────────────────── */}
+      {postcodeOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+          onClick={() => setPostcodeOpen(false)}
+        >
+          <div
+            className="bg-white rounded-xl overflow-hidden w-[95vw] max-w-[500px] shadow-2xl relative"
+            style={{ height: 500 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+              <span className="text-sm font-medium text-gray-700">주소 검색</span>
+              <button
+                onClick={() => setPostcodeOpen(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <DaumPostcode
+              onComplete={(addr: Address) => {
+                const road = addr.roadAddress || addr.autoRoadAddress || "";
+                setRoadAddress(road);
+                set("address", road + (detailAddress ? " " + detailAddress : ""));
+                setPostcodeOpen(false);
+              }}
+              style={{ height: "calc(100% - 49px)" }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

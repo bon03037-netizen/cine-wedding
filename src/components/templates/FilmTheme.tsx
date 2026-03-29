@@ -7,8 +7,6 @@ import {
   useInView,
 } from "framer-motion";
 import { X, Copy, Check, ChevronDown } from "lucide-react";
-import NaverMap from "@/components/NaverMap";
-
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface AccountInfo {
@@ -976,9 +974,6 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               {data.address}
             </p>
           </div>
-
-          {/* 네이버 지도 */}
-          <NaverMap address={data.address} preview={preview} dark />
 
           {/* Naver + Kakao navigation buttons */}
           {!preview && (
