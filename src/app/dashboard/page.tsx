@@ -3,8 +3,8 @@
 import { supabase } from '@/lib/supabase';
 import { useRef, useState, useCallback } from "react";
 import { Heart, ChevronDown, Upload, X, Plus } from "lucide-react";
-import FilmTheme, { WeddingData } from "@/components/templates/FilmTheme";
-import CinematicTheme from "@/components/templates/CinematicTheme";
+import { WeddingData } from "@/components/templates/FilmTheme";
+import InvitationView from "@/components/InvitationView";
 
 type Theme = "film" | "cinematic";
 
@@ -667,12 +667,12 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* FilmTheme preview */}
-                <div className="flex-1 overflow-y-auto">
-                  {currentTheme === "film"
-                    ? <FilmTheme data={data} preview />
-                    : <CinematicTheme data={data} preview />
-                  }
+                {/* 390px 실제 모바일 너비로 렌더링 후 zoom으로 축소 */}
+                <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
+                  {/* zoom: 300/390 ≈ 0.769 — 폰 프레임 내부 너비(300px)에 맞게 축소 */}
+                  <div style={{ width: 390, zoom: 300 / 390 } as React.CSSProperties}>
+                    <InvitationView data={data} theme={currentTheme} />
+                  </div>
                 </div>
               </div>
             </div>

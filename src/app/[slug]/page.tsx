@@ -1,8 +1,8 @@
 
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import FilmTheme, { WeddingData } from "@/components/templates/FilmTheme";
-import CinematicTheme from "@/components/templates/CinematicTheme";
+import { WeddingData } from "@/components/templates/FilmTheme";
+import InvitationView from "@/components/InvitationView";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -24,9 +24,10 @@ export default async function InvitationPage({ params }: Props) {
     photos: data.image_urls ?? [],
   };
 
-  if (data.theme === "cinematic") {
-    return <CinematicTheme data={weddingData} />;
-  }
-
-  return <FilmTheme data={weddingData} />;
+  return (
+    <InvitationView
+      data={weddingData}
+      theme={data.theme as "film" | "cinematic"}
+    />
+  );
 }
