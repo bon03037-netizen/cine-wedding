@@ -2,7 +2,7 @@
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { WeddingData } from "@/components/templates/FilmTheme";
-import InvitationView from "@/components/InvitationView";
+import InvitationPageClient from "@/components/InvitationPageClient";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -25,7 +25,7 @@ export default async function InvitationPage({ params }: Props) {
   };
 
   return (
-    <InvitationView
+    <InvitationPageClient
       data={weddingData}
       theme={data.theme as "film" | "cinematic"}
     />

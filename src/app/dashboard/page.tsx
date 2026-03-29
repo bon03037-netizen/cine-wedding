@@ -2,9 +2,10 @@
 
 import { supabase } from '@/lib/supabase';
 import { useRef, useState, useCallback } from "react";
-import { Heart, ChevronDown, Upload, X, Plus } from "lucide-react";
+import { Heart, ChevronDown, Upload, X, Plus, Film } from "lucide-react";
 import { WeddingData } from "@/components/templates/FilmTheme";
 import InvitationView from "@/components/InvitationView";
+import CinematicIntro from "@/components/CinematicIntro";
 
 type Theme = "film" | "cinematic";
 
@@ -170,6 +171,8 @@ export default function DashboardPage() {
     greeting: true, couple: false, datetime: false,
     venue: false, photos: false, accounts: false, transport: false,
   });
+  const [introPreviewKey, setIntroPreviewKey] = useState(0);
+  const [introPreviewActive, setIntroPreviewActive] = useState(false);
 
   const mainImgRef = useRef<HTMLInputElement>(null);
   const photosRef = useRef<HTMLInputElement>(null);
@@ -653,7 +656,7 @@ export default function DashboardPage() {
               {/* Screen */}
               <div
                 className="w-full h-full overflow-hidden flex flex-col"
-                style={{ background: "#0c0c0c", borderRadius: 36 }}
+                style={{ background: "#0c0c0c", borderRadius: 36, position: "relative" }}
               >
                 {/* Status bar */}
                 <div className="flex justify-between items-center px-5 pt-3 pb-1.5 shrink-0" style={{ background: "#0c0c0c" }}>
@@ -674,6 +677,16 @@ export default function DashboardPage() {
                     <InvitationView data={data} theme={currentTheme} />
                   </div>
                 </div>
+
+                {/* 인트로 미리보기 오버레이 (폰 스크린 안에 contained) */}
+                {introPreviewActive && (data.photos?.length ?? 0) > 0 && (
+                  <CinematicIntro
+                    key={introPreviewKey}
+                    photos={data.photos!}
+                    onComplete={() => setIntroPreviewActive(false)}
+                    contained
+                  />
+                )}
               </div>
             </div>
 
@@ -684,6 +697,27 @@ export default function DashboardPage() {
             >
               {data.date} · {data.time}
             </p>
+
+            {/* 인트로 미리보기 버튼 */}
+            <button
+              onClick={() => {
+                if ((data.photos?.length ?? 0) === 0) return;
+                setIntroPreviewKey((k) => k + 1);
+                setIntroPreviewActive(true);
+              }}
+              disabled={(data.photos?.length ?? 0) === 0 || introPreviewActive}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-mono tracking-wide transition-all"
+              style={{
+                background: (data.photos?.length ?? 0) === 0 ? "#e5e7eb" : "#111",
+                color: (data.photos?.length ?? 0) === 0 ? "#9ca3af" : "#fff",
+                cursor: (data.photos?.length ?? 0) === 0 ? "not-allowed" : "pointer",
+                opacity: introPreviewActive ? 0.5 : 1,
+              }}
+              title={(data.photos?.length ?? 0) === 0 ? "갤러리에 사진을 추가하면 인트로가 활성화됩니다" : ""}
+            >
+              <Film size={11} />
+              인트로 재생
+            </button>
           </div>
         </div>
 

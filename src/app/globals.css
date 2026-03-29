@@ -47,3 +47,8 @@ body {
   100% { transform: translateX(-50%); }
 }
 
+@keyframes filmRollUp {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
