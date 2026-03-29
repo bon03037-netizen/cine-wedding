@@ -3,8 +3,9 @@
 import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { Calendar, MapPin, Copy, Check, X } from "lucide-react";
-import { WeddingData } from "./FilmTheme";
+import { WeddingData, DEFAULT_SECTIONS_ORDER, SectionId, parentsLine, fullName } from "./FilmTheme";
 import FilmGallery from "./sections/FilmGallery";
+import NaverMap from "@/components/NaverMap";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -164,6 +165,8 @@ interface Props {
 export default function CinematicTheme({ data, preview = false }: Props) {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const { scrollY } = useScroll();
+  const sectionOrder = data.sectionsOrder ?? DEFAULT_SECTIONS_ORDER;
+  const orderOf = (id: SectionId) => sectionOrder.indexOf(id);
 
   // Parallax — bg moves slow (-42), text moves slightly faster (-68)
   const bgY    = useTransform(scrollY, [0, 900], [0, preview ? 0 : -42]);
@@ -237,74 +240,7 @@ export default function CinematicTheme({ data, preview = false }: Props) {
           }}
         />
 
-        {/* Names — separate from bg, unaffected by scale */}
-        <motion.div
-          style={{ position: "relative", zIndex: 1, textAlign: "center", y: textY, opacity: heroOp }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 2.5, delay: 0.4, ease: "easeOut" }}
-        >
-          <motion.p
-            style={{
-              fontSize: 8, letterSpacing: "0.55em", color: "#383838",
-              textTransform: "uppercase", marginBottom: preview ? 14 : 24,
-              fontFamily: C.mono,
-            }}
-            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.6, delay: 0.9 }}
-          >
-            Wedding Invitation
-          </motion.p>
-
-          <motion.h1
-            style={{
-              fontSize: preview ? 21 : 52, fontWeight: 100,
-              letterSpacing: preview ? "0.12em" : "0.28em",
-              color: C.text, fontFamily: C.serif, margin: 0, lineHeight: 1.15,
-            }}
-            initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 2, delay: 1.1, ease: [0.22, 1, 0.36, 1] }}
-          >
-            {data.groomName || "신랑"}
-          </motion.h1>
-
-          <motion.div
-            style={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              gap: preview ? 14 : 28,
-              margin: preview ? "10px 0" : "20px 0",
-            }}
-            initial={{ opacity: 0, scaleX: 0 }} animate={{ opacity: 1, scaleX: 1 }}
-            transition={{ duration: 1.4, delay: 1.7 }}
-          >
-            <div style={{ flex: 1, maxWidth: preview ? 28 : 72, height: 1, background: C.divider }} />
-            <span style={{ color: "#2e2e2e", fontSize: preview ? 13 : 20, fontWeight: 100, fontFamily: C.serif }}>&</span>
-            <div style={{ flex: 1, maxWidth: preview ? 28 : 72, height: 1, background: C.divider }} />
-          </motion.div>
-
-          <motion.h1
-            style={{
-              fontSize: preview ? 21 : 52, fontWeight: 100,
-              letterSpacing: preview ? "0.12em" : "0.28em",
-              color: C.text, fontFamily: C.serif, margin: 0, lineHeight: 1.15,
-            }}
-            initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 2, delay: 1.3, ease: [0.22, 1, 0.36, 1] }}
-          >
-            {data.brideName || "신부"}
-          </motion.h1>
-
-          <motion.p
-            style={{
-              fontSize: preview ? 9 : 12, color: "#404040",
-              marginTop: preview ? 14 : 28, letterSpacing: "0.28em", fontFamily: C.mono,
-            }}
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            transition={{ duration: 1.5, delay: 2.2 }}
-          >
-            {data.date}
-          </motion.p>
-        </motion.div>
+        {/* 히어로: 텍스트 없음 — 사진만 온전히 표시 */}
 
         {/* Scroll line indicator */}
         {!preview && (
@@ -329,7 +265,12 @@ export default function CinematicTheme({ data, preview = false }: Props) {
         )}
       </section>
 
+      {/* ── 섹션 컨테이너 (순서 + 가시성) ─────────────────────────────── */}
+      <div style={{ display: "flex", flexDirection: "column" }}>
+
       {/* ── 2. GREETING ──────────────────────────────────────────────────── */}
+      {data.showGreeting !== false && (
+      <div style={{ order: orderOf("greeting") }}>
       <FadeIn preview={preview}>
         <section style={S.section}>
           <p style={S.label}>Invitation</p>
@@ -345,8 +286,12 @@ export default function CinematicTheme({ data, preview = false }: Props) {
           </p>
         </section>
       </FadeIn>
+      </div>
+      )}
 
       {/* ── 3. CEREMONY (Date + Venue) ────────────────────────────────────── */}
+      {data.showMap !== false && (
+      <div style={{ order: orderOf("map") }}>
       <FadeIn preview={preview}>
         <section style={S.section}>
           <p style={S.label}>Ceremony</p>
@@ -373,8 +318,12 @@ export default function CinematicTheme({ data, preview = false }: Props) {
           </div>
         </section>
       </FadeIn>
+      </div>
+      )}
 
       {/* ── 4. GALLERY BUTTON ────────────────────────────────────────────── */}
+      {data.showGallery !== false && (
+      <div style={{ order: orderOf("gallery") }}>
       <FadeIn preview={preview}>
         <section
           style={{
@@ -442,8 +391,12 @@ export default function CinematicTheme({ data, preview = false }: Props) {
           )}
         </section>
       </FadeIn>
+      </div>
+      )}
 
       {/* ── 5. THE COUPLE ────────────────────────────────────────────────── */}
+      {data.showCouple !== false && (
+      <div style={{ order: orderOf("couple") }}>
       <FadeIn preview={preview}>
         <section style={S.section}>
           <p style={S.label}>The Couple</p>
@@ -459,6 +412,8 @@ export default function CinematicTheme({ data, preview = false }: Props) {
             {(["groom", "bride"] as const).map((side) => {
               const name = side === "groom" ? data.groomName : data.brideName;
               const parents = side === "groom" ? data.groomParents : data.brideParents;
+              const relation = side === "groom" ? "아들" as const : "딸" as const;
+              const line = parents ? parentsLine(parents, relation) : "";
               return (
                 <div key={side}>
                   <p style={{ fontSize: 8, color: C.faint, marginBottom: 10, letterSpacing: "0.2em", fontFamily: C.mono }}>
@@ -467,21 +422,10 @@ export default function CinematicTheme({ data, preview = false }: Props) {
                   <p style={{ fontSize: preview ? 15 : 26, fontWeight: 100, fontFamily: C.serif, color: C.text, letterSpacing: "0.16em", lineHeight: 1.2 }}>
                     {name}
                   </p>
-                  {parents && (
-                    <div style={{ marginTop: 10 }}>
-                      {parents.fatherName && (
-                        <p style={{ fontSize: 10, color: "#484848", lineHeight: 2.2 }}>
-                          {parents.isFatherDeceased && <span style={{ color: "#525252", marginRight: 4 }}>故</span>}
-                          {parents.fatherName}
-                        </p>
-                      )}
-                      {parents.motherName && (
-                        <p style={{ fontSize: 10, color: "#484848", lineHeight: 2.2 }}>
-                          {parents.isMotherDeceased && <span style={{ color: "#525252", marginRight: 4 }}>故</span>}
-                          {parents.motherName}
-                        </p>
-                      )}
-                    </div>
+                  {line && (
+                    <p style={{ fontSize: 10, color: "#484848", lineHeight: 2.2, marginTop: 8 }}>
+                      {line}
+                    </p>
                   )}
                 </div>
               );
@@ -490,30 +434,18 @@ export default function CinematicTheme({ data, preview = false }: Props) {
           </div>
         </section>
       </FadeIn>
+      </div>
+      )}
 
-      {/* ── 6. MAP ───────────────────────────────────────────────────────── */}
+      {/* ── 6. MAP / 오시는 길 ───────────────────────────────────────────── */}
+      {data.showTransport !== false && (
+      <div style={{ order: orderOf("transport") }}>
       <FadeIn preview={preview}>
         <section style={{ borderTop: `1px solid ${C.divider}` }}>
           <p style={{ ...S.label, padding: preview ? "20px 0 14px" : "72px 0 36px" }}>오시는 길</p>
-          {data.mapEmbedUrl ? (
-            <iframe
-              src={data.mapEmbedUrl}
-              style={{ width: "100%", height: preview ? 140 : 280, border: "none", display: "block", filter: "grayscale(1) invert(0.9) brightness(0.75)" }}
-              loading="lazy"
-            />
-          ) : (
-            <div
-              style={{
-                margin: "0 22px", marginBottom: preview ? 18 : 48,
-                height: preview ? 110 : 220,
-                background: C.surface, border: `1px solid ${C.divider}`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                color: "#222", fontSize: 10, fontFamily: C.mono, letterSpacing: "0.2em",
-              }}
-            >
-              지도 미등록
-            </div>
-          )}
+          <div style={{ margin: "0 22px", marginBottom: preview ? 18 : 48 }}>
+            <NaverMap address={data.address} preview={preview} dark />
+          </div>
           {(data.transport?.bus || data.transport?.car) && (
             <div style={{ padding: preview ? "14px 22px 18px" : "32px 48px 52px", display: "flex", flexDirection: "column", gap: 12 }}>
               {data.transport.bus && (
@@ -532,9 +464,12 @@ export default function CinematicTheme({ data, preview = false }: Props) {
           )}
         </section>
       </FadeIn>
+      </div>
+      )}
 
       {/* ── 7. ACCOUNTS ──────────────────────────────────────────────────── */}
-      {(data.groomAccount || data.brideAccount) && (
+      {data.showAccounts !== false && (data.groomAccount || data.brideAccount) && (
+      <div style={{ order: orderOf("accounts") }}>
         <FadeIn preview={preview}>
           <section style={S.section}>
             <p style={S.label}>마음 전하기</p>
@@ -563,7 +498,10 @@ export default function CinematicTheme({ data, preview = false }: Props) {
             </div>
           </section>
         </FadeIn>
+      </div>
       )}
+
+      </div>{/* end 섹션 컨테이너 */}
 
       {/* ── 8. FOOTER ────────────────────────────────────────────────────── */}
       <footer style={{ borderTop: `1px solid ${C.divider}`, padding: preview ? "20px 0" : "52px 0", textAlign: "center" }}>

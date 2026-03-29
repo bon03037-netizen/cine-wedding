@@ -7,6 +7,7 @@ import {
   useInView,
 } from "framer-motion";
 import { X, Copy, Check, ChevronDown } from "lucide-react";
+import NaverMap from "@/components/NaverMap";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -17,8 +18,10 @@ export interface AccountInfo {
 }
 
 export interface ParentInfo {
-  fatherName?: string;
-  motherName?: string;
+  fatherLastName?: string;
+  fatherFirstName?: string;
+  motherLastName?: string;
+  motherFirstName?: string;
   isFatherDeceased?: boolean;
   isMotherDeceased?: boolean;
 }
@@ -28,6 +31,12 @@ export interface TransportInfo {
   bus?: string;
   car?: string;
 }
+
+export type SectionId = "greeting" | "couple" | "gallery" | "map" | "transport" | "accounts";
+
+export const DEFAULT_SECTIONS_ORDER: SectionId[] = [
+  "greeting", "couple", "gallery", "map", "transport", "accounts",
+];
 
 export interface WeddingData {
   groomName: string;
@@ -43,8 +52,32 @@ export interface WeddingData {
   photos?: string[];
   groomAccount?: AccountInfo;
   brideAccount?: AccountInfo;
-  mapEmbedUrl?: string;
   transport?: TransportInfo;
+  // Section visibility (undefined = true)
+  showGreeting?: boolean;
+  showCouple?: boolean;
+  showGallery?: boolean;
+  showMap?: boolean;
+  showTransport?: boolean;
+  showAccounts?: boolean;
+  // Section render order
+  sectionsOrder?: SectionId[];
+}
+
+/** 성(optional) + 이름 합치기 */
+export function fullName(lastName?: string, firstName?: string) {
+  return `${lastName ?? ""}${firstName ?? ""}`.trim();
+}
+
+/** 혼주 한 줄 표시: "이창영 · 정경란의 아들" */
+export function parentsLine(parents: ParentInfo, relation: "아들" | "딸") {
+  const f = fullName(parents.fatherLastName, parents.fatherFirstName);
+  const m = fullName(parents.motherLastName, parents.motherFirstName);
+  const fp = parents.isFatherDeceased && f ? `故 ${f}` : f;
+  const mp = parents.isMotherDeceased && m ? `故 ${m}` : m;
+  const parts = [fp, mp].filter(Boolean);
+  if (!parts.length) return "";
+  return `${parts.join(" · ")}의 ${relation}`;
 }
 
 // ── Shared Atoms ──────────────────────────────────────────────────────────────
@@ -387,6 +420,9 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
     marginBottom: preview ? 14 : 30,
   };
 
+  const sectionOrder = data.sectionsOrder ?? DEFAULT_SECTIONS_ORDER;
+  const orderOf = (id: SectionId) => sectionOrder.indexOf(id);
+
   return (
     <div
       style={{
@@ -497,54 +533,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
           </>
         )}
 
-        {/* Hero content */}
-        <div
-          style={{
-            position: "relative",
-            zIndex: 2,
-            textAlign: "center",
-            padding: preview ? "0 16px 20px" : "0 28px 88px",
-            width: "100%",
-          }}
-        >
-          {/* Subtle label */}
-          <p
-            style={{
-              fontFamily: mono,
-              fontSize: preview ? 7 : 9,
-              letterSpacing: "0.65em",
-              color: "rgba(255,255,255,0.28)",
-              textTransform: "uppercase",
-              marginBottom: preview ? 12 : 22,
-            }}
-          >
-            Wedding Invitation
-          </p>
-
-          {/* Gold decorative line */}
-          <div
-            style={{
-              width: 32,
-              height: 1,
-              background: "rgba(212,175,55,0.5)",
-              margin: preview ? "0 auto 10px" : "0 auto 18px",
-            }}
-          />
-
-          {/* Date — 이름 대신 날짜로 사진 몰입감 강조 */}
-          <p
-            style={{
-              fontFamily: serif,
-              fontSize: preview ? 12 : 16,
-              fontWeight: 400,
-              color: "rgba(240,230,200,0.85)",
-              letterSpacing: "0.28em",
-              lineHeight: 1.6,
-            }}
-          >
-            {data.date}
-          </p>
-        </div>
+        {/* Hero: 텍스트 없음 — 사진만 온전히 표시 */}
 
         {/* Film perforations — bottom */}
         {!preview && (
@@ -572,7 +561,12 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         )}
       </section>
 
+      {/* ── 섹션 컨테이너 (순서 + 가시성) ─────────────────────────────── */}
+      <div style={{ display: "flex", flexDirection: "column" }}>
+
       {/* ── § 2  GREETING ────────────────────────────────────────────────── */}
+      {data.showGreeting !== false && (
+      <div style={{ order: orderOf("greeting") }}>
       <section style={{ ...divider, ...sp, textAlign: "center" }}>
         <FadeIn>
           <div style={{
@@ -630,8 +624,12 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
           </div>
         </FadeIn>
       </section>
+      </div>
+      )}
 
       {/* ── § 3  COUPLE INFO (혼주소개) ──────────────────────────────────── */}
+      {data.showCouple !== false && (
+      <div style={{ order: orderOf("couple") }}>
       <section style={{ ...divider, ...sp }}>
         <FadeIn>
           <p style={slabel}>The Couple</p>
@@ -670,40 +668,14 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               >
                 {data.groomName}
               </p>
-              {data.groomParents && (
-                <div>
-                  {data.groomParents.fatherName && (
-                    <p
-                      style={{
-                        fontFamily: serif,
-                        fontSize: preview ? 10 : 12,
-                        color: "#686868",
-                        lineHeight: preview ? 2.0 : 2.3,
-                      }}
-                    >
-                      {data.groomParents.isFatherDeceased && (
-                        <span style={{ color: "#383838" }}>故 </span>
-                      )}
-                      {data.groomParents.fatherName}의 아들
-                    </p>
-                  )}
-                  {data.groomParents.motherName && (
-                    <p
-                      style={{
-                        fontFamily: serif,
-                        fontSize: preview ? 10 : 12,
-                        color: "#686868",
-                        lineHeight: preview ? 2.0 : 2.3,
-                      }}
-                    >
-                      {data.groomParents.isMotherDeceased && (
-                        <span style={{ color: "#383838" }}>故 </span>
-                      )}
-                      {data.groomParents.motherName}의 아들
-                    </p>
-                  )}
-                </div>
-              )}
+              {data.groomParents && (() => {
+                const line = parentsLine(data.groomParents!, "아들");
+                return line ? (
+                  <p style={{ fontFamily: serif, fontSize: preview ? 10 : 12, color: "#686868", lineHeight: preview ? 2.0 : 2.3, marginTop: preview ? 4 : 6 }}>
+                    {line}
+                  </p>
+                ) : null;
+              })()}
             </div>
 
             {/* Center divider */}
@@ -757,46 +729,24 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               >
                 {data.brideName}
               </p>
-              {data.brideParents && (
-                <div>
-                  {data.brideParents.fatherName && (
-                    <p
-                      style={{
-                        fontFamily: serif,
-                        fontSize: preview ? 10 : 12,
-                        color: "#686868",
-                        lineHeight: preview ? 2.0 : 2.3,
-                      }}
-                    >
-                      {data.brideParents.isFatherDeceased && (
-                        <span style={{ color: "#383838" }}>故 </span>
-                      )}
-                      {data.brideParents.fatherName}의 딸
-                    </p>
-                  )}
-                  {data.brideParents.motherName && (
-                    <p
-                      style={{
-                        fontFamily: serif,
-                        fontSize: preview ? 10 : 12,
-                        color: "#686868",
-                        lineHeight: preview ? 2.0 : 2.3,
-                      }}
-                    >
-                      {data.brideParents.isMotherDeceased && (
-                        <span style={{ color: "#383838" }}>故 </span>
-                      )}
-                      {data.brideParents.motherName}의 딸
-                    </p>
-                  )}
-                </div>
-              )}
+              {data.brideParents && (() => {
+                const line = parentsLine(data.brideParents!, "딸");
+                return line ? (
+                  <p style={{ fontFamily: serif, fontSize: preview ? 10 : 12, color: "#686868", lineHeight: preview ? 2.0 : 2.3, marginTop: preview ? 4 : 6 }}>
+                    {line}
+                  </p>
+                ) : null;
+              })()}
             </div>
           </div>
         </FadeIn>
       </section>
+      </div>
+      )}
 
       {/* ── § 4  GALLERY (우리들의 이야기) ──────────────────────────────── */}
+      {data.showGallery !== false && (
+      <div style={{ order: orderOf("gallery") }}>
       <section style={{ ...divider, ...sp, textAlign: "center" }}>
         <FadeIn>
           <p style={slabel}>Our Story</p>
@@ -942,8 +892,12 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
           )}
         </FadeIn>
       </section>
+      </div>
+      )}
 
       {/* ── § 5  네이버 / 카카오 지도 ─────────────────────────────────────── */}
+      {data.showMap !== false && (
+      <div style={{ order: orderOf("map") }}>
       <section style={{ ...divider, ...sp }}>
         <FadeIn>
           <p style={slabel}>Ceremony</p>
@@ -1022,39 +976,8 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             </p>
           </div>
 
-          {/* Map embed or placeholder */}
-          {data.mapEmbedUrl ? (
-            <iframe
-              src={data.mapEmbedUrl}
-              style={{
-                width: "100%",
-                height: preview ? 120 : 200,
-                border: "none",
-                display: "block",
-                borderRadius: 8,
-                filter: "grayscale(1) invert(0.88) brightness(0.78)",
-              }}
-              loading="lazy"
-            />
-          ) : (
-            <div
-              style={{
-                height: preview ? 90 : 160,
-                background: "#0f0f0f",
-                borderRadius: 8,
-                border: "1px solid #181818",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#1e1e1e",
-                fontSize: 10,
-                fontFamily: mono,
-                letterSpacing: "0.14em",
-              }}
-            >
-              지도 미등록
-            </div>
-          )}
+          {/* 네이버 지도 */}
+          <NaverMap address={data.address} preview={preview} dark />
 
           {/* Naver + Kakao navigation buttons */}
           {!preview && (
@@ -1119,9 +1042,12 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
           )}
         </FadeIn>
       </section>
+      </div>
+      )}
 
       {/* ── § 6  오시는 길 (교통안내) ─────────────────────────────────────── */}
-      {(data.transport?.subway || data.transport?.bus || data.transport?.car) && (
+      {data.showTransport !== false && (data.transport?.subway || data.transport?.bus || data.transport?.car) && (
+      <div style={{ order: orderOf("transport") }}>
         <section style={{ ...divider, ...sp }}>
           <FadeIn>
             <p style={slabel}>오 시 는 길</p>
@@ -1275,10 +1201,12 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             </div>
           </FadeIn>
         </section>
+      </div>
       )}
 
       {/* ── § 7  축의금 안내 — Accounts ─────────────────────────────────── */}
-      {(data.groomAccount || data.brideAccount) && (
+      {data.showAccounts !== false && (data.groomAccount || data.brideAccount) && (
+      <div style={{ order: orderOf("accounts") }}>
         <section style={{ ...divider, ...sp }}>
           <FadeIn>
             <p style={slabel}>마음 전하실 곳</p>
@@ -1358,7 +1286,10 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             </div>
           </FadeIn>
         </section>
+      </div>
       )}
+
+      </div>{/* end 섹션 컨테이너 */}
 
       {/* ── FOOTER ───────────────────────────────────────────────────────── */}
       <footer

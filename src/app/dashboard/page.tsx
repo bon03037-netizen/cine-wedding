@@ -2,10 +2,27 @@
 
 import { supabase } from '@/lib/supabase';
 import { useRef, useState, useCallback } from "react";
-import { Heart, ChevronDown, Upload, X, Plus, Film } from "lucide-react";
-import { WeddingData } from "@/components/templates/FilmTheme";
+import { Heart, ChevronDown, Upload, X, Plus, Film, GripVertical } from "lucide-react";
+import { WeddingData, SectionId, DEFAULT_SECTIONS_ORDER } from "@/components/templates/FilmTheme";
 import InvitationView from "@/components/InvitationView";
 import CinematicIntro from "@/components/CinematicIntro";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type Theme = "film" | "cinematic";
 
@@ -53,8 +70,8 @@ function buildTime(d: DateState) {
 const DEFAULT: WeddingData = {
   groomName: "이호진",
   brideName: "차나리",
-  groomParents: { fatherName: "이창영", motherName: "정경란" },
-  brideParents: { fatherName: "차강호", motherName: "길복동" },
+  groomParents: { fatherLastName: "이", fatherFirstName: "창영", motherLastName: "정", motherFirstName: "경란" },
+  brideParents: { fatherLastName: "차", fatherFirstName: "강호", motherLastName: "길", motherFirstName: "복동" },
   date: buildDate(INIT_DATE),
   time: buildTime(INIT_DATE),
   venue: "그랜드 인터컨티넨탈 서울 파르나스",
@@ -69,6 +86,33 @@ const DEFAULT: WeddingData = {
     car: "건물 내 무료 주차 · 웨딩 참석 시 3시간 무료",
   },
   photos: [],
+  showGreeting: true,
+  showCouple: true,
+  showGallery: true,
+  showMap: true,
+  showTransport: true,
+  showAccounts: true,
+  sectionsOrder: [...DEFAULT_SECTIONS_ORDER],
+};
+
+// ── 섹션 메타 ────────────────────────────────────────────────────────────────
+
+const SECTION_LABELS: Record<SectionId, string> = {
+  greeting: "초대 문구",
+  couple: "신랑신부 & 혼주",
+  gallery: "우리들의 이야기",
+  map: "예식장 & 지도",
+  transport: "교통 안내",
+  accounts: "계좌 정보",
+};
+
+const SECTION_VISIBILITY_KEY: Record<SectionId, keyof WeddingData> = {
+  greeting: "showGreeting",
+  couple: "showCouple",
+  gallery: "showGallery",
+  map: "showMap",
+  transport: "showTransport",
+  accounts: "showAccounts",
 };
 
 // ── Sub-components ────────────────────────────────────────────────────────────
