@@ -83,36 +83,25 @@ function FilmGrain({ strong = false }: { strong?: boolean }) {
       style={{
         position: "absolute",
         inset: 0,
-        opacity: strong ? 0.22 : 0.11,
+        opacity: strong ? 0.08 : 0.04, // 농도를 확 낮춰서 은은하게!
         pointerEvents: "none",
-        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")`,
-        mixBlendMode: "screen",
-        animationName: "filmGrainAnim",
-        animationDuration: "0.45s",
-        animationTimingFunction: "steps(1)",
-        animationIterationCount: "infinite",
+        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' /%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")`,
+        mixBlendMode: "overlay", // screen보다 훨씬 자연스러운 질감을 줍니다.
       } as React.CSSProperties}
     />
   );
 }
 
-function FadeIn({
-  children,
-  delay = 0,
-  style,
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  style?: React.CSSProperties;
-}) {
+
+function FadeIn({ children, delay = 0, style }: { children: React.ReactNode; delay?: number; style?: React.CSSProperties }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.18 });
+  const isInView = useInView(ref, { once: true, amount: 0.1 });
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 45 }}
+      initial={{ opacity: 0, y: 80 }} // 45에서 80으로! 더 밑에서 올라옵니다.
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 1.3, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 1.8, delay, ease: [0.16, 1, 0.3, 1] }} // 시간을 1.3에서 1.8로 늘려 훨씬 우아하게!
       style={style}
     >
       {children}
@@ -440,7 +429,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               width: "100%",
               height: "100%",
               objectFit: "cover",
-              opacity: 0.9,
+              opacity: 1,
             }}
           />
         ) : (
@@ -459,7 +448,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             position: "absolute",
             inset: 0,
             background:
-              "radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.48) 100%)",
+              "radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.48) 100%)",
           }}
         />
         {/* Bottom gradient for text readability */}
