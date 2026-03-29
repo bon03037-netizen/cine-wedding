@@ -28,7 +28,7 @@ function FilmStrip({
   const doubled = [...frames, ...frames]; // seamless loop용 2배
 
   const FRAME_W = 160;
-  const PHOTO_H = 128;
+  const PHOTO_H = 200; // 4:5 세로형 고정 (160×200)
   const PERF_H = 18;
 
   const perfHole = {
@@ -120,6 +120,7 @@ function FilmStrip({
                   width: "100%",
                   height: "100%",
                   objectFit: "cover",
+                  objectPosition: "center 25%",
                   display: "block",
                   filter: "brightness(0.85) contrast(1.1) saturate(0.8)",
                 }}

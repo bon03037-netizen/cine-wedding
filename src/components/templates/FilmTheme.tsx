@@ -166,7 +166,7 @@ function FilmCard({
     <div
       style={{
         width: 240,
-        height: 340,
+        height: 320, // 3:4 비율 고정 (240×320)
         background: "#0a0a0a",
         borderRadius: 3,
         overflow: "hidden",
@@ -189,7 +189,7 @@ function FilmCard({
           <img
             src={src}
             alt={`photo ${index + 1}`}
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 25%", display: "block" }}
           />
         ) : (
           <div

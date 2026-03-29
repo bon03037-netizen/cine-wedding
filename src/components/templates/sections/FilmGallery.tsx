@@ -206,7 +206,7 @@ function FilmCard({
       {/* Top perforations */}
       <Perforations />
 
-      {/* Photo — ORIGINAL aspect ratio preserved */}
+      {/* Photo — 3:4 세로형 고정 프레임 */}
       <div
         style={{
           padding: "3px 10px",
@@ -217,16 +217,26 @@ function FilmCard({
         onClick={() => src && onLightbox(src)}
       >
         {src ? (
+          <div
+            style={{
+              width: "100%",
+              aspectRatio: "3 / 4",
+              overflow: "hidden",
+              position: "relative",
+            }}
+          >
           <img
             src={src}
             alt={`photo ${index + 1}`}
             style={{
               width: "100%",
-              height: "auto",        // ← auto height = original ratio
+              height: "100%",
+              objectFit: "cover",
+              objectPosition: "center 25%",
               display: "block",
-              aspectRatio: "auto",   // ← no forced ratio
             }}
           />
+          </div>
         ) : (
           /* ── Placeholder (unexposed film) ── */
           <div
