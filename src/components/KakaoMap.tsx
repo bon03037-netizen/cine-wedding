@@ -50,7 +50,7 @@ export default function KakaoMap({ address }: Props) {
 
     if (document.getElementById(scriptId)) {
       // Script already exists
-      if (window.kakao?.maps) {
+      if ((window as any).kakao?.maps) {
         initMap();
       } else {
         // Wait for it to load
