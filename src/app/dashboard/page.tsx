@@ -2,6 +2,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { useRef, useState, useCallback } from "react";
+import { motion } from "framer-motion";
 import { Heart, ChevronDown, Upload, X, Plus, Film, GripVertical } from "lucide-react";
 import { WeddingData, SectionId, DEFAULT_SECTIONS_ORDER } from "@/components/templates/FilmTheme";
 import InvitationView from "@/components/InvitationView";
@@ -33,12 +34,12 @@ const THEMES: { id: Theme; label: string; sub: string; icon: string }[] = [
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const fileToBase64 = (file: File): Promise<string> =>
-  new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (e) => resolve(e.target?.result as string);
-    reader.readAsDataURL(file);
-  });
+const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png"];
+const ALLOWED_EXT = /\.(jpg|jpeg|png)$/i;
+
+function isAllowedImage(file: File) {
+  return ALLOWED_TYPES.includes(file.type) || ALLOWED_EXT.test(file.name);
+}
 
 const DOW = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -106,25 +107,82 @@ const SECTION_LABELS: Record<SectionId, string> = {
   accounts: "계좌 정보",
 };
 
-const SECTION_VISIBILITY_KEY: Record<SectionId, keyof WeddingData> = {
+// 에디터 탭 ID → WeddingData 가시성 키 매핑
+const EDITOR_VISIBILITY: Partial<Record<string, keyof WeddingData>> = {
   greeting: "showGreeting",
-  couple: "showCouple",
-  gallery: "showGallery",
-  map: "showMap",
+  couple:   "showCouple",
+  photos:   "showGallery",
+  venue:    "showMap",
   transport: "showTransport",
-  accounts: "showAccounts",
+  accounts:  "showAccounts",
 };
 
-// ── Sub-components ────────────────────────────────────────────────────────────
+// ── Animated Toggle ────────────────────────────────────────────────────────────
+
+function AnimatedToggle({
+  isOn, onClick,
+}: {
+  isOn: boolean;
+  onClick: (e: React.MouseEvent) => void;
+}) {
+  return (
+    <motion.button
+      onClick={onClick}
+      animate={{ backgroundColor: isOn ? "#111111" : "#d1d5db" }}
+      transition={{ duration: 0.18 }}
+      style={{
+        width: 34,
+        height: 19,
+        borderRadius: 999,
+        display: "flex",
+        alignItems: "center",
+        padding: 2,
+        border: "none",
+        cursor: "pointer",
+        flexShrink: 0,
+        outline: "none",
+      }}
+      title={isOn ? "섹션 숨기기" : "섹션 보이기"}
+    >
+      <motion.div
+        animate={{ x: isOn ? 15 : 0 }}
+        transition={{ type: "spring", stiffness: 520, damping: 36 }}
+        style={{
+          width: 15,
+          height: 15,
+          borderRadius: "50%",
+          background: "#ffffff",
+          boxShadow: "0 1px 4px rgba(0,0,0,0.22)",
+        }}
+      />
+    </motion.button>
+  );
+}
+
+// ── AccSection ─────────────────────────────────────────────────────────────────
 
 function AccSection({
-  id, title, icon, openMap, onToggle, children,
+  id, title, icon, openMap, onToggle,
+  isOn, onToggleVisibility,
+  children,
 }: {
   id: string; title: string; icon: string;
   openMap: Record<string, boolean>; onToggle: (id: string) => void;
+  isOn?: boolean;
+  onToggleVisibility?: () => void;
   children: React.ReactNode;
 }) {
   const isOpen = openMap[id];
+
+  const handleToggleVisibility = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // OFF→ON 이면서 탭이 닫혀 있을 때 자동 펼침
+    if (isOn === false && !isOpen) {
+      onToggle(id);
+    }
+    onToggleVisibility?.();
+  };
+
   return (
     <div className="border border-gray-100 rounded-xl overflow-hidden bg-white">
       <button
@@ -136,6 +194,9 @@ function AccSection({
           <span className="text-sm font-medium text-gray-700" style={{ fontFamily: "var(--font-serif-kr), serif" }}>
             {title}
           </span>
+          {isOn !== undefined && onToggleVisibility && (
+            <AnimatedToggle isOn={isOn} onClick={handleToggleVisibility} />
+          )}
         </div>
         <ChevronDown
           size={14}
@@ -213,18 +274,14 @@ function PersonRow({
   );
 }
 
-// ── Sortable Section Item (DnD) ───────────────────────────────────────────────
+// ── Sortable Section Item (DnD) — 순서 변경 전용 ──────────────────────────────
 
-function SortableItem({
-  id, label, visible, onToggle,
-}: {
-  id: string; label: string; visible: boolean; onToggle: () => void;
-}) {
+function SortableItem({ id, label }: { id: string; label: string }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   return (
     <div
       ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
+      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.45 : 1 }}
       className="flex items-center gap-2.5 bg-white border border-gray-100 rounded-lg px-3 py-2.5"
     >
       <button
@@ -235,14 +292,6 @@ function SortableItem({
         <GripVertical size={13} />
       </button>
       <span className="flex-1 text-[13px] text-gray-600">{label}</span>
-      <button
-        onClick={onToggle}
-        className={`w-9 h-5 rounded-full transition-colors relative shrink-0 ${visible ? "bg-gray-900" : "bg-gray-200"}`}
-      >
-        <span
-          className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${visible ? "left-[18px]" : "left-0.5"}`}
-        />
-      </button>
     </div>
   );
 }
@@ -264,6 +313,7 @@ export default function DashboardPage() {
   });
   const [introPreviewKey, setIntroPreviewKey] = useState(0);
   const [introPreviewActive, setIntroPreviewActive] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number } | null>(null);
 
   const mainImgRef = useRef<HTMLInputElement>(null);
   const photosRef = useRef<HTMLInputElement>(null);
@@ -291,6 +341,11 @@ export default function DashboardPage() {
   const set = useCallback(<K extends keyof WeddingData>(key: K, val: WeddingData[K]) =>
     setData((prev) => ({ ...prev, [key]: val })), []);
 
+  // 가시성 토글 핸들러
+  const toggleVisibility = useCallback((key: keyof WeddingData) => {
+    setData((prev) => ({ ...prev, [key]: prev[key] !== false ? false : true }));
+  }, []);
+
   const updateDp = (patch: Partial<DateState>) => {
     setDp((prev) => {
       const next = { ...prev, ...patch };
@@ -299,52 +354,48 @@ export default function DashboardPage() {
     });
   };
 
-  // 1. 메인 이미지 업로드 함수 (사진 창고로 바로 쏘기)
-    const handleMainImg = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 메인 이미지 업로드 (JPG/JPEG/PNG)
+  const handleMainImg = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    const fileName = `${Date.now()}-${file.name}`; // 중복 방지용 이름
-    
-    // Supabase 사진 창고에 업로드
-    const { error } = await supabase.storage.from('wedding-photos').upload(fileName, file);
-    if (error) {
-      alert('사진 업로드 실패: ' + error.message);
+    if (!isAllowedImage(file)) {
+      alert("JPG, JPEG, PNG 파일만 업로드할 수 있습니다.");
+      e.target.value = "";
       return;
     }
-
-    // 업로드된 사진의 짧은 주소만 가져와서 화면에 적용
+    const fileName = `${Date.now()}-${file.name}`;
+    const { error } = await supabase.storage.from('wedding-photos').upload(fileName, file);
+    if (error) { alert('사진 업로드 실패: ' + error.message); return; }
     const { data: urlData } = supabase.storage.from('wedding-photos').getPublicUrl(fileName);
     set("mainImage", urlData.publicUrl);
     e.target.value = "";
   };
 
-  
-    // 🚀 3배 빨라진 갤러리 사진 업로드 함수 (동시 업로드)
-    const handlePhotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []);
-    if (!files.length) return;
+  // 갤러리 사진 다량 업로드 (진행률 표시)
+  const handlePhotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []).filter(isAllowedImage);
+    if (!files.length) {
+      alert("JPG, JPEG, PNG 파일만 업로드할 수 있습니다.");
+      e.target.value = "";
+      return;
+    }
 
-    // 여러 장의 사진을 동시에 Supabase 창고로 던집니다!
-    const uploadPromises = files.map(async (file) => {
-      const fileName = `${Date.now()}-${file.name}`;
+    setUploadProgress({ current: 0, total: files.length });
+
+    const uploadOne = async (file: File): Promise<string | null> => {
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
       const { error } = await supabase.storage.from('wedding-photos').upload(fileName, file);
-      
-      if (!error) {
-        const { data } = supabase.storage.from('wedding-photos').getPublicUrl(fileName);
-        return data.publicUrl;
-      }
-      return null;
-    });
+      setUploadProgress((p) => p ? { ...p, current: p.current + 1 } : null);
+      if (error) return null;
+      const { data } = supabase.storage.from('wedding-photos').getPublicUrl(fileName);
+      return data.publicUrl;
+    };
 
-    // 모든 사진이 올라갈 때까지 한 번만 기다립니다.
-    const results = await Promise.all(uploadPromises);
-    
-    // 에러 없이 성공한 사진 주소만 걸러냅니다.
-    const validUrls: string[] = results.filter((url) => url !== null) as string[];
-
-    // 화면에 짠! 하고 반영합니다.
+    const results = await Promise.all(files.map(uploadOne));
+    const validUrls = results.filter((url): url is string => url !== null);
     setData((prev) => ({ ...prev, photos: [...(prev.photos ?? []), ...validUrls] }));
+
+    setTimeout(() => setUploadProgress(null), 900);
     e.target.value = "";
   };
 
@@ -352,28 +403,27 @@ export default function DashboardPage() {
     setData((prev) => ({ ...prev, photos: (prev.photos ?? []).filter((_, idx) => idx !== i) }));
 
   const handleSave = async () => {
-      // 1. 고유한 임시 주소 생성 (중복 방지를 위해 현재 시간 숫자 사용)
-      const tempSlug = "toast-" + Date.now();
-
-      // 2. 현재 화면의 상태(state)를 그대로 모아서 데이터 만들기
-      const invitationData = {
-        slug: tempSlug,
-        theme: currentTheme,
-        content: data, // 에디터에서 입력한 모든 데이터(data 상태)를 통째로 JSON으로 넣습니다.
-        image_urls: data.photos || []
-      };
-
-      // 3. Supabase에 전송
-      const { error } = await supabase
-        .from('invitations')
-        .insert([invitationData]);
-
-      if (error) {
-        alert('저장 실패: ' + error.message);
-      } else {
-        alert('성공적으로 저장되었습니다!\n나의 고유 주소: ' + tempSlug);
-      }
+    const tempSlug = "toast-" + Date.now();
+    const invitationData = {
+      slug: tempSlug,
+      theme: currentTheme,
+      content: data,
+      image_urls: data.photos || [],
     };
+    const { error } = await supabase.from('invitations').insert([invitationData]);
+    if (error) {
+      alert('저장 실패: ' + error.message);
+    } else {
+      alert('성공적으로 저장되었습니다!\n나의 고유 주소: ' + tempSlug);
+    }
+  };
+
+  // 특정 탭의 가시성 값 조회 헬퍼
+  const isTabOn = (editorId: string): boolean => {
+    const key = EDITOR_VISIBILITY[editorId];
+    if (!key) return true;
+    return data[key] !== false;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50" style={{ fontFamily: "Pretendard, -apple-system, sans-serif" }}>
@@ -437,7 +487,7 @@ export default function DashboardPage() {
             </div>
 
             {/* 메인 이미지 */}
-            <input ref={mainImgRef} type="file" accept="image/*" onChange={handleMainImg} className="hidden" />
+            <input ref={mainImgRef} type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" onChange={handleMainImg} className="hidden" />
             <div className="border border-gray-100 rounded-xl overflow-hidden bg-white">
               <div className="px-4 py-3 flex items-center gap-2.5 border-b border-gray-50">
                 <span className="text-[15px]">🖼️</span>
@@ -469,16 +519,16 @@ export default function DashboardPage() {
                     className="w-full h-24 border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center gap-2 text-gray-400 hover:border-gray-300 hover:text-gray-500 transition-colors"
                   >
                     <Upload size={16} />
-                    <span className="text-xs">메인 사진 업로드</span>
+                    <span className="text-xs">메인 사진 업로드 (JPG · PNG)</span>
                   </button>
                 )}
               </div>
             </div>
 
-            {/* 섹션 관리 */}
+            {/* 섹션 관리 — 순서 변경 전용 */}
             <AccSection id="sections" title="섹션 관리" icon="🗂️" openMap={open} onToggle={toggleSection}>
               <div className="mt-2">
-                <p className="text-[11px] text-gray-300 mb-3 font-mono">드래그로 순서 변경 · 토글로 섹션 ON/OFF</p>
+                <p className="text-[11px] text-gray-300 mb-3 font-mono">드래그로 표시 순서를 변경합니다</p>
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                   <SortableContext
                     items={data.sectionsOrder ?? DEFAULT_SECTIONS_ORDER}
@@ -486,18 +536,7 @@ export default function DashboardPage() {
                   >
                     <div className="space-y-1.5">
                       {(data.sectionsOrder ?? DEFAULT_SECTIONS_ORDER).map((id) => (
-                        <SortableItem
-                          key={id}
-                          id={id}
-                          label={SECTION_LABELS[id]}
-                          visible={data[SECTION_VISIBILITY_KEY[id]] !== false}
-                          onToggle={() =>
-                            set(
-                              SECTION_VISIBILITY_KEY[id],
-                              data[SECTION_VISIBILITY_KEY[id]] !== false ? false : true,
-                            )
-                          }
-                        />
+                        <SortableItem key={id} id={id} label={SECTION_LABELS[id]} />
                       ))}
                     </div>
                   </SortableContext>
@@ -506,7 +545,12 @@ export default function DashboardPage() {
             </AccSection>
 
             {/* 초대 문구 */}
-            <AccSection id="greeting" title="초대 문구" icon="✉️" openMap={open} onToggle={toggleSection}>
+            <AccSection
+              id="greeting" title="초대 문구" icon="✉️"
+              openMap={open} onToggle={toggleSection}
+              isOn={isTabOn("greeting")}
+              onToggleVisibility={() => toggleVisibility("showGreeting")}
+            >
               <Field label="인삿말" className="mt-2">
                 <textarea
                   value={data.greeting}
@@ -520,7 +564,12 @@ export default function DashboardPage() {
             </AccSection>
 
             {/* 신랑신부 & 혼주 */}
-            <AccSection id="couple" title="신랑신부 & 혼주" icon="💍" openMap={open} onToggle={toggleSection}>
+            <AccSection
+              id="couple" title="신랑신부 & 혼주" icon="💍"
+              openMap={open} onToggle={toggleSection}
+              isOn={isTabOn("couple")}
+              onToggleVisibility={() => toggleVisibility("showCouple")}
+            >
               <div className="mt-2 space-y-5">
 
                 {/* 신랑 */}
@@ -581,7 +630,7 @@ export default function DashboardPage() {
                       isDeceased={!!data.brideParents?.isFatherDeceased}
                       onLastName={(v) => set("brideParents", { ...data.brideParents, fatherLastName: v })}
                       onFirstName={(v) => set("brideParents", { ...data.brideParents, fatherFirstName: v })}
-                      onDeceased={(v) => set("brideParents", { ...data.brideParents, isFatherDeceased: v })}
+                      onDeceased={(v) => set("brideParents", { ...data.brideParents, isMotherDeceased: v })}
                     />
                     <PersonRow
                       label="모친"
@@ -628,7 +677,6 @@ export default function DashboardPage() {
                   </select>
                   <span className="text-xs text-gray-400">분</span>
                 </div>
-                {/* Preview */}
                 <div
                   className="bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 text-sm text-gray-600"
                   style={{ fontFamily: "var(--font-serif-kr), serif" }}
@@ -638,8 +686,13 @@ export default function DashboardPage() {
               </div>
             </AccSection>
 
-            {/* 예식장 정보 */}
-            <AccSection id="venue" title="예식장 정보" icon="🏛️" openMap={open} onToggle={toggleSection}>
+            {/* 예식장 & 지도 */}
+            <AccSection
+              id="venue" title="예식장 & 지도" icon="🏛️"
+              openMap={open} onToggle={toggleSection}
+              isOn={isTabOn("venue")}
+              onToggleVisibility={() => toggleVisibility("showMap")}
+            >
               <div className="mt-2 space-y-3">
                 <Field label="예식장 이름">
                   <input type="text" value={data.venue} onChange={(e) => set("venue", e.target.value)} className={inputCls} />
@@ -647,22 +700,50 @@ export default function DashboardPage() {
                 <Field label="주소">
                   <input type="text" value={data.address} onChange={(e) => set("address", e.target.value)} className={inputCls} />
                 </Field>
-                <Field label="지도 임베드 URL">
-                  <input
-                    type="text"
-                    value={data.mapEmbedUrl ?? ""}
-                    onChange={(e) => set("mapEmbedUrl", e.target.value || undefined)}
-                    className={inputCls}
-                    placeholder="Google Maps embed URL (선택)"
-                  />
-                </Field>
               </div>
             </AccSection>
 
             {/* 우리들의 이야기 (갤러리) */}
-            <AccSection id="photos" title="우리들의 이야기 (갤러리)" icon="🎞️" openMap={open} onToggle={toggleSection}>
+            <AccSection
+              id="photos" title="우리들의 이야기 (갤러리)" icon="🎞️"
+              openMap={open} onToggle={toggleSection}
+              isOn={isTabOn("photos")}
+              onToggleVisibility={() => toggleVisibility("showGallery")}
+            >
               <div className="mt-2">
-                <input ref={photosRef} type="file" accept="image/*" multiple onChange={handlePhotos} className="hidden" />
+                <input
+                  ref={photosRef}
+                  type="file"
+                  accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                  multiple
+                  onChange={handlePhotos}
+                  className="hidden"
+                />
+
+                {/* 업로드 진행률 바 */}
+                {uploadProgress && (
+                  <div className="mb-3">
+                    <div className="flex justify-between items-center mb-1.5">
+                      <span className="text-[11px] text-gray-400 font-mono">
+                        업로드 중... ({uploadProgress.current}/{uploadProgress.total})
+                      </span>
+                      <span className="text-[11px] text-gray-400 font-mono">
+                        {Math.round((uploadProgress.current / uploadProgress.total) * 100)}%
+                      </span>
+                    </div>
+                    <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full bg-gray-900 rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{
+                          width: `${Math.round((uploadProgress.current / uploadProgress.total) * 100)}%`,
+                        }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-3 gap-2">
                   {(data.photos ?? []).map((src, i) => (
                     <div key={i} className="relative group aspect-[3/4] rounded-lg overflow-hidden bg-gray-100">
@@ -677,20 +758,26 @@ export default function DashboardPage() {
                   ))}
                   <button
                     onClick={() => photosRef.current?.click()}
-                    className="aspect-[3/4] rounded-lg border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-1.5 text-gray-400 hover:border-gray-300 hover:text-gray-500 transition-colors"
+                    disabled={!!uploadProgress}
+                    className="aspect-[3/4] rounded-lg border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-1.5 text-gray-400 hover:border-gray-300 hover:text-gray-500 transition-colors disabled:opacity-40"
                   >
                     <Plus size={15} />
                     <span className="text-[10px]">추가</span>
                   </button>
                 </div>
                 <p className="text-[11px] text-gray-300 mt-2.5 font-mono">
-                  3:4 비율 권장 · 방문자 페이지에서 3D 필름 드럼으로 표시됩니다
+                  JPG · JPEG · PNG · 3:4 비율 권장
                 </p>
               </div>
             </AccSection>
 
             {/* 계좌 정보 */}
-            <AccSection id="accounts" title="계좌 정보" icon="💳" openMap={open} onToggle={toggleSection}>
+            <AccSection
+              id="accounts" title="계좌 정보" icon="💳"
+              openMap={open} onToggle={toggleSection}
+              isOn={isTabOn("accounts")}
+              onToggleVisibility={() => toggleVisibility("showAccounts")}
+            >
               <div className="mt-2 space-y-5">
                 {(["groom", "bride"] as const).map((side) => {
                   const account = side === "groom" ? data.groomAccount : data.brideAccount;
@@ -739,7 +826,12 @@ export default function DashboardPage() {
             </AccSection>
 
             {/* 교통 안내 */}
-            <AccSection id="transport" title="교통 안내" icon="🚌" openMap={open} onToggle={toggleSection}>
+            <AccSection
+              id="transport" title="교통 안내" icon="🚌"
+              openMap={open} onToggle={toggleSection}
+              isOn={isTabOn("transport")}
+              onToggleVisibility={() => toggleVisibility("showTransport")}
+            >
               <div className="mt-2 space-y-3">
                 <Field label="지하철">
                   <textarea
@@ -818,13 +910,12 @@ export default function DashboardPage() {
 
                 {/* 390px 실제 모바일 너비로 렌더링 후 zoom으로 축소 */}
                 <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
-                  {/* zoom: 300/390 ≈ 0.769 — 폰 프레임 내부 너비(300px)에 맞게 축소 */}
                   <div style={{ width: 390, zoom: 300 / 390 } as React.CSSProperties}>
                     <InvitationView data={data} theme={currentTheme} />
                   </div>
                 </div>
 
-                {/* 인트로 미리보기 오버레이 (폰 스크린 안에 contained) */}
+                {/* 인트로 미리보기 오버레이 */}
                 {introPreviewActive && (data.photos?.length ?? 0) > 0 && (
                   <CinematicIntro
                     key={introPreviewKey}
