@@ -363,7 +363,8 @@ export default function DashboardPage() {
       e.target.value = "";
       return;
     }
-    const fileName = `${Date.now()}-${file.name}`;
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
     const { error } = await supabase.storage.from('wedding-photos').upload(fileName, file);
     if (error) { alert('사진 업로드 실패: ' + error.message); return; }
     const { data: urlData } = supabase.storage.from('wedding-photos').getPublicUrl(fileName);
@@ -383,7 +384,8 @@ export default function DashboardPage() {
     setUploadProgress({ current: 0, total: files.length });
 
     const uploadOne = async (file: File): Promise<string | null> => {
-      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const { error } = await supabase.storage.from('wedding-photos').upload(fileName, file);
       setUploadProgress((p) => p ? { ...p, current: p.current + 1 } : null);
       if (error) return null;
