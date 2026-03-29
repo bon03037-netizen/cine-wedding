@@ -2,11 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-declare global {
-  interface Window {
-    kakao: any;
-  }
-}
+declare var kakao: any;
 
 interface Props {
   address: string;
