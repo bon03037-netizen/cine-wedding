@@ -33,6 +33,13 @@ const THEMES: { id: Theme; label: string; sub: string; icon: string }[] = [
   { id: "cinematic", label: "Cinematic", sub: "시네마틱 패럴랙스", icon: "🎬" },
 ];
 
+const BG_COLOR_OPTIONS = [
+  { hex: "#0a0a0a", label: "블랙" },
+  { hex: "#0a192e", label: "다크 네이비" },
+  { hex: "#2e0a1a", label: "와인" },
+  { hex: "#0a2e1a", label: "딥 그린" },
+];
+
 const FONT_OPTIONS = [
   { id: "nanum-myeongjo", label: "나눔 명조", sample: "우아한 명조체", cssFamily: "var(--font-nanum), serif" },
   { id: "noto-serif-kr",  label: "Noto Serif KR", sample: "세련된 세리프체", cssFamily: "var(--font-serif-kr), serif" },
@@ -135,6 +142,7 @@ const DEFAULT: WeddingData = {
   showAccounts: true,
   sectionsOrder: [...DEFAULT_SECTIONS_ORDER],
   fontFamily: "nanum-myeongjo",
+  mainBackgroundColor: "#0a0a0a",
   accounts: {
     groom:       { bank: "국민은행", accountNumber: "123-456-78-901234", name: "이호진" },
     groomFather: { bank: "신한은행", accountNumber: "110-123-456789", name: "이창영" },
@@ -585,9 +593,11 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* ── 폰트 설정 ── */}
-            <AccSection id="font" title="폰트 설정" icon="🔤" openMap={open} onToggle={toggleSection}>
-              <div className="p-1 grid grid-cols-2 gap-2 mt-2">
+            {/* ── 세부 디자인 설정 ── */}
+            <AccSection id="font" title="세부 디자인 설정" icon="🎨" openMap={open} onToggle={toggleSection}>
+              {/* 폰트 선택 */}
+              <p className="text-[10px] text-gray-400 font-mono tracking-widest mt-2 mb-2">폰트 선택</p>
+              <div className="p-1 grid grid-cols-2 gap-2">
                 {FONT_OPTIONS.map((f) => (
                   <button
                     key={f.id}
@@ -602,6 +612,31 @@ export default function DashboardPage() {
                     <p className="text-[10px] mt-0.5 opacity-50" style={{ fontFamily: f.cssFamily }}>{f.sample}</p>
                   </button>
                 ))}
+              </div>
+
+              {/* 배경색 선택 */}
+              <p className="text-[10px] text-gray-400 font-mono tracking-widest mt-5 mb-2">배경색 선택</p>
+              <div className="grid grid-cols-2 gap-2">
+                {BG_COLOR_OPTIONS.map((c) => {
+                  const selected = (data.mainBackgroundColor || "#0a0a0a") === c.hex;
+                  return (
+                    <button
+                      key={c.hex}
+                      onClick={() => set("mainBackgroundColor", c.hex)}
+                      className={`flex items-center gap-2.5 p-3 rounded-lg border text-left transition-all ${
+                        selected
+                          ? "border-gray-900 bg-gray-900 text-white"
+                          : "border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50"
+                      }`}
+                    >
+                      <div
+                        className="w-5 h-5 rounded-full flex-shrink-0 border border-gray-300"
+                        style={{ backgroundColor: c.hex }}
+                      />
+                      <span className="text-xs font-medium">{c.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </AccSection>
 
