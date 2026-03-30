@@ -127,8 +127,13 @@ function AnimatedToggle({
   onClick: (e: React.MouseEvent) => void;
 }) {
   return (
-    <motion.button
-      onClick={onClick}
+    <motion.div // 🌟 button에서 div로 변경하여 에러 해결!
+      onClick={(e) => {
+        e.stopPropagation(); // 🌟 클릭 시 뒤에 있는 탭이 열리거나 닫히는 현상(이벤트 버블링) 차단
+        onClick(e);
+      }}
+      role="switch" // 웹 접근성을 위해 버튼 역할을 한다는 것을 명시
+      aria-checked={isOn}
       animate={{ backgroundColor: isOn ? "#111111" : "#d1d5db" }}
       transition={{ duration: 0.18 }}
       style={{
@@ -156,7 +161,7 @@ function AnimatedToggle({
           boxShadow: "0 1px 4px rgba(0,0,0,0.22)",
         }}
       />
-    </motion.button>
+    </motion.div>
   );
 }
 
