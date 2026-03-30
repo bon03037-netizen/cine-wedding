@@ -354,7 +354,7 @@ function FilmCard({
         }}
       >
         <span>○ {String(index + 1).padStart(2, "0")}</span>
-        <span>KODAK 400TX</span>
+        {/*<span>KODAK 400TX</span>*/}
         <span>{String(index + 1).padStart(2, "0")}/{String(total).padStart(2, "0")} ▷</span>
       </div>
     </div>
