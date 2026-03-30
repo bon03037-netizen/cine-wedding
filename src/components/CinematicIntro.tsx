@@ -258,7 +258,7 @@ function FilmStrip({
                     textShadow: "0 0 5px rgba(255,200,60,0.35)",
                   }}
                 >
-                {(i % frames.length) + 1}
+                   KODAK 400TX ▲ {(i % frames.length) + 1}
                 </span>
                 {Array.from({ length: PERFS_PER_FRAME }).map((_, j) => (
                   <div key={j} style={perfHole} />
@@ -303,7 +303,7 @@ function FilmStrip({
                 />
                 {/* 뮤직 플레이어 오버레이 */}
                 {isOverlayFrame && (
-                  <MusicPlayerOverlay/>
+                <MusicPlayerOverlay scriptText=" " />
                 )}
               </div>
 
