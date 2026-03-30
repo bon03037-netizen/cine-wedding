@@ -71,7 +71,7 @@ export default function KakaoMap({ address }: KakaoMapProps) {
   }, [address]);
 
   return (
-    <div style={{ position: "relative", width: "100%", height: "250px", borderRadius: "10px", border: "1px solid #333", overflow: "hidden", background: "#000" }}>
+    <div style={{ position: "relative", width: "100%", height: "200px", borderRadius: "10px", border: "1px solid #333", overflow: "hidden", background: "#000" }}>
       {status && (
         <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", background: "#111", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10, padding: "20px", textAlign: "center", fontSize: "13px", whiteSpace: "pre-wrap" }}>
           {status}

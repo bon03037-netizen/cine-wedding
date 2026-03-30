@@ -222,7 +222,7 @@ function AccountRow({
         justifyContent: "space-between",
         gap: 8,
         padding: preview ? "8px 0" : "12px 0",
-        borderBottom: "1px solid #1e1e1e",
+        borderBottom: "1px solid #e2e8f0",
       }}
     >
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -230,7 +230,7 @@ function AccountRow({
           style={{
             fontFamily: mono,
             fontSize: preview ? 8 : 10,
-            color: "#505050",
+            color: "#64748b",
             letterSpacing: "0.18em",
             textTransform: "uppercase",
             marginBottom: 5,
@@ -242,7 +242,7 @@ function AccountRow({
           style={{
             fontFamily: serif,
             fontSize: preview ? 11 : 16,
-            color: "#C8C8C8",
+            color: "#1e293b",
             letterSpacing: "0.06em",
             marginBottom: 3,
           }}
@@ -253,7 +253,7 @@ function AccountRow({
           style={{
             fontFamily: mono,
             fontSize: preview ? 10 : 15,
-            color: "#A0A0A0",
+            color: "#334155",
             letterSpacing: "0.05em",
             marginBottom: 4,
           }}
@@ -264,7 +264,7 @@ function AccountRow({
           style={{
             fontFamily: serif,
             fontSize: preview ? 9 : 13,
-            color: "#666666",
+            color: "#475569",
           }}
         >
           {name}
@@ -676,7 +676,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             backdropFilter: "blur(12px)",
             WebkitBackdropFilter: "blur(12px)",
             borderRadius: 14,
-            padding: preview ? "14px 16px" : "32px 28px",
+            padding: preview ? "14px 12px" : "32px 16px",
             border: "1px solid rgba(255,255,255,0.04)",
           } as React.CSSProperties}>
           <p style={slabel}>Greeting</p>
@@ -706,7 +706,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               overflowWrap: "break-word",
               fontWeight: 400,
               letterSpacing: "0.06em",
-              padding: preview ? "0 10px" : "0 32px",
+              padding: preview ? "0 4px" : "0 8px",
               maxWidth: "100%",
             }}
           >
@@ -1160,11 +1160,11 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                 display: "flex",
                 flexDirection: "column",
                 gap: preview ? 10 : 20,
-                background: "linear-gradient(135deg, #3e2723 0%, #2d1a11 50%, #1a0f0a 100%)",
+                background: "linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%)",
                 borderRadius: 14,
                 padding: preview ? "14px 16px" : "28px 24px",
-                border: "1px solid rgba(141,110,99,0.4)",
-                boxShadow: "0 4px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)",
+                border: "1px solid rgba(100,116,139,0.3)",
+                boxShadow: "0 4px 24px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)",
               } as React.CSSProperties}
             >
               {data.transport?.subway && (
@@ -1174,8 +1174,8 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       width: preview ? 32 : 44,
                       height: preview ? 32 : 44,
                       flexShrink: 0,
-                      background: "rgba(255,255,255,0.05)",
-                      border: "1px solid rgba(148,163,184,0.12)",
+                      background: "rgba(0,0,0,0.04)",
+                      border: "1px solid rgba(100,116,139,0.2)",
                       borderRadius: 12,
                       display: "flex",
                       alignItems: "center",
@@ -1190,7 +1190,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: mono,
                         fontSize: preview ? 9 : 11,
-                        color: "#6b7280",
+                        color: "#475569",
                         letterSpacing: "0.15em",
                         textTransform: "uppercase",
                         marginBottom: 5,
@@ -1203,7 +1203,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: serif,
                         fontSize: preview ? 12 : 15,
-                        color: "#C8C8C8",
+                        color: "#1e293b",
                         lineHeight: 1.9,
                       }}
                     >
@@ -1214,7 +1214,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               )}
 
               {data.transport?.subway && data.transport?.bus && (
-                <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }} />
+                <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }} />
               )}
 
               {data.transport?.bus && (
@@ -1224,8 +1224,8 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       width: preview ? 32 : 44,
                       height: preview ? 32 : 44,
                       flexShrink: 0,
-                      background: "rgba(255,255,255,0.05)",
-                      border: "1px solid rgba(148,163,184,0.12)",
+                      background: "rgba(0,0,0,0.04)",
+                      border: "1px solid rgba(100,116,139,0.2)",
                       borderRadius: 12,
                       display: "flex",
                       alignItems: "center",
@@ -1240,7 +1240,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: mono,
                         fontSize: preview ? 9 : 11,
-                        color: "#6b7280",
+                        color: "#475569",
                         letterSpacing: "0.15em",
                         textTransform: "uppercase",
                         marginBottom: 5,
@@ -1253,7 +1253,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: serif,
                         fontSize: preview ? 12 : 15,
-                        color: "#C8C8C8",
+                        color: "#1e293b",
                         lineHeight: 1.9,
                       }}
                     >
@@ -1264,7 +1264,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               )}
 
               {data.transport?.bus && data.transport?.car && (
-                <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }} />
+                <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }} />
               )}
 
               {data.transport?.car && (
@@ -1274,8 +1274,8 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       width: preview ? 32 : 44,
                       height: preview ? 32 : 44,
                       flexShrink: 0,
-                      background: "rgba(255,255,255,0.05)",
-                      border: "1px solid rgba(148,163,184,0.12)",
+                      background: "rgba(0,0,0,0.04)",
+                      border: "1px solid rgba(100,116,139,0.2)",
                       borderRadius: 12,
                       display: "flex",
                       alignItems: "center",
@@ -1290,7 +1290,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: mono,
                         fontSize: preview ? 9 : 11,
-                        color: "#6b7280",
+                        color: "#475569",
                         letterSpacing: "0.15em",
                         textTransform: "uppercase",
                         marginBottom: 5,
@@ -1303,7 +1303,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: serif,
                         fontSize: preview ? 12 : 15,
-                        color: "#C8C8C8",
+                        color: "#1e293b",
                         lineHeight: 1.9,
                       }}
                     >
@@ -1330,7 +1330,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             <p
               style={{
                 ...slabel,
-                fontSize: preview ? 14 : 28,
+                fontSize: preview ? 12 : 22,
                 letterSpacing: "0.18em",
                 color: "#9a9a9a",
                 marginBottom: preview ? 16 : 36,
@@ -1344,10 +1344,10 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               {(data.accounts?.groom || data.accounts?.groomFather || data.accounts?.groomMother || data.groomAccount) && (
                 <div
                   style={{
-                    background: "linear-gradient(135deg, #3e2723 0%, #2d1a11 50%, #1a0f0a 100%)",
+                    background: "linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%)",
                     borderRadius: 14,
-                    border: "1px solid rgba(141,110,99,0.4)",
-                    boxShadow: "0 4px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(100,116,139,0.3)",
+                    boxShadow: "0 4px 24px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)",
                     overflow: "hidden",
                   }}
                 >
@@ -1370,7 +1370,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                         style={{
                           fontFamily: serif,
                           fontSize: preview ? 12 : 17,
-                          color: "#D4AF37",
+                          color: "#334155",
                           letterSpacing: "0.12em",
                           fontWeight: 400,
                         }}
@@ -1383,7 +1383,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                         animate={{ rotate: groomAccOpen ? 180 : 0 }}
                         transition={{ duration: 0.25 }}
                       >
-                        <ChevronDown size={18} color="#555" />
+                        <ChevronDown size={18} color="#475569" />
                       </motion.div>
                     )}
                   </button>
@@ -1400,7 +1400,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       >
                         <div
                           style={{
-                            borderTop: "1px solid rgba(148,163,184,0.12)",
+                            borderTop: "1px solid rgba(100,116,139,0.2)",
                             padding: preview ? "10px 14px 12px" : "18px 22px 22px",
                             display: "flex",
                             flexDirection: "column",
@@ -1461,10 +1461,10 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               {(data.accounts?.bride || data.accounts?.brideFather || data.accounts?.brideMother || data.brideAccount) && (
                 <div
                   style={{
-                    background: "linear-gradient(135deg, #3e2723 0%, #2d1a11 50%, #1a0f0a 100%)",
+                    background: "linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%)",
                     borderRadius: 14,
-                    border: "1px solid rgba(141,110,99,0.4)",
-                    boxShadow: "0 4px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(100,116,139,0.3)",
+                    boxShadow: "0 4px 24px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)",
                     overflow: "hidden",
                   }}
                 >
@@ -1487,7 +1487,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                         style={{
                           fontFamily: serif,
                           fontSize: preview ? 12 : 17,
-                          color: "#D4AF37",
+                          color: "#334155",
                           letterSpacing: "0.12em",
                           fontWeight: 400,
                         }}
@@ -1500,7 +1500,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                         animate={{ rotate: brideAccOpen ? 180 : 0 }}
                         transition={{ duration: 0.25 }}
                       >
-                        <ChevronDown size={18} color="#555" />
+                        <ChevronDown size={18} color="#475569" />
                       </motion.div>
                     )}
                   </button>
@@ -1517,7 +1517,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       >
                         <div
                           style={{
-                            borderTop: "1px solid rgba(148,163,184,0.12)",
+                            borderTop: "1px solid rgba(100,116,139,0.2)",
                             padding: preview ? "10px 14px 12px" : "18px 22px 22px",
                             display: "flex",
                             flexDirection: "column",
