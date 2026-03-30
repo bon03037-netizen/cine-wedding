@@ -16,6 +16,12 @@ export interface AccountInfo {
   holder: string;
 }
 
+export interface PersonAccount {
+  bank: string;
+  accountNumber: string;
+  name: string;
+}
+
 export interface ParentInfo {
   fatherLastName?: string;
   fatherFirstName?: string;
@@ -62,6 +68,17 @@ export interface WeddingData {
   showAccounts?: boolean;
   // Section render order
   sectionsOrder?: SectionId[];
+  // Font selection
+  fontFamily?: string;
+  // Extended accounts (마음 전하실 곳)
+  accounts?: {
+    groom?: PersonAccount;
+    groomFather?: PersonAccount;
+    groomMother?: PersonAccount;
+    bride?: PersonAccount;
+    brideFather?: PersonAccount;
+    brideMother?: PersonAccount;
+  };
 }
 
 /** 성(optional) + 이름 합치기 */
@@ -181,6 +198,80 @@ function CopyButton({ text }: { text: string }) {
         </>
       )}
     </button>
+  );
+}
+
+// ── Account Row ───────────────────────────────────────────────────────────────
+
+function AccountRow({
+  role, bank, accountNumber, name, preview, serif, mono,
+}: {
+  role: string;
+  bank: string;
+  accountNumber: string;
+  name: string;
+  preview: boolean;
+  serif: string;
+  mono: string;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 8,
+        padding: preview ? "8px 0" : "12px 0",
+        borderBottom: "1px solid #1e1e1e",
+      }}
+    >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p
+          style={{
+            fontFamily: mono,
+            fontSize: preview ? 8 : 10,
+            color: "#505050",
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            marginBottom: 5,
+          }}
+        >
+          {role}
+        </p>
+        <p
+          style={{
+            fontFamily: serif,
+            fontSize: preview ? 11 : 16,
+            color: "#C8C8C8",
+            letterSpacing: "0.06em",
+            marginBottom: 3,
+          }}
+        >
+          {bank}
+        </p>
+        <p
+          style={{
+            fontFamily: mono,
+            fontSize: preview ? 10 : 15,
+            color: "#A0A0A0",
+            letterSpacing: "0.05em",
+            marginBottom: 4,
+          }}
+        >
+          {accountNumber}
+        </p>
+        <p
+          style={{
+            fontFamily: serif,
+            fontSize: preview ? 9 : 13,
+            color: "#666666",
+          }}
+        >
+          {name}
+        </p>
+      </div>
+      {!preview && <CopyButton text={accountNumber} />}
+    </div>
   );
 }
 
@@ -400,11 +491,22 @@ interface FilmThemeProps {
   preview?: boolean;
 }
 
+const FONT_MAP: Record<string, string> = {
+  "nanum-myeongjo": "var(--font-nanum), 'Nanum Myeongjo', serif",
+  "noto-serif-kr": "var(--font-serif-kr), 'Noto Serif KR', serif",
+  "gowun-dodum": "var(--font-gowun), 'Gowun Dodum', sans-serif",
+  "nanum-gothic": "var(--font-nanum-gothic), 'Nanum Gothic', sans-serif",
+};
+
 export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
   const [albumOpen, setAlbumOpen] = useState(false);
+  const [groomAccOpen, setGroomAccOpen] = useState(false);
+  const [brideAccOpen, setBrideAccOpen] = useState(false);
   const photos = data.photos ?? [];
 
-  const serif = "var(--font-nanum), var(--font-serif-kr), 'Apple SD Gothic Neo', serif";
+  const serif = (data.fontFamily && FONT_MAP[data.fontFamily])
+    ? FONT_MAP[data.fontFamily]
+    : "var(--font-nanum), var(--font-serif-kr), 'Apple SD Gothic Neo', serif";
   const sans = "Pretendard, -apple-system, BlinkMacSystemFont, sans-serif";
   const mono = "monospace";
 
@@ -428,7 +530,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       style={{
         background: "#0c0c0c",
         color: "#F0F0F0",
-        fontFamily: sans,
+        fontFamily: serif,
         minHeight: "100%",
         position: "relative",
         lineHeight: 1.85,
@@ -1050,36 +1152,35 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       {/* ── § 6  오시는 길 (교통안내) ─────────────────────────────────────── */}
       {data.showTransport !== false && (data.transport?.subway || data.transport?.bus || data.transport?.car) && (
       <div style={{ order: orderOf("transport") }}>
-        <section style={{ ...divider, ...sp }}>
+        <section style={{ ...divider, ...sp, background: "#ffffff" }}>
           <FadeIn>
-            <p style={slabel}>오 시 는 길</p>
+            <p style={{ ...slabel, color: "#bbbbbf" }}>오 시 는 길</p>
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
-                gap: preview ? 10 : 16,
-                background: "rgba(20,20,20,0.6)",
-                backdropFilter: "blur(12px)",
-                WebkitBackdropFilter: "blur(12px)",
+                gap: preview ? 10 : 20,
+                background: "#ffffff",
                 borderRadius: 14,
-                padding: preview ? "14px 16px" : "24px 22px",
-                border: "1px solid rgba(255,255,255,0.04)",
+                padding: preview ? "14px 16px" : "28px 24px",
+                border: "1px solid #e5e7eb",
+                boxShadow: "0 2px 16px rgba(0,0,0,0.06)",
               } as React.CSSProperties}
             >
               {data.transport?.subway && (
-                <div style={{ display: "flex", gap: 13, alignItems: "flex-start" }}>
+                <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
                   <div
                     style={{
-                      width: preview ? 28 : 36,
-                      height: preview ? 28 : 36,
+                      width: preview ? 32 : 44,
+                      height: preview ? 32 : 44,
                       flexShrink: 0,
-                      background: "#141414",
-                      border: "1px solid #282828",
-                      borderRadius: 9,
+                      background: "#f3f4f6",
+                      border: "1px solid #e5e7eb",
+                      borderRadius: 12,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: preview ? 13 : 17,
+                      fontSize: preview ? 14 : 20,
                     }}
                   >
                     🚇
@@ -1088,21 +1189,22 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                     <p
                       style={{
                         fontFamily: mono,
-                        fontSize: 8,
-                        color: "#505050",
+                        fontSize: preview ? 9 : 11,
+                        color: "#9ca3af",
                         letterSpacing: "0.15em",
                         textTransform: "uppercase",
                         marginBottom: 5,
+                        fontWeight: 600,
                       }}
                     >
                       지하철
                     </p>
                     <p
                       style={{
-                        fontFamily: sans,
-                        fontSize: preview ? 11 : 13,
-                        color: "#ABABAB",
-                        lineHeight: 2.0,
+                        fontFamily: serif,
+                        fontSize: preview ? 12 : 15,
+                        color: "#1f2937",
+                        lineHeight: 1.9,
                       }}
                     >
                       {data.transport.subway}
@@ -1111,20 +1213,24 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                 </div>
               )}
 
+              {data.transport?.subway && data.transport?.bus && (
+                <div style={{ borderTop: "1px solid #f3f4f6" }} />
+              )}
+
               {data.transport?.bus && (
-                <div style={{ display: "flex", gap: 13, alignItems: "flex-start" }}>
+                <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
                   <div
                     style={{
-                      width: preview ? 28 : 36,
-                      height: preview ? 28 : 36,
+                      width: preview ? 32 : 44,
+                      height: preview ? 32 : 44,
                       flexShrink: 0,
-                      background: "#141414",
-                      border: "1px solid #282828",
-                      borderRadius: 9,
+                      background: "#f3f4f6",
+                      border: "1px solid #e5e7eb",
+                      borderRadius: 12,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: preview ? 13 : 17,
+                      fontSize: preview ? 14 : 20,
                     }}
                   >
                     🚌
@@ -1133,21 +1239,22 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                     <p
                       style={{
                         fontFamily: mono,
-                        fontSize: 8,
-                        color: "#505050",
+                        fontSize: preview ? 9 : 11,
+                        color: "#9ca3af",
                         letterSpacing: "0.15em",
                         textTransform: "uppercase",
                         marginBottom: 5,
+                        fontWeight: 600,
                       }}
                     >
                       버스
                     </p>
                     <p
                       style={{
-                        fontFamily: sans,
-                        fontSize: preview ? 11 : 13,
-                        color: "#ABABAB",
-                        lineHeight: 2.0,
+                        fontFamily: serif,
+                        fontSize: preview ? 12 : 15,
+                        color: "#1f2937",
+                        lineHeight: 1.9,
                       }}
                     >
                       {data.transport.bus}
@@ -1156,20 +1263,24 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                 </div>
               )}
 
+              {data.transport?.bus && data.transport?.car && (
+                <div style={{ borderTop: "1px solid #f3f4f6" }} />
+              )}
+
               {data.transport?.car && (
-                <div style={{ display: "flex", gap: 13, alignItems: "flex-start" }}>
+                <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
                   <div
                     style={{
-                      width: preview ? 28 : 36,
-                      height: preview ? 28 : 36,
+                      width: preview ? 32 : 44,
+                      height: preview ? 32 : 44,
                       flexShrink: 0,
-                      background: "#141414",
-                      border: "1px solid #282828",
-                      borderRadius: 9,
+                      background: "#f3f4f6",
+                      border: "1px solid #e5e7eb",
+                      borderRadius: 12,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: preview ? 13 : 17,
+                      fontSize: preview ? 14 : 20,
                     }}
                   >
                     🚗
@@ -1178,21 +1289,22 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                     <p
                       style={{
                         fontFamily: mono,
-                        fontSize: 8,
-                        color: "#505050",
+                        fontSize: preview ? 9 : 11,
+                        color: "#9ca3af",
                         letterSpacing: "0.15em",
                         textTransform: "uppercase",
                         marginBottom: 5,
+                        fontWeight: 600,
                       }}
                     >
                       자가용
                     </p>
                     <p
                       style={{
-                        fontFamily: sans,
-                        fontSize: preview ? 11 : 13,
-                        color: "#ABABAB",
-                        lineHeight: 2.0,
+                        fontFamily: serif,
+                        fontSize: preview ? 12 : 15,
+                        color: "#1f2937",
+                        lineHeight: 1.9,
                       }}
                     >
                       {data.transport.car}
@@ -1206,85 +1318,250 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       </div>
       )}
 
-      {/* ── § 7  축의금 안내 — Accounts ─────────────────────────────────── */}
-      {data.showAccounts !== false && (data.groomAccount || data.brideAccount) && (
+      {/* ── § 7  마음 전하실 곳 — Accounts Accordion ───────────────────── */}
+      {data.showAccounts !== false && (
+        data.accounts?.groom || data.accounts?.groomFather || data.accounts?.groomMother ||
+        data.accounts?.bride || data.accounts?.brideFather || data.accounts?.brideMother ||
+        data.groomAccount || data.brideAccount
+      ) && (
       <div style={{ order: orderOf("accounts") }}>
         <section style={{ ...divider, ...sp }}>
           <FadeIn>
             <p style={slabel}>마음 전하실 곳</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {[
-                { account: data.groomAccount, label: "신랑측" },
-                { account: data.brideAccount, label: "신부측" },
-              ].map(
-                ({ account, label }) =>
-                  account && (
-                    <div
-                      key={label}
-                      style={{
-                        background: "rgba(18,18,18,0.85)",
-                        borderRadius: 12,
-                        border: "1px solid #242424",
-                        padding: preview ? "12px 14px" : "16px 18px",
-                      }}
-                    >
-                      <div
+            <div style={{ display: "flex", flexDirection: "column", gap: preview ? 8 : 12 }}>
+
+              {/* 신랑측 아코디언 */}
+              {(data.accounts?.groom || data.accounts?.groomFather || data.accounts?.groomMother || data.groomAccount) && (
+                <div
+                  style={{
+                    background: "rgba(18,18,18,0.9)",
+                    borderRadius: 14,
+                    border: "1px solid #2a2a2a",
+                    overflow: "hidden",
+                  }}
+                >
+                  <button
+                    onClick={() => !preview && setGroomAccOpen((v) => !v)}
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: preview ? "11px 14px" : "18px 22px",
+                      background: "none",
+                      border: "none",
+                      cursor: preview ? "default" : "pointer",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ fontSize: preview ? 14 : 18 }}>💌</span>
+                      <p
                         style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
+                          fontFamily: serif,
+                          fontSize: preview ? 12 : 17,
+                          color: "#D4AF37",
+                          letterSpacing: "0.12em",
+                          fontWeight: 400,
                         }}
                       >
-                        <div>
-                          <p
-                            style={{
-                              fontFamily: mono,
-                              fontSize: 8,
-                              color: "#505050",
-                              letterSpacing: "0.18em",
-                              textTransform: "uppercase",
-                              marginBottom: 6,
-                            }}
-                          >
-                            {label}
-                          </p>
-                          <p
-                            style={{
-                              fontFamily: serif,
-                              fontSize: preview ? 11 : 14,
-                              color: "#C8C8C8",
-                              letterSpacing: "0.06em",
-                              marginBottom: 3,
-                            }}
-                          >
-                            {account.bank}
-                          </p>
-                          <p
-                            style={{
-                              fontFamily: mono,
-                              fontSize: preview ? 10 : 13,
-                              color: "#A0A0A0",
-                              letterSpacing: "0.05em",
-                              marginBottom: 3,
-                            }}
-                          >
-                            {account.number}
-                          </p>
-                          <p
-                            style={{
-                              fontFamily: serif,
-                              fontSize: preview ? 9 : 11,
-                              color: "#666666",
-                            }}
-                          >
-                            {account.holder}
-                          </p>
-                        </div>
-                        {!preview && <CopyButton text={account.number} />}
-                      </div>
+                        신랑측 계좌번호
+                      </p>
                     </div>
-                  )
+                    {!preview && (
+                      <motion.div
+                        animate={{ rotate: groomAccOpen ? 180 : 0 }}
+                        transition={{ duration: 0.25 }}
+                      >
+                        <ChevronDown size={18} color="#555" />
+                      </motion.div>
+                    )}
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {(groomAccOpen || preview) && (
+                      <motion.div
+                        key="groom-acc"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+                        style={{ overflow: "hidden" }}
+                      >
+                        <div
+                          style={{
+                            borderTop: "1px solid #222",
+                            padding: preview ? "10px 14px 12px" : "18px 22px 22px",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: preview ? 10 : 16,
+                          }}
+                        >
+                          {/* 신랑 본인 */}
+                          {(data.accounts?.groom || data.groomAccount) && (() => {
+                            const acc = data.accounts?.groom;
+                            const legacy = data.groomAccount;
+                            const bank = acc?.bank ?? legacy?.bank ?? "";
+                            const accountNumber = acc?.accountNumber ?? legacy?.number ?? "";
+                            const name = acc?.name ?? legacy?.holder ?? "";
+                            return bank || accountNumber ? (
+                              <AccountRow
+                                role="신랑"
+                                bank={bank}
+                                accountNumber={accountNumber}
+                                name={name}
+                                preview={preview}
+                                serif={serif}
+                                mono={mono}
+                              />
+                            ) : null;
+                          })()}
+                          {/* 신랑 부친 */}
+                          {data.accounts?.groomFather && (data.accounts.groomFather.bank || data.accounts.groomFather.accountNumber) && (
+                            <AccountRow
+                              role="부친"
+                              bank={data.accounts.groomFather.bank}
+                              accountNumber={data.accounts.groomFather.accountNumber}
+                              name={data.accounts.groomFather.name}
+                              preview={preview}
+                              serif={serif}
+                              mono={mono}
+                            />
+                          )}
+                          {/* 신랑 모친 */}
+                          {data.accounts?.groomMother && (data.accounts.groomMother.bank || data.accounts.groomMother.accountNumber) && (
+                            <AccountRow
+                              role="모친"
+                              bank={data.accounts.groomMother.bank}
+                              accountNumber={data.accounts.groomMother.accountNumber}
+                              name={data.accounts.groomMother.name}
+                              preview={preview}
+                              serif={serif}
+                              mono={mono}
+                            />
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               )}
+
+              {/* 신부측 아코디언 */}
+              {(data.accounts?.bride || data.accounts?.brideFather || data.accounts?.brideMother || data.brideAccount) && (
+                <div
+                  style={{
+                    background: "rgba(18,18,18,0.9)",
+                    borderRadius: 14,
+                    border: "1px solid #2a2a2a",
+                    overflow: "hidden",
+                  }}
+                >
+                  <button
+                    onClick={() => !preview && setBrideAccOpen((v) => !v)}
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: preview ? "11px 14px" : "18px 22px",
+                      background: "none",
+                      border: "none",
+                      cursor: preview ? "default" : "pointer",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ fontSize: preview ? 14 : 18 }}>💌</span>
+                      <p
+                        style={{
+                          fontFamily: serif,
+                          fontSize: preview ? 12 : 17,
+                          color: "#D4AF37",
+                          letterSpacing: "0.12em",
+                          fontWeight: 400,
+                        }}
+                      >
+                        신부측 계좌번호
+                      </p>
+                    </div>
+                    {!preview && (
+                      <motion.div
+                        animate={{ rotate: brideAccOpen ? 180 : 0 }}
+                        transition={{ duration: 0.25 }}
+                      >
+                        <ChevronDown size={18} color="#555" />
+                      </motion.div>
+                    )}
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {(brideAccOpen || preview) && (
+                      <motion.div
+                        key="bride-acc"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+                        style={{ overflow: "hidden" }}
+                      >
+                        <div
+                          style={{
+                            borderTop: "1px solid #222",
+                            padding: preview ? "10px 14px 12px" : "18px 22px 22px",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: preview ? 10 : 16,
+                          }}
+                        >
+                          {/* 신부 본인 */}
+                          {(data.accounts?.bride || data.brideAccount) && (() => {
+                            const acc = data.accounts?.bride;
+                            const legacy = data.brideAccount;
+                            const bank = acc?.bank ?? legacy?.bank ?? "";
+                            const accountNumber = acc?.accountNumber ?? legacy?.number ?? "";
+                            const name = acc?.name ?? legacy?.holder ?? "";
+                            return bank || accountNumber ? (
+                              <AccountRow
+                                role="신부"
+                                bank={bank}
+                                accountNumber={accountNumber}
+                                name={name}
+                                preview={preview}
+                                serif={serif}
+                                mono={mono}
+                              />
+                            ) : null;
+                          })()}
+                          {/* 신부 부친 */}
+                          {data.accounts?.brideFather && (data.accounts.brideFather.bank || data.accounts.brideFather.accountNumber) && (
+                            <AccountRow
+                              role="부친"
+                              bank={data.accounts.brideFather.bank}
+                              accountNumber={data.accounts.brideFather.accountNumber}
+                              name={data.accounts.brideFather.name}
+                              preview={preview}
+                              serif={serif}
+                              mono={mono}
+                            />
+                          )}
+                          {/* 신부 모친 */}
+                          {data.accounts?.brideMother && (data.accounts.brideMother.bank || data.accounts.brideMother.accountNumber) && (
+                            <AccountRow
+                              role="모친"
+                              bank={data.accounts.brideMother.bank}
+                              accountNumber={data.accounts.brideMother.accountNumber}
+                              name={data.accounts.brideMother.name}
+                              preview={preview}
+                              serif={serif}
+                              mono={mono}
+                            />
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
+
             </div>
           </FadeIn>
         </section>

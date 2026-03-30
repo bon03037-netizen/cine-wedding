@@ -33,6 +33,40 @@ const THEMES: { id: Theme; label: string; sub: string; icon: string }[] = [
   { id: "cinematic", label: "Cinematic", sub: "시네마틱 패럴랙스", icon: "🎬" },
 ];
 
+const FONT_OPTIONS = [
+  { id: "nanum-myeongjo", label: "나눔 명조", sample: "우아한 명조체", cssFamily: "var(--font-nanum), serif" },
+  { id: "noto-serif-kr",  label: "Noto Serif KR", sample: "세련된 세리프체", cssFamily: "var(--font-serif-kr), serif" },
+  { id: "gowun-dodum",    label: "고운돋움", sample: "깔끔한 돋움체", cssFamily: "var(--font-gowun), sans-serif" },
+  { id: "nanum-gothic",   label: "나눔 고딕", sample: "모던 고딕체", cssFamily: "var(--font-nanum-gothic), sans-serif" },
+];
+
+const GREETING_SAMPLES = [
+  {
+    title: "감성적",
+    text: "저희 두 사람이 사랑을 맺어\n한 가정을 이루게 되었습니다.\n\n두 사람이 걸어온 길이 하나로 모여\n이제 함께 새로운 길을 걷고자 합니다.\n\n바쁘시더라도 자리를 빛내주시어\n저희의 첫 출발을 축복해 주시면\n더없는 기쁨이 되겠습니다.",
+  },
+  {
+    title: "정중한",
+    text: "참으로 감사한 인연의 소중함을 느끼며\n저희 두 사람은 이제 하나가 되고자 합니다.\n\n오시는 걸음마다 진심을 담아\n따뜻하게 맞이하겠습니다.\n\n귀한 걸음 해주시어\n저희의 출발을 함께 축복해 주세요.",
+  },
+  {
+    title: "서정적",
+    text: "봄날의 햇살처럼 따뜻하게\n가을 하늘처럼 맑고 높게\n언제나 서로 곁에 있겠습니다.\n\n저희가 걸어갈 길 위에\n꽃처럼 피어날 사랑의 증인이 되어\n소중한 발걸음 함께해 주세요.",
+  },
+  {
+    title: "위트있는",
+    text: "드디어 저희가 결심했습니다! 🎉\n\n눈이 맞고, 마음이 맞고\n결국엔 손도 잡게 되었습니다.\n\n맛있는 음식과 행복한 자리로\n여러분의 발걸음에 보답하겠습니다.\n꼭 오셔서 축하해 주세요!",
+  },
+  {
+    title: "간결한",
+    text: "저희 두 사람\n이제 함께 걷겠습니다.\n\n소중한 분들과 함께하는\n작은 시작의 자리에\n꼭 함께해 주세요.",
+  },
+  {
+    title: "고전적",
+    text: "하늘이 맺어준 인연으로\n두 사람이 백년가약을 맺으려 합니다.\n\n존경하는 어른들의 축복 속에\n새 출발을 하고자 하오니\n부디 왕림하시어 자리를 빛내주시기\n간곡히 부탁드립니다.",
+  },
+];
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png"];
@@ -95,6 +129,15 @@ const DEFAULT: WeddingData = {
   showTransport: true,
   showAccounts: true,
   sectionsOrder: [...DEFAULT_SECTIONS_ORDER],
+  fontFamily: "nanum-myeongjo",
+  accounts: {
+    groom:       { bank: "국민은행", accountNumber: "123-456-78-901234", name: "이호진" },
+    groomFather: { bank: "신한은행", accountNumber: "110-123-456789", name: "이창영" },
+    groomMother: { bank: "", accountNumber: "", name: "" },
+    bride:       { bank: "신한은행", accountNumber: "110-123-456789", name: "차나리" },
+    brideFather: { bank: "국민은행", accountNumber: "123-456-78-901234", name: "차강호" },
+    brideMother: { bank: "", accountNumber: "", name: "" },
+  },
 };
 
 // ── 섹션 메타 ────────────────────────────────────────────────────────────────
@@ -315,8 +358,9 @@ export default function DashboardPage() {
   const [currentTheme, setCurrentTheme] = useState<Theme>("film");
   const [open, setOpen] = useState<Record<string, boolean>>({
     sections: false, greeting: true, couple: false, datetime: false,
-    venue: false, photos: false, accounts: false, transport: false,
+    venue: false, photos: false, accounts: false, transport: false, font: false,
   });
+  const [showGreetingSamples, setShowGreetingSamples] = useState(false);
   const [introPreviewKey, setIntroPreviewKey] = useState(0);
   const [introPreviewActive, setIntroPreviewActive] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number } | null>(null);
@@ -497,6 +541,26 @@ export default function DashboardPage() {
               </div>
             </div>
 
+            {/* ── 폰트 설정 ── */}
+            <AccSection id="font" title="폰트 설정" icon="🔤" openMap={open} onToggle={toggleSection}>
+              <div className="p-1 grid grid-cols-2 gap-2 mt-2">
+                {FONT_OPTIONS.map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => set("fontFamily", f.id)}
+                    className={`p-3 rounded-lg border text-left transition-all ${
+                      data.fontFamily === f.id
+                        ? "border-gray-900 bg-gray-900 text-white"
+                        : "border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    <p className="text-sm font-medium" style={{ fontFamily: f.cssFamily }}>{f.label}</p>
+                    <p className="text-[10px] mt-0.5 opacity-50" style={{ fontFamily: f.cssFamily }}>{f.sample}</p>
+                  </button>
+                ))}
+              </div>
+            </AccSection>
+
             {/* 메인 이미지 */}
             <input ref={mainImgRef} type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" onChange={handleMainImg} className="hidden" />
             <div className="border border-gray-100 rounded-xl overflow-hidden bg-white">
@@ -572,6 +636,42 @@ export default function DashboardPage() {
                   style={{ fontFamily: "var(--font-serif-kr), serif", fontSize: 13 }}
                 />
               </Field>
+
+              {/* 샘플 양식 */}
+              <div className="mt-3">
+                <button
+                  onClick={() => setShowGreetingSamples((v) => !v)}
+                  className="flex items-center gap-1.5 text-[11px] text-gray-400 hover:text-gray-600 transition-colors font-mono tracking-wide"
+                >
+                  <span>{showGreetingSamples ? "▲" : "▼"}</span>
+                  샘플 양식 {showGreetingSamples ? "닫기" : "보기"}
+                </button>
+
+                {showGreetingSamples && (
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    {GREETING_SAMPLES.map((s) => (
+                      <button
+                        key={s.title}
+                        onClick={() => {
+                          set("greeting", s.text);
+                          setShowGreetingSamples(false);
+                        }}
+                        className="text-left p-3 border border-gray-200 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all group"
+                      >
+                        <p className="text-[10px] font-semibold text-gray-400 mb-1.5 uppercase tracking-[0.1em] group-hover:text-gray-600">
+                          {s.title}
+                        </p>
+                        <p
+                          className="text-[10.5px] text-gray-500 leading-relaxed line-clamp-3"
+                          style={{ fontFamily: "var(--font-serif-kr), serif" }}
+                        >
+                          {s.text.replace(/\n/g, " ")}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </AccSection>
 
             {/* 신랑신부 & 혼주 */}
@@ -818,24 +918,36 @@ export default function DashboardPage() {
               onToggleVisibility={() => toggleVisibility("showAccounts")}
             >
               <div className="mt-2 space-y-5">
-                {(["groom", "bride"] as const).map((side) => {
-                  const account = side === "groom" ? data.groomAccount : data.brideAccount;
-                  const label = side === "groom" ? "신랑측" : "신부측";
-                  const update = (patch: Partial<typeof account>) =>
-                    side === "groom"
-                      ? set("groomAccount", { ...data.groomAccount!, ...patch })
-                      : set("brideAccount", { ...data.brideAccount!, ...patch });
+                {(
+                  [
+                    { key: "groom",       sideLabel: "신랑측", personLabel: "신랑 본인" },
+                    { key: "groomFather", sideLabel: null,     personLabel: "신랑 부친" },
+                    { key: "groomMother", sideLabel: null,     personLabel: "신랑 모친" },
+                    { key: "bride",       sideLabel: "신부측", personLabel: "신부 본인" },
+                    { key: "brideFather", sideLabel: null,     personLabel: "신부 부친" },
+                    { key: "brideMother", sideLabel: null,     personLabel: "신부 모친" },
+                  ] as const
+                ).map(({ key, sideLabel, personLabel }, idx) => {
+                  const acc = data.accounts?.[key];
+                  const updateAcc = (patch: Partial<{ bank: string; accountNumber: string; name: string }>) =>
+                    set("accounts", {
+                      ...data.accounts,
+                      [key]: { bank: "", accountNumber: "", name: "", ...acc, ...patch },
+                    });
                   return (
-                    <div key={side}>
-                      <p className="text-[10px] font-semibold text-gray-300 uppercase tracking-[0.2em] mb-3 font-mono">
-                        {label}
-                      </p>
+                    <div key={key}>
+                      {sideLabel && (
+                        <p className="text-[10px] font-semibold text-gray-300 uppercase tracking-[0.2em] mb-3 font-mono">
+                          {sideLabel}
+                        </p>
+                      )}
+                      <p className="text-[11px] text-gray-400 mb-2">{personLabel}</p>
                       <div className="grid grid-cols-3 gap-2">
                         <Field label="은행">
                           <input
                             type="text"
-                            value={account?.bank ?? ""}
-                            onChange={(e) => update({ bank: e.target.value })}
+                            value={acc?.bank ?? ""}
+                            onChange={(e) => updateAcc({ bank: e.target.value })}
                             className={inputCls}
                             placeholder="신한은행"
                           />
@@ -843,21 +955,22 @@ export default function DashboardPage() {
                         <Field label="계좌번호" className="col-span-2">
                           <input
                             type="text"
-                            value={account?.number ?? ""}
-                            onChange={(e) => update({ number: e.target.value })}
+                            value={acc?.accountNumber ?? ""}
+                            onChange={(e) => updateAcc({ accountNumber: e.target.value })}
                             className={inputCls}
+                            placeholder="000-000-000000"
                           />
                         </Field>
                       </div>
                       <Field label="예금주" className="mt-2">
                         <input
                           type="text"
-                          value={account?.holder ?? ""}
-                          onChange={(e) => update({ holder: e.target.value })}
+                          value={acc?.name ?? ""}
+                          onChange={(e) => updateAcc({ name: e.target.value })}
                           className={inputCls}
                         />
                       </Field>
-                      {side === "groom" && <div className="border-t border-gray-100 mt-5" />}
+                      {(idx === 2) && <div className="border-t border-gray-100 mt-5" />}
                     </div>
                   );
                 })}
