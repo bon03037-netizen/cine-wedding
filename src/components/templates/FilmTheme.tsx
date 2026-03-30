@@ -701,9 +701,11 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               fontSize: preview ? 12 : 16,
               lineHeight: preview ? 2.3 : 2.8,
               color: "#C8C8C8",
-              whiteSpace: "pre-line",
+              whiteSpace: "pre-wrap",
+              wordBreak: "keep-all",
               fontWeight: 400,
               letterSpacing: "0.06em",
+              padding: preview ? "0 8px" : "0 28px",
             }}
           >
             {data.greeting || "두 사람이 하나가 되는 날,\n소중한 자리에 함께해 주세요."}
@@ -1152,19 +1154,19 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       {/* ── § 6  오시는 길 (교통안내) ─────────────────────────────────────── */}
       {data.showTransport !== false && (data.transport?.subway || data.transport?.bus || data.transport?.car) && (
       <div style={{ order: orderOf("transport") }}>
-        <section style={{ ...divider, ...sp, background: "#ffffff" }}>
+        <section style={{ ...divider, ...sp }}>
           <FadeIn>
-            <p style={{ ...slabel, color: "#bbbbbf" }}>오 시 는 길</p>
+            <p style={{ ...slabel }}>오 시 는 길</p>
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
                 gap: preview ? 10 : 20,
-                background: "#ffffff",
+                background: "linear-gradient(135deg, #0d0f1e 0%, #1a1b35 50%, #0d0f1e 100%)",
                 borderRadius: 14,
                 padding: preview ? "14px 16px" : "28px 24px",
-                border: "1px solid #e5e7eb",
-                boxShadow: "0 2px 16px rgba(0,0,0,0.06)",
+                border: "1px solid rgba(148,163,184,0.15)",
+                boxShadow: "0 4px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)",
               } as React.CSSProperties}
             >
               {data.transport?.subway && (
@@ -1174,8 +1176,8 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       width: preview ? 32 : 44,
                       height: preview ? 32 : 44,
                       flexShrink: 0,
-                      background: "#f3f4f6",
-                      border: "1px solid #e5e7eb",
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(148,163,184,0.12)",
                       borderRadius: 12,
                       display: "flex",
                       alignItems: "center",
@@ -1190,7 +1192,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: mono,
                         fontSize: preview ? 9 : 11,
-                        color: "#9ca3af",
+                        color: "#6b7280",
                         letterSpacing: "0.15em",
                         textTransform: "uppercase",
                         marginBottom: 5,
@@ -1203,7 +1205,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: serif,
                         fontSize: preview ? 12 : 15,
-                        color: "#1f2937",
+                        color: "#C8C8C8",
                         lineHeight: 1.9,
                       }}
                     >
@@ -1214,7 +1216,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               )}
 
               {data.transport?.subway && data.transport?.bus && (
-                <div style={{ borderTop: "1px solid #f3f4f6" }} />
+                <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }} />
               )}
 
               {data.transport?.bus && (
@@ -1224,8 +1226,8 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       width: preview ? 32 : 44,
                       height: preview ? 32 : 44,
                       flexShrink: 0,
-                      background: "#f3f4f6",
-                      border: "1px solid #e5e7eb",
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(148,163,184,0.12)",
                       borderRadius: 12,
                       display: "flex",
                       alignItems: "center",
@@ -1240,7 +1242,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: mono,
                         fontSize: preview ? 9 : 11,
-                        color: "#9ca3af",
+                        color: "#6b7280",
                         letterSpacing: "0.15em",
                         textTransform: "uppercase",
                         marginBottom: 5,
@@ -1253,7 +1255,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: serif,
                         fontSize: preview ? 12 : 15,
-                        color: "#1f2937",
+                        color: "#C8C8C8",
                         lineHeight: 1.9,
                       }}
                     >
@@ -1264,7 +1266,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               )}
 
               {data.transport?.bus && data.transport?.car && (
-                <div style={{ borderTop: "1px solid #f3f4f6" }} />
+                <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }} />
               )}
 
               {data.transport?.car && (
@@ -1274,8 +1276,8 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       width: preview ? 32 : 44,
                       height: preview ? 32 : 44,
                       flexShrink: 0,
-                      background: "#f3f4f6",
-                      border: "1px solid #e5e7eb",
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(148,163,184,0.12)",
                       borderRadius: 12,
                       display: "flex",
                       alignItems: "center",
@@ -1290,7 +1292,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: mono,
                         fontSize: preview ? 9 : 11,
-                        color: "#9ca3af",
+                        color: "#6b7280",
                         letterSpacing: "0.15em",
                         textTransform: "uppercase",
                         marginBottom: 5,
@@ -1303,7 +1305,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       style={{
                         fontFamily: serif,
                         fontSize: preview ? 12 : 15,
-                        color: "#1f2937",
+                        color: "#C8C8C8",
                         lineHeight: 1.9,
                       }}
                     >
@@ -1327,16 +1329,27 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       <div style={{ order: orderOf("accounts") }}>
         <section style={{ ...divider, ...sp }}>
           <FadeIn>
-            <p style={slabel}>마음 전하실 곳</p>
+            <p
+              style={{
+                ...slabel,
+                fontSize: preview ? 14 : 28,
+                letterSpacing: "0.18em",
+                color: "#9a9a9a",
+                marginBottom: preview ? 16 : 36,
+              }}
+            >
+              마음 전하실 곳
+            </p>
             <div style={{ display: "flex", flexDirection: "column", gap: preview ? 8 : 12 }}>
 
               {/* 신랑측 아코디언 */}
               {(data.accounts?.groom || data.accounts?.groomFather || data.accounts?.groomMother || data.groomAccount) && (
                 <div
                   style={{
-                    background: "rgba(18,18,18,0.9)",
+                    background: "linear-gradient(135deg, #0d0f1e 0%, #1a1b35 50%, #0d0f1e 100%)",
                     borderRadius: 14,
-                    border: "1px solid #2a2a2a",
+                    border: "1px solid rgba(148,163,184,0.15)",
+                    boxShadow: "0 4px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)",
                     overflow: "hidden",
                   }}
                 >
@@ -1389,7 +1402,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       >
                         <div
                           style={{
-                            borderTop: "1px solid #222",
+                            borderTop: "1px solid rgba(148,163,184,0.12)",
                             padding: preview ? "10px 14px 12px" : "18px 22px 22px",
                             display: "flex",
                             flexDirection: "column",
@@ -1450,9 +1463,10 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               {(data.accounts?.bride || data.accounts?.brideFather || data.accounts?.brideMother || data.brideAccount) && (
                 <div
                   style={{
-                    background: "rgba(18,18,18,0.9)",
+                    background: "linear-gradient(135deg, #0d0f1e 0%, #1a1b35 50%, #0d0f1e 100%)",
                     borderRadius: 14,
-                    border: "1px solid #2a2a2a",
+                    border: "1px solid rgba(148,163,184,0.15)",
+                    boxShadow: "0 4px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)",
                     overflow: "hidden",
                   }}
                 >
@@ -1505,7 +1519,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                       >
                         <div
                           style={{
-                            borderTop: "1px solid #222",
+                            borderTop: "1px solid rgba(148,163,184,0.12)",
                             padding: preview ? "10px 14px 12px" : "18px 22px 22px",
                             display: "flex",
                             flexDirection: "column",
