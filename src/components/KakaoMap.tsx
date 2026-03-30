@@ -63,7 +63,7 @@ export default function KakaoMap({ address }: KakaoMapProps) {
       const script = document.createElement("script");
       script.id = scriptId;
       // 🌟 보안을 위해 https://를 붙이고, 반드시 libraries=services를 포함
-      script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=c67adac892ec0d37b5e8fe4d61177c91&libraries=services&autoload=false`;
+      script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY}&libraries=services&autoload=false`;
       script.async = true;
       document.head.appendChild(script);
       script.onload = initMap;
