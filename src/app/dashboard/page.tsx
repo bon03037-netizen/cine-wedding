@@ -121,7 +121,12 @@ const DEFAULT: WeddingData = {
     bus: "145 · 148 · 341번 삼성역 하차 후 도보 3분",
     car: "건물 내 무료 주차 · 웨딩 참석 시 3시간 무료",
   },
-  photos: [],
+  photos: [
+    "https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80",
+    "https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=600&q=80",
+    "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=600&q=80",
+    "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=600&q=80",
+  ],
   showGreeting: true,
   showCouple: true,
   showGallery: true,
@@ -541,26 +546,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* ── 폰트 설정 ── */}
-            <AccSection id="font" title="폰트 설정" icon="🔤" openMap={open} onToggle={toggleSection}>
-              <div className="p-1 grid grid-cols-2 gap-2 mt-2">
-                {FONT_OPTIONS.map((f) => (
-                  <button
-                    key={f.id}
-                    onClick={() => set("fontFamily", f.id)}
-                    className={`p-3 rounded-lg border text-left transition-all ${
-                      data.fontFamily === f.id
-                        ? "border-gray-900 bg-gray-900 text-white"
-                        : "border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    <p className="text-sm font-medium" style={{ fontFamily: f.cssFamily }}>{f.label}</p>
-                    <p className="text-[10px] mt-0.5 opacity-50" style={{ fontFamily: f.cssFamily }}>{f.sample}</p>
-                  </button>
-                ))}
-              </div>
-            </AccSection>
-
             {/* 메인 이미지 */}
             <input ref={mainImgRef} type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" onChange={handleMainImg} className="hidden" />
             <div className="border border-gray-100 rounded-xl overflow-hidden bg-white">
@@ -600,8 +585,28 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* 섹션 관리 — 순서 변경 전용 */}
-            <AccSection id="sections" title="섹션 관리" icon="🗂️" openMap={open} onToggle={toggleSection}>
+            {/* ── 폰트 설정 ── */}
+            <AccSection id="font" title="폰트 설정" icon="🔤" openMap={open} onToggle={toggleSection}>
+              <div className="p-1 grid grid-cols-2 gap-2 mt-2">
+                {FONT_OPTIONS.map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => set("fontFamily", f.id)}
+                    className={`p-3 rounded-lg border text-left transition-all ${
+                      data.fontFamily === f.id
+                        ? "border-gray-900 bg-gray-900 text-white"
+                        : "border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    <p className="text-sm font-medium" style={{ fontFamily: f.cssFamily }}>{f.label}</p>
+                    <p className="text-[10px] mt-0.5 opacity-50" style={{ fontFamily: f.cssFamily }}>{f.sample}</p>
+                  </button>
+                ))}
+              </div>
+            </AccSection>
+
+            {/* 섹션 순서 변경 */}
+            <AccSection id="sections" title="섹션 순서 변경" icon="🗂️" openMap={open} onToggle={toggleSection}>
               <div className="mt-2">
                 <p className="text-[11px] text-gray-300 mb-3 font-mono">드래그로 표시 순서를 변경합니다</p>
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -616,6 +621,91 @@ export default function DashboardPage() {
                     </div>
                   </SortableContext>
                 </DndContext>
+              </div>
+            </AccSection>
+
+            {/* 예식 일시 */}
+            <AccSection id="datetime" title="예식 일시" icon="📅" openMap={open} onToggle={toggleSection}>
+              <div className="mt-2 space-y-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <select value={dp.year} onChange={(e) => updateDp({ year: e.target.value })} className={selectCls}>
+                    {["2025", "2026", "2027", "2028"].map((y) => <option key={y}>{y}</option>)}
+                  </select>
+                  <span className="text-xs text-gray-400">년</span>
+                  <select value={dp.month} onChange={(e) => updateDp({ month: e.target.value })} className={selectCls}>
+                    {Array.from({ length: 12 }, (_, i) => String(i + 1)).map((m) => <option key={m}>{m}</option>)}
+                  </select>
+                  <span className="text-xs text-gray-400">월</span>
+                  <select value={dp.day} onChange={(e) => updateDp({ day: e.target.value })} className={selectCls}>
+                    {Array.from({ length: 31 }, (_, i) => String(i + 1)).map((d) => <option key={d}>{d}</option>)}
+                  </select>
+                  <span className="text-xs text-gray-400">일</span>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <select value={dp.ampm} onChange={(e) => updateDp({ ampm: e.target.value })} className={selectCls}>
+                    <option>오전</option>
+                    <option>오후</option>
+                  </select>
+                  <select value={dp.hour} onChange={(e) => updateDp({ hour: e.target.value })} className={selectCls}>
+                    {Array.from({ length: 12 }, (_, i) => String(i + 1)).map((h) => <option key={h}>{h}</option>)}
+                  </select>
+                  <span className="text-xs text-gray-400">시</span>
+                  <select value={dp.minute} onChange={(e) => updateDp({ minute: e.target.value })} className={selectCls}>
+                    {["00", "10", "20", "30", "40", "50"].map((m) => <option key={m}>{m}</option>)}
+                  </select>
+                  <span className="text-xs text-gray-400">분</span>
+                </div>
+                <div
+                  className="bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 text-sm text-gray-600"
+                  style={{ fontFamily: "var(--font-serif-kr), serif" }}
+                >
+                  {data.date} &nbsp;{data.time}
+                </div>
+              </div>
+            </AccSection>
+
+            {/* 예식장 & 지도 */}
+            <AccSection
+              id="venue" title="예식장 & 지도" icon="🏛️"
+              openMap={open} onToggle={toggleSection}
+              isOn={isTabOn("venue")}
+              onToggleVisibility={() => toggleVisibility("showMap")}
+            >
+              <div className="mt-2 space-y-3">
+                <Field label="예식장 이름">
+                  <input type="text" value={data.venue} onChange={(e) => set("venue", e.target.value)} className={inputCls} />
+                </Field>
+                <Field label="도로명 주소">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={roadAddress}
+                      placeholder="주소 검색 버튼을 눌러주세요"
+                      className={`${inputCls} flex-1 cursor-default`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setPostcodeOpen(true)}
+                      className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 whitespace-nowrap transition-colors"
+                    >
+                      주소 검색
+                    </button>
+                  </div>
+                </Field>
+                <Field label="상세 주소">
+                  <input
+                    type="text"
+                    value={detailAddress}
+                    onChange={(e) => {
+                      const detail = e.target.value;
+                      setDetailAddress(detail);
+                      set("address", roadAddress + (detail ? " " + detail : ""));
+                    }}
+                    placeholder="예: 펠리스홀 3층"
+                    className={inputCls}
+                  />
+                </Field>
               </div>
             </AccSection>
 
@@ -754,91 +844,6 @@ export default function DashboardPage() {
                     />
                   </div>
                 </div>
-              </div>
-            </AccSection>
-
-            {/* 예식 일시 */}
-            <AccSection id="datetime" title="예식 일시" icon="📅" openMap={open} onToggle={toggleSection}>
-              <div className="mt-2 space-y-3">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <select value={dp.year} onChange={(e) => updateDp({ year: e.target.value })} className={selectCls}>
-                    {["2025", "2026", "2027", "2028"].map((y) => <option key={y}>{y}</option>)}
-                  </select>
-                  <span className="text-xs text-gray-400">년</span>
-                  <select value={dp.month} onChange={(e) => updateDp({ month: e.target.value })} className={selectCls}>
-                    {Array.from({ length: 12 }, (_, i) => String(i + 1)).map((m) => <option key={m}>{m}</option>)}
-                  </select>
-                  <span className="text-xs text-gray-400">월</span>
-                  <select value={dp.day} onChange={(e) => updateDp({ day: e.target.value })} className={selectCls}>
-                    {Array.from({ length: 31 }, (_, i) => String(i + 1)).map((d) => <option key={d}>{d}</option>)}
-                  </select>
-                  <span className="text-xs text-gray-400">일</span>
-                </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <select value={dp.ampm} onChange={(e) => updateDp({ ampm: e.target.value })} className={selectCls}>
-                    <option>오전</option>
-                    <option>오후</option>
-                  </select>
-                  <select value={dp.hour} onChange={(e) => updateDp({ hour: e.target.value })} className={selectCls}>
-                    {Array.from({ length: 12 }, (_, i) => String(i + 1)).map((h) => <option key={h}>{h}</option>)}
-                  </select>
-                  <span className="text-xs text-gray-400">시</span>
-                  <select value={dp.minute} onChange={(e) => updateDp({ minute: e.target.value })} className={selectCls}>
-                    {["00", "10", "20", "30", "40", "50"].map((m) => <option key={m}>{m}</option>)}
-                  </select>
-                  <span className="text-xs text-gray-400">분</span>
-                </div>
-                <div
-                  className="bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 text-sm text-gray-600"
-                  style={{ fontFamily: "var(--font-serif-kr), serif" }}
-                >
-                  {data.date} &nbsp;{data.time}
-                </div>
-              </div>
-            </AccSection>
-
-            {/* 예식장 & 지도 */}
-            <AccSection
-              id="venue" title="예식장 & 지도" icon="🏛️"
-              openMap={open} onToggle={toggleSection}
-              isOn={isTabOn("venue")}
-              onToggleVisibility={() => toggleVisibility("showMap")}
-            >
-              <div className="mt-2 space-y-3">
-                <Field label="예식장 이름">
-                  <input type="text" value={data.venue} onChange={(e) => set("venue", e.target.value)} className={inputCls} />
-                </Field>
-                <Field label="도로명 주소">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      readOnly
-                      value={roadAddress}
-                      placeholder="주소 검색 버튼을 눌러주세요"
-                      className={`${inputCls} flex-1 cursor-default`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setPostcodeOpen(true)}
-                      className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 whitespace-nowrap transition-colors"
-                    >
-                      주소 검색
-                    </button>
-                  </div>
-                </Field>
-                <Field label="상세 주소">
-                  <input
-                    type="text"
-                    value={detailAddress}
-                    onChange={(e) => {
-                      const detail = e.target.value;
-                      setDetailAddress(detail);
-                      set("address", roadAddress + (detail ? " " + detail : ""));
-                    }}
-                    placeholder="예: 펠리스홀 3층"
-                    className={inputCls}
-                  />
-                </Field>
               </div>
             </AccSection>
 

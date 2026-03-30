@@ -703,9 +703,11 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               color: "#C8C8C8",
               whiteSpace: "pre-wrap",
               wordBreak: "keep-all",
+              overflowWrap: "break-word",
               fontWeight: 400,
               letterSpacing: "0.06em",
-              padding: preview ? "0 8px" : "0 28px",
+              padding: preview ? "0 10px" : "0 32px",
+              maxWidth: "100%",
             }}
           >
             {data.greeting || "두 사람이 하나가 되는 날,\n소중한 자리에 함께해 주세요."}
@@ -1089,9 +1091,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
           {!preview && (
             <div style={{ display: "flex", gap: 9, marginTop: 0 }}>
               <a
-                href={`https://map.naver.com/v5/search/${encodeURIComponent(
-                  data.venue || data.address
-                )}`}
+                href={`https://map.naver.com/v5/search/${encodeURIComponent(data.address)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
@@ -1117,9 +1117,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                 네이버 지도
               </a>
               <a
-                href={`https://map.kakao.com/?q=${encodeURIComponent(
-                  data.venue || data.address
-                )}`}
+                href={`https://map.kakao.com/link/search/${encodeURIComponent(data.address)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
@@ -1162,10 +1160,10 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                 display: "flex",
                 flexDirection: "column",
                 gap: preview ? 10 : 20,
-                background: "linear-gradient(135deg, #0d0f1e 0%, #1a1b35 50%, #0d0f1e 100%)",
+                background: "linear-gradient(135deg, #3e2723 0%, #2d1a11 50%, #1a0f0a 100%)",
                 borderRadius: 14,
                 padding: preview ? "14px 16px" : "28px 24px",
-                border: "1px solid rgba(148,163,184,0.15)",
+                border: "1px solid rgba(141,110,99,0.4)",
                 boxShadow: "0 4px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)",
               } as React.CSSProperties}
             >
@@ -1346,9 +1344,9 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               {(data.accounts?.groom || data.accounts?.groomFather || data.accounts?.groomMother || data.groomAccount) && (
                 <div
                   style={{
-                    background: "linear-gradient(135deg, #0d0f1e 0%, #1a1b35 50%, #0d0f1e 100%)",
+                    background: "linear-gradient(135deg, #3e2723 0%, #2d1a11 50%, #1a0f0a 100%)",
                     borderRadius: 14,
-                    border: "1px solid rgba(148,163,184,0.15)",
+                    border: "1px solid rgba(141,110,99,0.4)",
                     boxShadow: "0 4px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)",
                     overflow: "hidden",
                   }}
@@ -1463,9 +1461,9 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               {(data.accounts?.bride || data.accounts?.brideFather || data.accounts?.brideMother || data.brideAccount) && (
                 <div
                   style={{
-                    background: "linear-gradient(135deg, #0d0f1e 0%, #1a1b35 50%, #0d0f1e 100%)",
+                    background: "linear-gradient(135deg, #3e2723 0%, #2d1a11 50%, #1a0f0a 100%)",
                     borderRadius: 14,
-                    border: "1px solid rgba(148,163,184,0.15)",
+                    border: "1px solid rgba(141,110,99,0.4)",
                     boxShadow: "0 4px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)",
                     overflow: "hidden",
                   }}

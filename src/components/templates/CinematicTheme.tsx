@@ -324,7 +324,7 @@ export default function CinematicTheme({ data, preview = false }: Props) {
                 {!preview && (
                   <div style={{ display: "flex", gap: 8, marginTop: 0 }}>
                     <a
-                      href={`https://map.naver.com/v5/search/${encodeURIComponent(data.venue || data.address)}`}
+                      href={`https://map.naver.com/v5/search/${encodeURIComponent(data.address)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
@@ -341,7 +341,7 @@ export default function CinematicTheme({ data, preview = false }: Props) {
                       네이버 지도
                     </a>
                     <a
-                      href={`https://map.kakao.com/?q=${encodeURIComponent(data.venue || data.address)}`}
+                      href={`https://map.kakao.com/link/search/${encodeURIComponent(data.address)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
