@@ -1,6 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap');
 @import "tailwindcss";
 
+/* ── Local Font: Sermo ────────────────────────────────────────────────────── */
+@font-face {
+  font-family: 'Sermo';
+  src: url('/fonts/SERMOItalic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

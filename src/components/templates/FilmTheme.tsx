@@ -42,7 +42,7 @@ export interface TransportInfo {
 export type SectionId = "greeting" | "couple" | "gallery" | "map" | "transport" | "accounts";
 
 export const DEFAULT_SECTIONS_ORDER: SectionId[] = [
-  "greeting", "couple", "gallery", "map", "transport", "accounts",
+  "map", "transport", "greeting", "couple", "gallery", "accounts",
 ];
 
 export interface WeddingData {
@@ -520,13 +520,13 @@ function FallingParticles({ type, preview = false }: { type: "petals" | "snowfla
   );
 
   return (
-    <div style={{ position: "fixed", inset: 0, pointerEvents: "none", overflow: "hidden", zIndex: 1 }}>
+    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden", zIndex: 1 }}>
       {particles.map((p) => (
         <motion.div
           key={p.id}
-          initial={{ y: "-5vh", x: 0, rotate: 0, opacity: 0 }}
+          initial={{ y: "-60px", x: 0, rotate: 0, opacity: 0 }}
           animate={{
-            y: "108vh",
+            y: 3600,
             x: [0, p.driftX * 0.4, p.driftX],
             rotate: p.rotateEnd,
             opacity: [0, p.opacity, p.opacity, 0],
@@ -577,7 +577,7 @@ function StaggeredGreeting({
 
   const containerVariants = {
     hidden: {},
-    visible: { transition: { staggerChildren: preview ? 0.12 : 0.38, delayChildren: 0.05 } },
+    visible: { transition: { staggerChildren: preview ? 0.08 : 0.13, delayChildren: 0.05 } },
   };
   const lineVariants = {
     hidden: { opacity: 0, y: preview ? 6 : 14 },
@@ -879,6 +879,17 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
     textAlign: "center",
     marginBottom: preview ? 14 : 30,
   };
+  // Sermo 이탤릭 장식 타이틀 (GALLERY, LOCATION)
+  const sTitle: React.CSSProperties = {
+    fontFamily: "'Sermo', serif",
+    fontStyle: "italic",
+    fontSize: preview ? 18 : 36,
+    letterSpacing: "0.06em",
+    color: theme.textBody,
+    textAlign: "center",
+    marginBottom: preview ? 14 : 28,
+    lineHeight: 1,
+  };
 
   const sectionOrder = data.sectionsOrder ?? DEFAULT_SECTIONS_ORDER;
   const orderOf = (id: SectionId) => sectionOrder.indexOf(id);
@@ -891,6 +902,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         fontFamily: serif,
         minHeight: "100%",
         position: "relative",
+        overflow: "hidden",
         lineHeight: 1.85,
         letterSpacing: "0.035em",
       }}
@@ -1028,7 +1040,6 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             border: `1px solid ${theme.cardBorder}`,
             boxShadow: theme.cardShadow,
           } as React.CSSProperties}>
-          <p style={slabel}>Greeting</p>
           {/* Decorative top flourish */}
           <div
             style={{
@@ -1080,60 +1091,38 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         <FadeIn>
           <p style={slabel}>The Couple</p>
 
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: preview ? 18 : 32 }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: preview ? 10 : 18 }}>
 
-            {/* 신랑 블록 */}
-            <div style={{ textAlign: "center" }}>
-              {data.groomParents && (() => {
-                const line = parentsLine(data.groomParents!, "아들");
-                return line ? (
-                  <p style={{
-                    fontFamily: serif, fontSize: preview ? 10 : 13,
-                    color: theme.parentColor, letterSpacing: "0.05em",
-                    lineHeight: preview ? 1.8 : 2.0, marginBottom: preview ? 6 : 10,
-                  }}>
-                    {line}
-                  </p>
-                ) : null;
-              })()}
-              <p style={{
-                fontFamily: serif, fontSize: preview ? 20 : 30,
-                fontWeight: 400, letterSpacing: "0.22em",
-                color: theme.accentColor, textShadow: theme.accentShadow,
-              }}>
+            {/* 신랑 줄 */}
+            <p style={{ fontFamily: serif, lineHeight: preview ? 2.0 : 2.4, textAlign: "center" }}>
+              {data.groomParents && parentsLine(data.groomParents, "아들") && (
+                <span style={{ fontSize: preview ? 10 : 13, color: theme.parentColor, letterSpacing: "0.04em" }}>
+                  {parentsLine(data.groomParents, "아들")}{" "}
+                </span>
+              )}
+              <span style={{ fontSize: preview ? 17 : 26, color: theme.accentColor, letterSpacing: "0.2em", textShadow: theme.accentShadow }}>
                 {data.groomName}
-              </p>
-            </div>
+              </span>
+            </p>
 
-            {/* 구분 */}
+            {/* 구분선 */}
             <div style={{ display: "flex", alignItems: "center", gap: preview ? 10 : 16 }}>
               <div style={{ width: preview ? 20 : 36, height: 1, background: theme.coupleDividerBg }} />
               <span style={{ fontFamily: serif, color: theme.coupleSymbolColor, fontSize: preview ? 12 : 18 }}>∞</span>
               <div style={{ width: preview ? 20 : 36, height: 1, background: theme.coupleDividerBg }} />
             </div>
 
-            {/* 신부 블록 */}
-            <div style={{ textAlign: "center" }}>
-              {data.brideParents && (() => {
-                const line = parentsLine(data.brideParents!, "딸");
-                return line ? (
-                  <p style={{
-                    fontFamily: serif, fontSize: preview ? 10 : 13,
-                    color: theme.parentColor, letterSpacing: "0.05em",
-                    lineHeight: preview ? 1.8 : 2.0, marginBottom: preview ? 6 : 10,
-                  }}>
-                    {line}
-                  </p>
-                ) : null;
-              })()}
-              <p style={{
-                fontFamily: serif, fontSize: preview ? 20 : 30,
-                fontWeight: 400, letterSpacing: "0.22em",
-                color: theme.accentColor, textShadow: theme.accentShadow,
-              }}>
+            {/* 신부 줄 */}
+            <p style={{ fontFamily: serif, lineHeight: preview ? 2.0 : 2.4, textAlign: "center" }}>
+              {data.brideParents && parentsLine(data.brideParents, "딸") && (
+                <span style={{ fontSize: preview ? 10 : 13, color: theme.parentColor, letterSpacing: "0.04em" }}>
+                  {parentsLine(data.brideParents, "딸")}{" "}
+                </span>
+              )}
+              <span style={{ fontSize: preview ? 17 : 26, color: theme.accentColor, letterSpacing: "0.2em", textShadow: theme.accentShadow }}>
                 {data.brideName}
-              </p>
-            </div>
+              </span>
+            </p>
           </div>
 
           {/* 연락하기 버튼 */}
@@ -1169,7 +1158,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       <div style={{ order: orderOf("gallery") }}>
       <section style={{ ...sp, textAlign: "center" }}>
         <FadeIn>
-          <p style={slabel}>Our Story</p>
+          <p style={sTitle}>GALLERY</p>
 
           {/* Mini film strip — horizontal infinite scroll */}
           {photos.length > 0 && (
@@ -1180,6 +1169,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                 height: preview ? 110 : 150,
                 marginBottom: preview ? 14 : 22,
                 overflow: "hidden",
+                background: "#000",
                 border: "1px solid #222",
                 boxShadow: "0 0 20px rgba(255,255,255,0.03), 0 0 40px rgba(212,175,55,0.05)",
               }}
@@ -1204,7 +1194,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                     !preview
                       ? {
                           animationName: "filmStripScroll",
-                          animationDuration: `${Math.max(photos.length * 5, 10)}s`,
+                          animationDuration: `${Math.max(photos.length * 2.5, 5)}s`,
                           animationTimingFunction: "linear",
                           animationIterationCount: "infinite",
                         }
@@ -1319,7 +1309,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       <div style={{ order: orderOf("map") }}>
       <section style={{ ...sp }}>
         <FadeIn>
-          <p style={slabel}>Ceremony</p>
+          <p style={sTitle}>LOCATION</p>
 
           {/* Date + Time + Venue big display */}
           <div
