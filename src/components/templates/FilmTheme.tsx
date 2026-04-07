@@ -707,7 +707,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               wordBreak: "keep-all",
               overflowWrap: "break-word",
               fontWeight: 400,
-              letterSpacing: "0.06em",
+              letterSpacing: "-0.02em",
               padding: preview ? "0 4px" : "0 8px",
               maxWidth: "100%",
             }}

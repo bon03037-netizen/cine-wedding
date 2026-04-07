@@ -34,10 +34,12 @@ const THEMES: { id: Theme; label: string; sub: string; icon: string }[] = [
 ];
 
 const BG_COLOR_OPTIONS = [
-  { hex: "#0a0a0a", label: "블랙" },
-  { hex: "#0a192e", label: "다크 네이비" },
-  { hex: "#2e0a1a", label: "와인" },
-  { hex: "#0a2e1a", label: "딥 그린" },
+  { hex: "#ffffff", label: "화이트" },
+  { hex: "#000000", label: "블랙" },
+  { hex: "#f8f8f4", label: "베이지" },
+  { hex: "#fffaf0", label: "플로랄 화이트" },
+  { hex: "#fff0f5", label: "연핑크" },
+  { hex: "#122f24", label: "딥그린" },
 ];
 
 const FONT_OPTIONS = [
@@ -162,6 +164,15 @@ const SECTION_LABELS: Record<SectionId, string> = {
   map: "예식장 & 지도",
   transport: "교통 안내",
   accounts: "계좌 정보",
+};
+
+const SECTION_VISIBILITY: Record<SectionId, keyof WeddingData> = {
+  greeting:  "showGreeting",
+  couple:    "showCouple",
+  gallery:   "showGallery",
+  map:       "showMap",
+  transport: "showTransport",
+  accounts:  "showAccounts",
 };
 
 // 에디터 탭 ID → WeddingData 가시성 키 매핑
@@ -525,7 +536,7 @@ export default function DashboardPage() {
       <div className="flex flex-row-reverse h-[calc(100vh-57px)] max-w-7xl mx-auto w-full gap-10 px-6 py-8">
 
         {/* ── Right: Editor ── */}
-        <div className="w-[460px] shrink-0 overflow-y-auto bg-white border border-gray-100 rounded-2xl shadow-sm">
+        <div className="w-[520px] shrink-0 overflow-y-auto bg-white border border-gray-100 rounded-2xl shadow-sm">
           <div className="p-4 space-y-2">
 
             {/* ── Theme Selector ── */}
@@ -646,13 +657,17 @@ export default function DashboardPage() {
                 <p className="text-[11px] text-gray-300 mb-3 font-mono">드래그로 표시 순서를 변경합니다</p>
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                   <SortableContext
-                    items={data.sectionsOrder ?? DEFAULT_SECTIONS_ORDER}
+                    items={(data.sectionsOrder ?? DEFAULT_SECTIONS_ORDER).filter(
+                      (id) => data[SECTION_VISIBILITY[id]] !== false
+                    )}
                     strategy={verticalListSortingStrategy}
                   >
                     <div className="space-y-1.5">
-                      {(data.sectionsOrder ?? DEFAULT_SECTIONS_ORDER).map((id) => (
-                        <SortableItem key={id} id={id} label={SECTION_LABELS[id]} />
-                      ))}
+                      {(data.sectionsOrder ?? DEFAULT_SECTIONS_ORDER)
+                        .filter((id) => data[SECTION_VISIBILITY[id]] !== false)
+                        .map((id) => (
+                          <SortableItem key={id} id={id} label={SECTION_LABELS[id]} />
+                        ))}
                     </div>
                   </SortableContext>
                 </DndContext>
@@ -1118,14 +1133,6 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
-
-            {/* Date below phone */}
-            <p
-              className="text-[11px] text-gray-400"
-              style={{ fontFamily: "var(--font-serif-kr), serif" }}
-            >
-              {data.date} · {data.time}
-            </p>
 
             {/* 인트로 미리보기 버튼 */}
             <button

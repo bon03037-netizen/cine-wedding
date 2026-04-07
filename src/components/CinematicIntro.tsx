@@ -176,11 +176,13 @@ function FilmStrip({
   animDuration,
   reversed = false,
   showOverlay = false,
+  contained = false,
 }: {
   photos: string[];
   animDuration: number;
   reversed?: boolean;
   showOverlay?: boolean;
+  contained?: boolean;
 }) {
   const MIN = 8;
   const reps = Math.max(1, Math.ceil(MIN / photos.length));
@@ -188,7 +190,7 @@ function FilmStrip({
   const doubled = [...frames, ...frames];
 
   const FRAME_W = 170;
-  const PHOTO_H = 210;
+  const PHOTO_H = contained ? 130 : 210;
   const PERF_H = 16;
 
   const perfHole = {
@@ -408,9 +410,9 @@ export default function CinematicIntro({
           paddingBottom: 32,
         }}
       >
-        <FilmStrip photos={photos} animDuration={22} showOverlay />
-        <FilmStrip photos={[...photos].reverse()} animDuration={30} reversed showOverlay />
-        <FilmStrip photos={photos} animDuration={18} showOverlay={false} />
+        <FilmStrip photos={photos} animDuration={22} showOverlay contained={contained} />
+        <FilmStrip photos={[...photos].reverse()} animDuration={30} reversed showOverlay contained={contained} />
+        <FilmStrip photos={photos} animDuration={18} showOverlay={false} contained={contained} />
       </div>
 
       {/* 하단 라벨 바 */}
