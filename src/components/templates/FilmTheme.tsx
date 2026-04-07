@@ -42,7 +42,7 @@ export interface TransportInfo {
 export type SectionId = "greeting" | "couple" | "gallery" | "map" | "transport" | "accounts";
 
 export const DEFAULT_SECTIONS_ORDER: SectionId[] = [
-  "map", "transport", "greeting", "couple", "gallery", "accounts",
+  "greeting", "couple", "gallery", "map", "transport", "accounts",
 ];
 
 export interface WeddingData {
@@ -1206,15 +1206,11 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: preview ? 10 : 18 }}>
 
             {/* 신랑 줄 */}
-            <p style={{ fontFamily: serif, lineHeight: preview ? 2.0 : 2.4, textAlign: "center" }}>
+            <p style={{ fontFamily: serif, fontSize: preview ? 10 : 13, color: theme.parentColor, letterSpacing: "0.04em", lineHeight: preview ? 2.0 : 2.4, textAlign: "center" }}>
               {data.groomParents && parentsLine(data.groomParents, "아들") && (
-                <span style={{ fontSize: preview ? 10 : 13, color: theme.parentColor, letterSpacing: "0.04em" }}>
-                  {parentsLine(data.groomParents, "아들")}{" "}
-                </span>
+                <>{parentsLine(data.groomParents, "아들")}{" "}</>
               )}
-              <span style={{ fontSize: preview ? 17 : 26, color: theme.accentColor, letterSpacing: "0.2em", textShadow: theme.accentShadow }}>
-                {data.groomName}
-              </span>
+              {data.groomName}
             </p>
 
             {/* 구분선 */}
@@ -1225,15 +1221,11 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             </div>
 
             {/* 신부 줄 */}
-            <p style={{ fontFamily: serif, lineHeight: preview ? 2.0 : 2.4, textAlign: "center" }}>
+            <p style={{ fontFamily: serif, fontSize: preview ? 10 : 13, color: theme.parentColor, letterSpacing: "0.04em", lineHeight: preview ? 2.0 : 2.4, textAlign: "center" }}>
               {data.brideParents && parentsLine(data.brideParents, "딸") && (
-                <span style={{ fontSize: preview ? 10 : 13, color: theme.parentColor, letterSpacing: "0.04em" }}>
-                  {parentsLine(data.brideParents, "딸")}{" "}
-                </span>
+                <>{parentsLine(data.brideParents, "딸")}{" "}</>
               )}
-              <span style={{ fontSize: preview ? 17 : 26, color: theme.accentColor, letterSpacing: "0.2em", textShadow: theme.accentShadow }}>
-                {data.brideName}
-              </span>
+              {data.brideName}
             </p>
           </div>
 

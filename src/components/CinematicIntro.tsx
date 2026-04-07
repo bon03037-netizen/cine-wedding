@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 
 interface Props {
@@ -105,6 +106,7 @@ function FilmStrip({
             {/* 사진 */}
             <div
               style={{
+                position: "relative",
                 width: FRAME_W,
                 height: PHOTO_H,
                 overflow: "hidden",
@@ -112,16 +114,14 @@ function FilmStrip({
                 backgroundColor: "#0a0a0a",
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={photo}
                 alt=""
+                fill
+                sizes="160px"
                 style={{
-                  width: "100%",
-                  height: "100%",
                   objectFit: "cover",
                   objectPosition: "center 25%",
-                  display: "block",
                   filter: "brightness(0.85) contrast(1.1) saturate(0.8)",
                 }}
               />

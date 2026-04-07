@@ -85,6 +85,45 @@ function isAllowedImage(file: File) {
   return ALLOWED_TYPES.includes(file.type) || ALLOWED_EXT.test(file.name);
 }
 
+/** Canvas API로 클라이언트 사이드 이미지 압축/리사이즈 */
+async function compressImage(
+  file: File,
+  maxWidth = 1200,
+  quality = 0.82
+): Promise<File> {
+  return new Promise((resolve) => {
+    const img = new window.Image();
+    img.onload = () => {
+      URL.revokeObjectURL(img.src);
+      const scale = Math.min(1, maxWidth / img.naturalWidth);
+      const w = Math.round(img.naturalWidth * scale);
+      const h = Math.round(img.naturalHeight * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { resolve(file); return; }
+      ctx.drawImage(img, 0, 0, w, h);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) { resolve(file); return; }
+          const compressed = new File(
+            [blob],
+            file.name.replace(/\.[^.]+$/, ".jpg"),
+            { type: "image/jpeg" }
+          );
+          // 압축 결과가 더 크면 원본 사용
+          resolve(compressed.size < file.size ? compressed : file);
+        },
+        "image/jpeg",
+        quality
+      );
+    };
+    img.onerror = () => resolve(file);
+    img.src = URL.createObjectURL(file);
+  });
+}
+
 const DOW = ["일", "월", "화", "수", "목", "금", "토"];
 
 interface DateState {
@@ -155,7 +194,7 @@ const DEFAULT: WeddingData = {
 const SECTION_LABELS: Record<SectionId, string> = {
   greeting: "초대 문구",
   couple: "신랑신부 & 혼주",
-  gallery: "우리들의 이야기",
+  gallery: "갤러리",
   map: "예식장 & 지도",
   transport: "교통 안내",
   accounts: "계좌 정보",
@@ -426,7 +465,7 @@ export default function DashboardPage() {
     });
   };
 
-  // 메인 이미지 업로드 (JPG/JPEG/PNG)
+  // 메인 이미지 업로드 (JPG/JPEG/PNG) — Canvas 압축 후 업로드
   const handleMainImg = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -435,16 +474,17 @@ export default function DashboardPage() {
       e.target.value = "";
       return;
     }
-    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-    const { error } = await supabase.storage.from('wedding-photos').upload(fileName, file);
+    // 메인 이미지는 최대 1600px로 압축
+    const compressed = await compressImage(file, 1600, 0.85);
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`;
+    const { error } = await supabase.storage.from('wedding-photos').upload(fileName, compressed);
     if (error) { alert('사진 업로드 실패: ' + error.message); return; }
     const { data: urlData } = supabase.storage.from('wedding-photos').getPublicUrl(fileName);
     set("mainImage", urlData.publicUrl);
     e.target.value = "";
   };
 
-  // 갤러리 사진 다량 업로드 (진행률 표시)
+  // 갤러리 사진 다량 업로드 (진행률 표시) — Canvas 압축 후 업로드
   const handlePhotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []).filter(isAllowedImage);
     if (!files.length) {
@@ -456,9 +496,10 @@ export default function DashboardPage() {
     setUploadProgress({ current: 0, total: files.length });
 
     const uploadOne = async (file: File): Promise<string | null> => {
-      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const { error } = await supabase.storage.from('wedding-photos').upload(fileName, file);
+      // 갤러리 사진은 최대 1200px로 압축 (필름롤 썸네일 용도)
+      const compressed = await compressImage(file, 1200, 0.82);
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`;
+      const { error } = await supabase.storage.from('wedding-photos').upload(fileName, compressed);
       setUploadProgress((p) => p ? { ...p, current: p.current + 1 } : null);
       if (error) return null;
       const { data } = supabase.storage.from('wedding-photos').getPublicUrl(fileName);
