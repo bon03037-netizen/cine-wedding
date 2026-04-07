@@ -130,12 +130,7 @@ const DEFAULT: WeddingData = {
     bus: "145 · 148 · 341번 삼성역 하차 후 도보 3분",
     car: "건물 내 무료 주차 · 웨딩 참석 시 3시간 무료",
   },
-  photos: [
-    "https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80",
-    "https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=600&q=80",
-    "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=600&q=80",
-    "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=600&q=80",
-  ],
+  photos: [],
   showGreeting: true,
   showCouple: true,
   showGallery: true,

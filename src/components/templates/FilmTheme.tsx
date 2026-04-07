@@ -296,27 +296,55 @@ function FilmCard({
   index: number;
   total: number;
 }) {
+  const perfHole = {
+    width: 11,
+    height: 7,
+    background: "#050505",
+    border: "0.5px solid #1a1a1a",
+    borderRadius: 1.5,
+    boxShadow: "inset 0 1px 2px rgba(0,0,0,0.8), 0 0 3px rgba(255,255,255,0.04)",
+    flexShrink: 0,
+  } as const;
+
   return (
     <div
       style={{
-        width: 240,
-        height: 320, // 3:4 비율 고정 (240×320)
-        background: "#0a0a0a",
-        borderRadius: 3,
+        width: 230,
+        background: "#090909",
+        borderRadius: 2,
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
-        boxShadow: "0 0 0 1px #2a2a2a, 0 0 18px rgba(255,255,255,0.05), 0 0 40px rgba(212,175,55,0.08), 0 18px 70px rgba(0,0,0,0.97)",
+        boxShadow:
+          "0 0 0 1px #1a1a1a, 0 0 0 2px #080808, 0 20px 60px rgba(0,0,0,0.98), 0 0 30px rgba(212,175,55,0.04)",
       }}
     >
-      <Perforations count={8} />
+      {/* Top sprocket strip */}
+      <div style={{
+        height: 22,
+        background: "#050505",
+        borderBottom: "0.5px solid #1e1e1e",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 10px",
+      }}>
+        {Array.from({ length: 7 }).map((_, i) => <div key={i} style={perfHole} />)}
+      </div>
+
+      {/* Kodak orange stripe */}
+      <div style={{ height: 3, background: "rgba(255,140,0,0.08)" }} />
+
+      {/* Photo area */}
       <div
         style={{
-          flex: 1,
-          margin: "0 8px",
+          height: 310,
+          margin: "0 10px",
           background: "#111",
           overflow: "hidden",
           position: "relative",
+          borderLeft: "0.5px solid #1c1c1c",
+          borderRight: "0.5px solid #1c1c1c",
         }}
       >
         {src ? (
@@ -346,23 +374,46 @@ function FilmCard({
             </span>
           </div>
         )}
-        <FilmGrain />
+        <FilmGrain strong />
+        {/* Corner darkening */}
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%)",
+          pointerEvents: "none",
+        }} />
       </div>
-      <Perforations count={8} />
-      {/* Kodak edge */}
+
+      {/* Kodak orange stripe bottom */}
+      <div style={{ height: 3, background: "rgba(255,140,0,0.08)" }} />
+
+      {/* Bottom sprocket strip */}
+      <div style={{
+        height: 22,
+        background: "#050505",
+        borderTop: "0.5px solid #1e1e1e",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 10px",
+      }}>
+        {Array.from({ length: 7 }).map((_, i) => <div key={i} style={perfHole} />)}
+      </div>
+
+      {/* Kodak edge text */}
       <div
         style={{
-          padding: "0 9px 4px",
+          padding: "3px 10px 5px",
           display: "flex",
           justifyContent: "space-between",
           fontFamily: "monospace",
           fontSize: 7,
-          color: "rgba(255,160,0,0.18)",
+          color: "rgba(255,140,0,0.22)",
           letterSpacing: "0.15em",
+          background: "#050505",
         }}
       >
         <span>○ {String(index + 1).padStart(2, "0")}</span>
-        <span>KODAK 400TX</span>
+        <span>KODAK 400TX ▲</span>
         <span>{String(index + 1).padStart(2, "0")}/{String(total).padStart(2, "0")} ▷</span>
       </div>
     </div>
@@ -460,16 +511,18 @@ function FilmAlbum({
           alignItems: "center",
           overflowX: "scroll",
           scrollSnapType: "x mandatory",
+          scrollBehavior: "smooth",
           WebkitOverflowScrolling: "touch" as React.CSSProperties["WebkitOverflowScrolling"],
           scrollbarWidth: "none" as React.CSSProperties["scrollbarWidth"],
-          padding: "0 calc(50% - 120px)",
-          gap: 20,
+          padding: "0 calc(50% - 115px)",
+          gap: 28,
         } as React.CSSProperties}
+        className="hide-scrollbar"
       >
         {Array.from({ length: N }).map((_, i) => (
           <div
             key={i}
-            style={{ scrollSnapAlign: "center", flexShrink: 0 }}
+            style={{ scrollSnapAlign: "center", scrollSnapStop: "always", flexShrink: 0 }}
           >
             <FilmCard src={photos[i]} index={i} total={N} />
           </div>
@@ -577,7 +630,7 @@ function StaggeredGreeting({
 
   const containerVariants = {
     hidden: {},
-    visible: { transition: { staggerChildren: preview ? 0.08 : 0.13, delayChildren: 0.05 } },
+    visible: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
   };
   const lineVariants = {
     hidden: { opacity: 0, y: preview ? 6 : 14 },
@@ -769,9 +822,6 @@ const FONT_MAP: Record<string, string> = {
   "nanum-gothic": "var(--font-nanum-gothic), 'Nanum Gothic', sans-serif",
 };
 
-const PLACEHOLDER_MAIN =
-  "https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=800&q=80";
-
 const LIGHT_BG_SET = new Set(["#ffffff", "#f8f8f4", "#fffaf0", "#fff0f5"]);
 
 interface SectionTheme {
@@ -926,19 +976,48 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
           </div>
         )}
 
-        {/* Background — 항상 이미지 표시 (업로드 전엔 플레이스홀더) */}
-        <img
-          src={data.mainImage || PLACEHOLDER_MAIN}
-          alt=""
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            objectPosition: "center",
-          }}
-        />
+        {/* Background — 이미지 업로드 전엔 깔끔한 플레이스홀더 */}
+        {data.mainImage ? (
+          <img
+            src={data.mainImage}
+            alt=""
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              objectPosition: "center",
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(160deg, #141414 0%, #0a0a0a 100%)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: preview ? 8 : 16,
+            }}
+          >
+            <svg width={preview ? 28 : 44} height={preview ? 28 : 44} viewBox="0 0 24 24" fill="none" stroke="#2c2c2c" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <p style={{
+              fontFamily: serif,
+              fontSize: preview ? 9 : 13,
+              color: "#2e2e2e",
+              letterSpacing: "0.14em",
+            }}>
+              사진을 삽입해 주세요
+            </p>
+          </div>
+        )}
 
         {/* Vignette — 세련된 빈티지 비네팅 */}
         <div
@@ -1023,6 +1102,41 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         )}
       </section>
 
+      {/* ── 예식 정보 요약 (히어로 직하단) ─────────────────────────────── */}
+      <div style={{
+        textAlign: "center",
+        padding: preview ? "16px 18px 10px" : "36px 28px 20px",
+      }}>
+        <p style={{
+          fontFamily: serif,
+          fontSize: preview ? 11 : 16,
+          color: theme.textBody,
+          letterSpacing: "0.1em",
+          lineHeight: 1.9,
+        }}>
+          {data.date}
+        </p>
+        <p style={{
+          fontFamily: serif,
+          fontSize: preview ? 10 : 13,
+          color: theme.textMuted,
+          letterSpacing: "0.08em",
+          lineHeight: 1.8,
+        }}>
+          {data.time}
+        </p>
+        <div style={{ width: 18, height: 1, background: theme.flourishBg, margin: `${preview ? 8 : 14}px auto` }} />
+        <p style={{
+          fontFamily: serif,
+          fontSize: preview ? 11 : 15,
+          color: theme.textBody,
+          letterSpacing: "0.1em",
+          lineHeight: 1.8,
+        }}>
+          {data.venue}
+        </p>
+      </div>
+
       {/* ── 섹션 컨테이너 (순서 + 가시성) ─────────────────────────────── */}
       <div style={{ display: "flex", flexDirection: "column" }}>
 
@@ -1089,8 +1203,6 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       <div style={{ order: orderOf("couple") }}>
       <section style={{ ...sp, textAlign: "center" }}>
         <FadeIn>
-          <p style={slabel}>The Couple</p>
-
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: preview ? 10 : 18 }}>
 
             {/* 신랑 줄 */}
@@ -1161,8 +1273,9 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
           <p style={sTitle}>GALLERY</p>
 
           {/* Mini film strip — horizontal infinite scroll */}
-          {photos.length > 0 && (
+          {photos.length > 0 ? (
             <div
+              onClick={() => !preview && setAlbumOpen(true)}
               style={{
                 position: "relative",
                 width: "100%",
@@ -1172,6 +1285,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                 background: "#000",
                 border: "1px solid #222",
                 boxShadow: "0 0 20px rgba(255,255,255,0.03), 0 0 40px rgba(212,175,55,0.05)",
+                cursor: preview ? "default" : "pointer",
               }}
             >
               {/* Left/right fade mask */}
@@ -1247,56 +1361,44 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                   </div>
                 ))}
               </div>
+              {/* 클릭 힌트 (비프리뷰) */}
+              {!preview && (
+                <div style={{
+                  position: "absolute",
+                  bottom: 6,
+                  right: 8,
+                  zIndex: 3,
+                  fontFamily: mono,
+                  fontSize: 7,
+                  color: "rgba(255,255,255,0.28)",
+                  letterSpacing: "0.18em",
+                  pointerEvents: "none",
+                }}>
+                  TAP TO VIEW ALL
+                </div>
+              )}
             </div>
-          )}
-
-          {/* "우리들의 이야기" button / preview badge */}
-          {!preview ? (
-            <motion.button
-              onClick={() => setAlbumOpen(true)}
-              whileHover={{ scale: 1.03, borderColor: "#444", color: "#c0c0c0" }}
-              whileTap={{ scale: 0.97 }}
-              style={{
-                padding: "13px 30px",
-                border: "1px solid #383838",
-                borderRadius: 999,
-                background: "rgba(20,20,20,0.5)",
-                color: "#A0A0A0",
-                fontSize: 14,
-                letterSpacing: "0.22em",
-                cursor: "pointer",
-                fontFamily: serif,
-                fontWeight: 400,
-                transition: "border-color 0.25s, color 0.25s",
-              }}
-            >
-              우리들의 이야기
-            </motion.button>
           ) : (
+            /* 사진 없을 때 플레이스홀더 */
             <div
               style={{
-                display: "inline-flex",
+                width: "100%",
+                height: preview ? 90 : 130,
+                marginBottom: preview ? 14 : 22,
+                display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
-                gap: 7,
-                padding: "7px 14px",
-                border: "1px solid #1e1e1e",
-                borderRadius: 999,
-                background: "#0f0f0f",
+                justifyContent: "center",
+                gap: 8,
+                background: "#0a0a0a",
+                border: "1px dashed #222",
+                borderRadius: 4,
               }}
             >
-              <span style={{ fontFamily: mono, fontSize: 8, color: "#606060", letterSpacing: "0.18em" }}>
-                🎞
-              </span>
-              <span
-                style={{
-                  fontFamily: serif,
-                  fontSize: 10,
-                  color: "#707070",
-                  letterSpacing: "0.18em",
-                }}
-              >
-                {photos.length > 0 ? `우리들의 이야기 · ${photos.length}장` : "우리들의 이야기"}
-              </span>
+              <span style={{ fontFamily: "monospace", fontSize: preview ? 16 : 24, opacity: 0.2 }}>🎞</span>
+              <p style={{ fontFamily: serif, fontSize: preview ? 9 : 12, color: "#333", letterSpacing: "0.1em" }}>
+                사진을 추가해 주세요
+              </p>
             </div>
           )}
         </FadeIn>
