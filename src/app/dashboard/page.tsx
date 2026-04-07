@@ -1116,7 +1116,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* 390px 실제 모바일 너비로 렌더링 후 zoom으로 축소 */}
-                <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
+                <div className="hide-scrollbar" style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
                   <div style={{ width: 390, zoom: 300 / 390 } as React.CSSProperties}>
                     <InvitationView data={data} theme={currentTheme} />
                   </div>

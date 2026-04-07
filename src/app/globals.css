@@ -67,3 +67,12 @@ body {
   100% { transform: translate(0,    0);   }
 }
 
+/* ── Hide scrollbar (scroll still works) ─────────────────────────────────── */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
