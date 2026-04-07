@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import {
   motion,
   AnimatePresence,
   useInView,
 } from "framer-motion";
-import { X, Copy, Check, ChevronDown } from "lucide-react";
+import { X, Copy, Check, ChevronDown, Phone } from "lucide-react";
 import KakaoMap from "../KakaoMap";
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -29,6 +29,8 @@ export interface ParentInfo {
   motherFirstName?: string;
   isFatherDeceased?: boolean;
   isMotherDeceased?: boolean;
+  fatherPhone?: string;
+  motherPhone?: string;
 }
 
 export interface TransportInfo {
@@ -72,6 +74,11 @@ export interface WeddingData {
   fontFamily?: string;
   // Main background color
   mainBackgroundColor?: string;
+  // Particle effect
+  particleEffect?: "petals" | "snowflakes" | "none";
+  // Contact phone numbers
+  groomPhone?: string;
+  bridePhone?: string;
   // Extended accounts (마음 전하실 곳)
   accounts?: {
     groom?: PersonAccount;
@@ -494,6 +501,267 @@ interface FilmThemeProps {
   preview?: boolean;
 }
 
+// ── Falling Particles ─────────────────────────────────────────────────────────
+
+function FallingParticles({ type, preview = false }: { type: "petals" | "snowflakes"; preview?: boolean }) {
+  const count = preview ? 8 : 22;
+  const particles = useMemo(() =>
+    Array.from({ length: count }, (_, i) => ({
+      id: i,
+      x: 3 + ((i * 89 / count + Math.sin(i * 2.1) * 11) % 94),
+      delay: (i * 13 % 11) / 2,
+      duration: 7 + (i * 7 % 8),
+      size: type === "petals" ? 8 + (i * 3 % 10) : 7 + (i * 5 % 8),
+      opacity: 0.22 + (i % 5) * 0.06,
+      rotateEnd: (i % 2 === 0 ? 1 : -1) * (180 + (i * 47 % 200)),
+      driftX: (i % 2 === 0 ? 1 : -1) * (10 + (i * 13 % 38)),
+      repeatDelay: 0.5 + (i * 11 % 6) / 2,
+    })), [count, type]
+  );
+
+  return (
+    <div style={{ position: "fixed", inset: 0, pointerEvents: "none", overflow: "hidden", zIndex: 1 }}>
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          initial={{ y: "-5vh", x: 0, rotate: 0, opacity: 0 }}
+          animate={{
+            y: "108vh",
+            x: [0, p.driftX * 0.4, p.driftX],
+            rotate: p.rotateEnd,
+            opacity: [0, p.opacity, p.opacity, 0],
+          }}
+          transition={{
+            duration: p.duration,
+            delay: p.delay,
+            repeat: Infinity,
+            repeatDelay: p.repeatDelay,
+            ease: "linear",
+          }}
+          style={{ position: "absolute", top: 0, left: `${p.x}%` }}
+        >
+          {type === "petals" ? (
+            <div style={{
+              width: p.size,
+              height: p.size * 1.5,
+              background: "linear-gradient(135deg, rgba(255,192,210,0.85) 0%, rgba(240,140,160,0.65) 100%)",
+              borderRadius: "50% 40% 60% 40% / 60% 50% 50% 40%",
+            }} />
+          ) : (
+            <svg width={p.size} height={p.size} viewBox="0 0 20 20" fill="none">
+              <line x1="10" y1="2" x2="10" y2="18" stroke="rgba(195,225,255,0.8)" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="2" y1="10" x2="18" y2="10" stroke="rgba(195,225,255,0.8)" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="4" y1="4" x2="16" y2="16" stroke="rgba(195,225,255,0.8)" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="16" y1="4" x2="4" y2="16" stroke="rgba(195,225,255,0.8)" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          )}
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+// ── Staggered Greeting ─────────────────────────────────────────────────────────
+
+function StaggeredGreeting({
+  text, serif, textColor, preview,
+}: {
+  text: string;
+  serif: string;
+  textColor: string;
+  preview: boolean;
+}) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.15 });
+  const lines = text.split("\n");
+
+  const containerVariants = {
+    hidden: {},
+    visible: { transition: { staggerChildren: preview ? 0.12 : 0.38, delayChildren: 0.05 } },
+  };
+  const lineVariants = {
+    hidden: { opacity: 0, y: preview ? 6 : 14 },
+    visible: { opacity: 1, y: 0, transition: { duration: preview ? 0.4 : 0.85, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } },
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      variants={containerVariants}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      style={{ textAlign: "center" }}
+    >
+      {lines.map((line, i) => (
+        <motion.p
+          key={i}
+          variants={lineVariants}
+          style={{
+            fontFamily: serif,
+            fontSize: preview ? 12 : 16,
+            lineHeight: preview ? 2.3 : 2.8,
+            color: textColor,
+            fontWeight: 400,
+            letterSpacing: "-0.02em",
+            minHeight: line === "" ? (preview ? 8 : 16) : undefined,
+          }}
+        >
+          {line || "\u00A0"}
+        </motion.p>
+      ))}
+    </motion.div>
+  );
+}
+
+// ── Contact Group ──────────────────────────────────────────────────────────────
+
+function ContactGroup({
+  title, contacts, serif, mono,
+}: {
+  title: string;
+  contacts: { role: string; name: string; phone: string }[];
+  serif: string;
+  mono: string;
+}) {
+  return (
+    <div>
+      <p style={{ fontFamily: mono, fontSize: 9, letterSpacing: "0.35em", color: "#D4AF37", textTransform: "uppercase", marginBottom: 10 }}>
+        {title}
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {contacts.map((c, i) => (
+          <a
+            key={i}
+            href={`tel:${c.phone}`}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "12px 16px",
+              background: "rgba(255,255,255,0.05)",
+              borderRadius: 12,
+              border: "1px solid rgba(255,255,255,0.09)",
+              textDecoration: "none",
+            }}
+          >
+            <div>
+              <p style={{ fontFamily: mono, fontSize: 9, color: "#7a7a7a", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 3 }}>
+                {c.role}
+              </p>
+              <p style={{ fontFamily: serif, fontSize: 16, color: "#d4d4d4", letterSpacing: "0.1em" }}>
+                {c.name}
+              </p>
+            </div>
+            <div style={{
+              width: 40, height: 40, borderRadius: "50%",
+              background: "rgba(212,175,55,0.14)",
+              border: "1px solid rgba(212,175,55,0.28)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <Phone size={15} color="#D4AF37" />
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Contact Modal (bottom sheet) ───────────────────────────────────────────────
+
+function ContactModal({
+  open, onClose, data, serif, mono,
+}: {
+  open: boolean;
+  onClose: () => void;
+  data: WeddingData;
+  serif: string;
+  mono: string;
+}) {
+  const groomContacts = [
+    data.groomPhone ? { role: "신랑", name: data.groomName, phone: data.groomPhone } : null,
+    data.groomParents?.fatherPhone ? {
+      role: "신랑 아버지",
+      name: fullName(data.groomParents.fatherLastName, data.groomParents.fatherFirstName),
+      phone: data.groomParents.fatherPhone,
+    } : null,
+    data.groomParents?.motherPhone ? {
+      role: "신랑 어머니",
+      name: fullName(data.groomParents.motherLastName, data.groomParents.motherFirstName),
+      phone: data.groomParents.motherPhone,
+    } : null,
+  ].filter(Boolean) as { role: string; name: string; phone: string }[];
+
+  const brideContacts = [
+    data.bridePhone ? { role: "신부", name: data.brideName, phone: data.bridePhone } : null,
+    data.brideParents?.fatherPhone ? {
+      role: "신부 아버지",
+      name: fullName(data.brideParents.fatherLastName, data.brideParents.fatherFirstName),
+      phone: data.brideParents.fatherPhone,
+    } : null,
+    data.brideParents?.motherPhone ? {
+      role: "신부 어머니",
+      name: fullName(data.brideParents.motherLastName, data.brideParents.motherFirstName),
+      phone: data.brideParents.motherPhone,
+    } : null,
+  ].filter(Boolean) as { role: string; name: string; phone: string }[];
+
+  const hasAny = groomContacts.length > 0 || brideContacts.length > 0;
+  if (!hasAny) return null;
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div
+            key="backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 300 }}
+          />
+          <motion.div
+            key="sheet"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 32, stiffness: 320 }}
+            style={{
+              position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 301,
+              background: "#111111",
+              borderRadius: "20px 20px 0 0",
+              padding: "20px 20px 44px",
+              maxHeight: "80vh",
+              overflowY: "auto",
+            }}
+            className="hide-scrollbar"
+          >
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
+              <div style={{ width: 36, height: 4, background: "#2e2e2e", borderRadius: 2 }} />
+            </div>
+            <p style={{
+              fontFamily: mono, fontSize: 9, letterSpacing: "0.5em",
+              color: "#505050", textAlign: "center", marginBottom: 24,
+              textTransform: "uppercase",
+            }}>
+              연락하기
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+              {groomContacts.length > 0 && (
+                <ContactGroup title="신랑측" contacts={groomContacts} serif={serif} mono={mono} />
+              )}
+              {brideContacts.length > 0 && (
+                <ContactGroup title="신부측" contacts={brideContacts} serif={serif} mono={mono} />
+              )}
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
 const FONT_MAP: Record<string, string> = {
   "nanum-myeongjo": "var(--font-nanum), 'Nanum Myeongjo', serif",
   "noto-serif-kr": "var(--font-serif-kr), 'Noto Serif KR', serif",
@@ -588,6 +856,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
   const [albumOpen, setAlbumOpen] = useState(false);
   const [groomAccOpen, setGroomAccOpen] = useState(false);
   const [brideAccOpen, setBrideAccOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
   const photos = data.photos ?? [];
 
   const serif = (data.fontFamily && FONT_MAP[data.fontFamily])
@@ -775,23 +1044,14 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             <div style={{ flex: 1, maxWidth: 48, height: 1, background: theme.flourishBg }} />
           </div>
 
-          <p
-            style={{
-              fontFamily: serif,
-              fontSize: preview ? 12 : 16,
-              lineHeight: preview ? 2.3 : 2.8,
-              color: theme.textBody,
-              whiteSpace: "pre-wrap",
-              wordBreak: "keep-all",
-              overflowWrap: "break-word",
-              fontWeight: 400,
-              letterSpacing: "-0.02em",
-              padding: preview ? "0 4px" : "0 8px",
-              maxWidth: "100%",
-            }}
-          >
-            {data.greeting || "두 사람이 하나가 되는 날,\n소중한 자리에 함께해 주세요."}
-          </p>
+          <div style={{ padding: preview ? "0 4px" : "0 8px" }}>
+            <StaggeredGreeting
+              text={data.greeting || "두 사람이 하나가 되는 날,\n소중한 자리에 함께해 주세요."}
+              serif={serif}
+              textColor={theme.textBody}
+              preview={preview}
+            />
+          </div>
 
           {/* Decorative bottom flourish */}
           <div
@@ -816,115 +1076,89 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       {/* ── § 3  COUPLE INFO (혼주소개) ──────────────────────────────────── */}
       {data.showCouple !== false && (
       <div style={{ order: orderOf("couple") }}>
-      <section style={{ ...sp }}>
+      <section style={{ ...sp, textAlign: "center" }}>
         <FadeIn>
           <p style={slabel}>The Couple</p>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr auto 1fr",
-              gap: 0,
-              alignItems: "start",
-            }}
-          >
-            {/* Groom */}
+
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: preview ? 18 : 32 }}>
+
+            {/* 신랑 블록 */}
             <div style={{ textAlign: "center" }}>
-              <p
-                style={{
-                  fontFamily: mono,
-                  fontSize: 8,
-                  color: theme.textLabel,
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  marginBottom: preview ? 5 : 8,
-                }}
-              >
-                신랑
-              </p>
-              <p
-                style={{
-                  fontFamily: serif,
-                  fontSize: preview ? 15 : 22,
-                  fontWeight: 400,
-                  letterSpacing: "0.2em",
-                  color: theme.accentColor,
-                  textShadow: theme.accentShadow,
-                  marginBottom: preview ? 5 : 10,
-                }}
-              >
-                {data.groomName}
-              </p>
               {data.groomParents && (() => {
                 const line = parentsLine(data.groomParents!, "아들");
                 return line ? (
-                  <p style={{ fontFamily: serif, fontSize: preview ? 10 : 12, color: theme.parentColor, lineHeight: preview ? 2.0 : 2.3, marginTop: preview ? 4 : 6 }}>
+                  <p style={{
+                    fontFamily: serif, fontSize: preview ? 10 : 13,
+                    color: theme.parentColor, letterSpacing: "0.05em",
+                    lineHeight: preview ? 1.8 : 2.0, marginBottom: preview ? 6 : 10,
+                  }}>
                     {line}
                   </p>
                 ) : null;
               })()}
+              <p style={{
+                fontFamily: serif, fontSize: preview ? 20 : 30,
+                fontWeight: 400, letterSpacing: "0.22em",
+                color: theme.accentColor, textShadow: theme.accentShadow,
+              }}>
+                {data.groomName}
+              </p>
             </div>
 
-            {/* Center divider */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: `${preview ? 14 : 22}px 14px 0`,
-              }}
-            >
-              <div style={{ width: 1, height: preview ? 18 : 26, background: theme.coupleDividerBg }} />
-              <span
-                style={{
-                  fontFamily: serif,
-                  color: theme.coupleSymbolColor,
-                  fontSize: preview ? 13 : 18,
-                  margin: "5px 0",
-                }}
-              >
-                ∞
-              </span>
-              <div style={{ width: 1, height: preview ? 18 : 26, background: theme.coupleDividerBg }} />
+            {/* 구분 */}
+            <div style={{ display: "flex", alignItems: "center", gap: preview ? 10 : 16 }}>
+              <div style={{ width: preview ? 20 : 36, height: 1, background: theme.coupleDividerBg }} />
+              <span style={{ fontFamily: serif, color: theme.coupleSymbolColor, fontSize: preview ? 12 : 18 }}>∞</span>
+              <div style={{ width: preview ? 20 : 36, height: 1, background: theme.coupleDividerBg }} />
             </div>
 
-            {/* Bride */}
+            {/* 신부 블록 */}
             <div style={{ textAlign: "center" }}>
-              <p
-                style={{
-                  fontFamily: mono,
-                  fontSize: 8,
-                  color: theme.textLabel,
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  marginBottom: preview ? 5 : 8,
-                }}
-              >
-                신부
-              </p>
-              <p
-                style={{
-                  fontFamily: serif,
-                  fontSize: preview ? 15 : 22,
-                  fontWeight: 400,
-                  letterSpacing: "0.2em",
-                  color: theme.accentColor,
-                  textShadow: theme.accentShadow,
-                  marginBottom: preview ? 5 : 10,
-                }}
-              >
-                {data.brideName}
-              </p>
               {data.brideParents && (() => {
                 const line = parentsLine(data.brideParents!, "딸");
                 return line ? (
-                  <p style={{ fontFamily: serif, fontSize: preview ? 10 : 12, color: theme.parentColor, lineHeight: preview ? 2.0 : 2.3, marginTop: preview ? 4 : 6 }}>
+                  <p style={{
+                    fontFamily: serif, fontSize: preview ? 10 : 13,
+                    color: theme.parentColor, letterSpacing: "0.05em",
+                    lineHeight: preview ? 1.8 : 2.0, marginBottom: preview ? 6 : 10,
+                  }}>
                     {line}
                   </p>
                 ) : null;
               })()}
+              <p style={{
+                fontFamily: serif, fontSize: preview ? 20 : 30,
+                fontWeight: 400, letterSpacing: "0.22em",
+                color: theme.accentColor, textShadow: theme.accentShadow,
+              }}>
+                {data.brideName}
+              </p>
             </div>
           </div>
+
+          {/* 연락하기 버튼 */}
+          {!preview && (
+            <div style={{ display: "flex", justifyContent: "center", marginTop: 36 }}>
+              <motion.button
+                onClick={() => setContactOpen(true)}
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                style={{
+                  display: "flex", alignItems: "center", gap: 8,
+                  padding: "11px 26px",
+                  border: `1px solid ${theme.sectionBorder}`,
+                  borderRadius: 999,
+                  background: theme.sectionBg,
+                  color: theme.textMuted,
+                  fontSize: 13, letterSpacing: "0.16em",
+                  cursor: "pointer", fontFamily: serif, fontWeight: 400,
+                }}
+              >
+                <Phone size={13} color={theme.accentColor} />
+                연락하기
+              </motion.button>
+            </div>
+          )}
         </FadeIn>
       </section>
       </div>
@@ -1704,6 +1938,22 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
           />
         )}
       </AnimatePresence>
+
+      {/* ── CONTACT MODAL ──────────────────────────────────────────────────── */}
+      {!preview && (
+        <ContactModal
+          open={contactOpen}
+          onClose={() => setContactOpen(false)}
+          data={data}
+          serif={serif}
+          mono={mono}
+        />
+      )}
+
+      {/* ── FALLING PARTICLES ──────────────────────────────────────────────── */}
+      {data.particleEffect && data.particleEffect !== "none" && (
+        <FallingParticles type={data.particleEffect} preview={preview} />
+      )}
     </div>
   );
 }

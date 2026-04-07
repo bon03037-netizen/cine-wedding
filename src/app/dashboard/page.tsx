@@ -625,6 +625,29 @@ export default function DashboardPage() {
                 ))}
               </div>
 
+              {/* 배경 효과 선택 */}
+              <p className="text-[10px] text-gray-400 font-mono tracking-widest mt-5 mb-2">배경 효과</p>
+              <div className="grid grid-cols-3 gap-2 mb-1">
+                {([
+                  { id: "none",       label: "없음",  icon: "○" },
+                  { id: "petals",     label: "꽃잎",  icon: "🌸" },
+                  { id: "snowflakes", label: "눈꽃",  icon: "❄️" },
+                ] as { id: "none" | "petals" | "snowflakes"; label: string; icon: string }[]).map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => set("particleEffect", opt.id)}
+                    className={`p-2.5 rounded-lg border text-center transition-all ${
+                      (data.particleEffect ?? "none") === opt.id
+                        ? "border-gray-900 bg-gray-900 text-white"
+                        : "border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    <p className="text-[15px]">{opt.icon}</p>
+                    <p className="text-[10px] mt-0.5">{opt.label}</p>
+                  </button>
+                ))}
+              </div>
+
               {/* 배경색 선택 */}
               <p className="text-[10px] text-gray-400 font-mono tracking-widest mt-5 mb-2">배경색 선택</p>
               <div className="grid grid-cols-2 gap-2">
@@ -836,6 +859,15 @@ export default function DashboardPage() {
                       className={inputCls}
                     />
                   </Field>
+                  <Field label="연락처" className="mt-2">
+                    <input
+                      type="tel"
+                      value={data.groomPhone ?? ""}
+                      onChange={(e) => set("groomPhone", e.target.value)}
+                      placeholder="010-0000-0000"
+                      className={inputCls}
+                    />
+                  </Field>
                   <div className="mt-3 space-y-2">
                     <PersonRow
                       label="부친"
@@ -846,6 +878,15 @@ export default function DashboardPage() {
                       onFirstName={(v) => set("groomParents", { ...data.groomParents, fatherFirstName: v })}
                       onDeceased={(v) => set("groomParents", { ...data.groomParents, isFatherDeceased: v })}
                     />
+                    <div className="flex items-center gap-2 pl-9">
+                      <input
+                        type="tel"
+                        value={data.groomParents?.fatherPhone ?? ""}
+                        onChange={(e) => set("groomParents", { ...data.groomParents, fatherPhone: e.target.value })}
+                        placeholder="부친 연락처"
+                        className={`${inputCls} text-[12px]`}
+                      />
+                    </div>
                     <PersonRow
                       label="모친"
                       lastName={data.groomParents?.motherLastName ?? ""}
@@ -855,6 +896,15 @@ export default function DashboardPage() {
                       onFirstName={(v) => set("groomParents", { ...data.groomParents, motherFirstName: v })}
                       onDeceased={(v) => set("groomParents", { ...data.groomParents, isMotherDeceased: v })}
                     />
+                    <div className="flex items-center gap-2 pl-9">
+                      <input
+                        type="tel"
+                        value={data.groomParents?.motherPhone ?? ""}
+                        onChange={(e) => set("groomParents", { ...data.groomParents, motherPhone: e.target.value })}
+                        placeholder="모친 연락처"
+                        className={`${inputCls} text-[12px]`}
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -873,6 +923,15 @@ export default function DashboardPage() {
                       className={inputCls}
                     />
                   </Field>
+                  <Field label="연락처" className="mt-2">
+                    <input
+                      type="tel"
+                      value={data.bridePhone ?? ""}
+                      onChange={(e) => set("bridePhone", e.target.value)}
+                      placeholder="010-0000-0000"
+                      className={inputCls}
+                    />
+                  </Field>
                   <div className="mt-3 space-y-2">
                     <PersonRow
                       label="부친"
@@ -881,8 +940,17 @@ export default function DashboardPage() {
                       isDeceased={!!data.brideParents?.isFatherDeceased}
                       onLastName={(v) => set("brideParents", { ...data.brideParents, fatherLastName: v })}
                       onFirstName={(v) => set("brideParents", { ...data.brideParents, fatherFirstName: v })}
-                      onDeceased={(v) => set("brideParents", { ...data.brideParents, isMotherDeceased: v })}
+                      onDeceased={(v) => set("brideParents", { ...data.brideParents, isFatherDeceased: v })}
                     />
+                    <div className="flex items-center gap-2 pl-9">
+                      <input
+                        type="tel"
+                        value={data.brideParents?.fatherPhone ?? ""}
+                        onChange={(e) => set("brideParents", { ...data.brideParents, fatherPhone: e.target.value })}
+                        placeholder="부친 연락처"
+                        className={`${inputCls} text-[12px]`}
+                      />
+                    </div>
                     <PersonRow
                       label="모친"
                       lastName={data.brideParents?.motherLastName ?? ""}
@@ -892,6 +960,15 @@ export default function DashboardPage() {
                       onFirstName={(v) => set("brideParents", { ...data.brideParents, motherFirstName: v })}
                       onDeceased={(v) => set("brideParents", { ...data.brideParents, isMotherDeceased: v })}
                     />
+                    <div className="flex items-center gap-2 pl-9">
+                      <input
+                        type="tel"
+                        value={data.brideParents?.motherPhone ?? ""}
+                        onChange={(e) => set("brideParents", { ...data.brideParents, motherPhone: e.target.value })}
+                        placeholder="모친 연락처"
+                        className={`${inputCls} text-[12px]`}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
