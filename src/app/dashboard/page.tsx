@@ -522,10 +522,10 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <div className="flex h-[calc(100vh-57px)]">
+      <div className="flex flex-row-reverse h-[calc(100vh-57px)] max-w-7xl mx-auto w-full gap-10 px-6 py-8">
 
-        {/* ── Left: Editor ── */}
-        <div className="w-[460px] shrink-0 overflow-y-auto border-r border-gray-100">
+        {/* ── Right: Editor ── */}
+        <div className="w-[460px] shrink-0 overflow-y-auto bg-white border border-gray-100 rounded-2xl shadow-sm">
           <div className="p-4 space-y-2">
 
             {/* ── Theme Selector ── */}
@@ -1059,8 +1059,8 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* ── Right: Preview ── */}
-        <div className="flex-1 flex items-center justify-center bg-[#f4f4f4] p-8">
+        {/* ── Left: Preview ── */}
+        <div className="flex-1 flex items-center justify-center bg-[#f4f4f4] rounded-2xl p-8">
           <div className="flex flex-col items-center gap-3">
             <p className="text-[10px] text-gray-400 tracking-[0.25em] uppercase font-mono">Live Preview</p>
 
