@@ -160,6 +160,7 @@ const DEFAULT: WeddingData = {
   time: buildTime(INIT_DATE),
   venue: "그랜드 인터컨티넨탈 서울 파르나스",
   address: "서울특별시 강남구 테헤란로 521 (삼성동)",
+  roadAddress: "서울특별시 강남구 테헤란로 521",
   greeting:
     "저희 두 사람이 사랑을 맺어\n한 가정을 이루게 되었습니다.\n\n두 사람이 걸어온 길이 하나로 모여\n이제 함께 새로운 길을 걷고자 합니다.\n\n바쁘시더라도 자리를 빛내주시어\n저희의 첫 출발을 축복해 주시면\n더없는 기쁨이 되겠습니다.",
   groomAccount: { bank: "국민은행", number: "123-456-78-901234", holder: "이호진" },
@@ -1196,25 +1197,25 @@ export default function DashboardPage() {
             <div
               className="relative"
               style={{
-                width: 320,
-                height: 640,
+                width: 400,
+                height: 812,
                 background: "#111",
-                borderRadius: 44,
-                padding: 10,
+                borderRadius: 52,
+                padding: 12,
                 boxShadow:
                   "0 0 0 1px #2a2a2a, inset 0 0 0 1px #1a1a1a, 0 32px 80px rgba(0,0,0,0.25)",
               }}
             >
               {/* Side buttons */}
-              <div className="absolute -left-[3px] top-[110px] w-[3px] h-8 bg-[#2a2a2a] rounded-l-sm" />
-              <div className="absolute -left-[3px] top-[155px] w-[3px] h-12 bg-[#2a2a2a] rounded-l-sm" />
-              <div className="absolute -left-[3px] top-[215px] w-[3px] h-12 bg-[#2a2a2a] rounded-l-sm" />
-              <div className="absolute -right-[3px] top-[160px] w-[3px] h-16 bg-[#2a2a2a] rounded-r-sm" />
+              <div className="absolute -left-[3px] top-[137px] w-[3px] h-10 bg-[#2a2a2a] rounded-l-sm" />
+              <div className="absolute -left-[3px] top-[194px] w-[3px] h-[60px] bg-[#2a2a2a] rounded-l-sm" />
+              <div className="absolute -left-[3px] top-[269px] w-[3px] h-[60px] bg-[#2a2a2a] rounded-l-sm" />
+              <div className="absolute -right-[3px] top-[200px] w-[3px] h-20 bg-[#2a2a2a] rounded-r-sm" />
 
               {/* Screen */}
               <div
                 className="w-full h-full overflow-hidden flex flex-col"
-                style={{ background: "#0c0c0c", borderRadius: 36, position: "relative" }}
+                style={{ background: "#0c0c0c", borderRadius: 42, position: "relative" }}
               >
                 {/* Status bar */}
                 <div className="flex justify-between items-center px-5 pt-3 pb-1.5 shrink-0" style={{ background: "#0c0c0c" }}>
@@ -1230,7 +1231,7 @@ export default function DashboardPage() {
 
                 {/* 390px 실제 모바일 너비로 렌더링 후 zoom으로 축소 */}
                 <div className="hide-scrollbar" style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
-                  <div style={{ width: 390, zoom: 300 / 390 } as React.CSSProperties}>
+                  <div style={{ width: 390, zoom: 376 / 390 } as React.CSSProperties}>
                     <InvitationView data={data} theme={currentTheme} />
                   </div>
                 </div>
@@ -1297,6 +1298,7 @@ export default function DashboardPage() {
                 const road = addr.roadAddress || addr.autoRoadAddress || "";
                 setRoadAddress(road);
                 set("address", road + (detailAddress ? " " + detailAddress : ""));
+                set("roadAddress", road);
                 setPostcodeOpen(false);
               }}
               style={{ height: "calc(100% - 49px)" }}

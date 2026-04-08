@@ -74,6 +74,8 @@ export interface WeddingData {
   fontFamily?: string;
   // Main background color
   mainBackgroundColor?: string;
+  // Road address only (for navigation URLs, no floor/hall detail)
+  roadAddress?: string;
   // Particle effect
   particleEffect?: "petals" | "snowflakes" | "none";
   // Contact phone numbers
@@ -625,7 +627,7 @@ function StaggeredGreeting({
   preview: boolean;
 }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.15 });
+  const isInView = useInView(ref, { once: false, amount: 0.2 });
   const lines = text.split("\n");
 
   const containerVariants = {
@@ -652,11 +654,11 @@ function StaggeredGreeting({
           style={{
             fontFamily: serif,
             fontSize: preview ? 12 : 16,
-            lineHeight: preview ? 2.3 : 2.8,
+            lineHeight: preview ? 1.6 : 1.85,
             color: textColor,
             fontWeight: 400,
             letterSpacing: "-0.02em",
-            minHeight: line === "" ? (preview ? 8 : 16) : undefined,
+            minHeight: line === "" ? (preview ? 6 : 12) : undefined,
           }}
         >
           {line || "\u00A0"}
@@ -815,6 +817,116 @@ function ContactModal({
   );
 }
 
+const GALLERY_SAMPLES = [
+  "/samples/gallery-1.jpg",
+  "/samples/gallery-2.jpg",
+  "/samples/gallery-3.jpg",
+];
+
+// ── Wedding Calendar + D-Day ───────────────────────────────────────────────────
+
+function WeddingCalendar({
+  dateStr, preview, serif, mono, theme, bgColor,
+}: {
+  dateStr: string;
+  preview: boolean;
+  serif: string;
+  mono: string;
+  theme: SectionTheme;
+  bgColor: string;
+}) {
+  const match = dateStr.match(/(\d+)년\s*(\d+)월\s*(\d+)일/);
+  if (!match) return null;
+  const y = Number(match[1]);
+  const m = Number(match[2]);
+  const d = Number(match[3]);
+
+  const firstDow = new Date(y, m - 1, 1).getDay(); // 0=일
+  const daysInMonth = new Date(y, m, 0).getDate();
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const weddingDate = new Date(y, m - 1, d);
+  const diffDays = Math.round((weddingDate.getTime() - today.getTime()) / 86400000);
+  const dday = diffDays === 0 ? "D-Day" : diffDays > 0 ? `D-${diffDays}` : `D+${Math.abs(diffDays)}`;
+
+  const cells: (number | null)[] = Array.from({ length: firstDow }, () => null);
+  for (let i = 1; i <= daysInMonth; i++) cells.push(i);
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const DOW_KR = ["일", "월", "화", "수", "목", "금", "토"];
+  const isLight = LIGHT_BG_SET.has(bgColor.toLowerCase());
+
+  return (
+    <div style={{ width: "100%", marginTop: preview ? 14 : 28 }}>
+      {/* Year.Month */}
+      <p style={{
+        fontFamily: mono,
+        fontSize: preview ? 8 : 11,
+        letterSpacing: "0.4em",
+        color: theme.textMuted,
+        textAlign: "center",
+        marginBottom: preview ? 8 : 16,
+        textTransform: "uppercase",
+      }}>
+        {y}.{String(m).padStart(2, "0")}
+      </p>
+
+      {/* DOW header */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: preview ? 1 : 4, marginBottom: preview ? 3 : 6 }}>
+        {DOW_KR.map((label, i) => (
+          <div key={label} style={{
+            textAlign: "center",
+            fontFamily: mono,
+            fontSize: preview ? 6 : 9,
+            color: i === 0 ? "rgba(200,60,60,0.55)" : theme.textMuted,
+            letterSpacing: "0.05em",
+          }}>
+            {label}
+          </div>
+        ))}
+      </div>
+
+      {/* Date grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: preview ? 1 : 3 }}>
+        {cells.map((cell, i) => {
+          const isWedding = cell === d;
+          const isSun = i % 7 === 0;
+          return (
+            <div key={i} style={{
+              height: preview ? 16 : 28,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: "50%",
+              fontSize: preview ? 7 : 11,
+              fontFamily: mono,
+              fontWeight: isWedding ? 700 : 400,
+              background: isWedding ? theme.accentColor : "transparent",
+              color: isWedding
+                ? (isLight ? "#fff" : "#050505")
+                : (cell
+                    ? (isSun ? "rgba(200,60,60,0.65)" : theme.textBody)
+                    : "transparent"),
+            }}>
+              {cell ?? ""}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* D-Day */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: preview ? 8 : 14, marginTop: preview ? 10 : 20 }}>
+        <div style={{ flex: 1, maxWidth: preview ? 28 : 48, height: 1, background: theme.flourishBg }} />
+        <span style={{ fontFamily: mono, fontSize: preview ? 9 : 14, letterSpacing: "0.35em", color: theme.accentColor }}>
+          {dday}
+        </span>
+        <div style={{ flex: 1, maxWidth: preview ? 28 : 48, height: 1, background: theme.flourishBg }} />
+      </div>
+    </div>
+  );
+}
+
 const FONT_MAP: Record<string, string> = {
   "nanum-myeongjo": "var(--font-nanum), 'Nanum Myeongjo', serif",
   "noto-serif-kr": "var(--font-serif-kr), 'Noto Serif KR', serif",
@@ -908,6 +1020,8 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
   const [brideAccOpen, setBrideAccOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const photos = data.photos ?? [];
+  // 업로드 사진이 없으면 샘플 이미지로 필름롤 표시
+  const galleryPhotos = photos.length > 0 ? photos : GALLERY_SAMPLES;
 
   const serif = (data.fontFamily && FONT_MAP[data.fontFamily])
     ? FONT_MAP[data.fontFamily]
@@ -976,48 +1090,20 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
           </div>
         )}
 
-        {/* Background — 이미지 업로드 전엔 깔끔한 플레이스홀더 */}
-        {data.mainImage ? (
-          <img
-            src={data.mainImage}
-            alt=""
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              objectPosition: "center",
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "linear-gradient(160deg, #141414 0%, #0a0a0a 100%)",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: preview ? 8 : 16,
-            }}
-          >
-            <svg width={preview ? 28 : 44} height={preview ? 28 : 44} viewBox="0 0 24 24" fill="none" stroke="#2c2c2c" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2"/>
-              <circle cx="8.5" cy="8.5" r="1.5"/>
-              <polyline points="21 15 16 10 5 21"/>
-            </svg>
-            <p style={{
-              fontFamily: serif,
-              fontSize: preview ? 9 : 13,
-              color: "#2e2e2e",
-              letterSpacing: "0.14em",
-            }}>
-              사진을 삽입해 주세요
-            </p>
-          </div>
-        )}
+        {/* Background — 업로드 전엔 /samples/main-sample.jpg 표시 */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={data.mainImage || "/samples/main-sample.jpg"}
+          alt=""
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center",
+          }}
+        />
 
         {/* Vignette — 세련된 빈티지 비네팅 */}
         <div
@@ -1105,33 +1191,31 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       {/* ── 예식 정보 요약 (히어로 직하단) ─────────────────────────────── */}
       <div style={{
         textAlign: "center",
-        padding: preview ? "16px 18px 10px" : "36px 28px 20px",
+        padding: preview ? "12px 18px" : "28px 28px",
+        borderTop: `1px solid ${theme.sectionBorder}`,
+        borderBottom: `1px solid ${theme.sectionBorder}`,
+        margin: preview ? "0" : "0",
       }}>
         <p style={{
           fontFamily: serif,
-          fontSize: preview ? 11 : 16,
+          fontSize: preview ? 10 : 15,
           color: theme.textBody,
           letterSpacing: "0.1em",
-          lineHeight: 1.9,
+          lineHeight: 1.8,
+          whiteSpace: "nowrap",
         }}>
-          {data.date}
+          {data.date} · {data.time}
         </p>
+        <div style={{ width: 16, height: 1, background: theme.flourishBg, margin: `${preview ? 6 : 10}px auto` }} />
         <p style={{
           fontFamily: serif,
-          fontSize: preview ? 10 : 13,
+          fontSize: preview ? 10 : 14,
           color: theme.textMuted,
           letterSpacing: "0.08em",
-          lineHeight: 1.8,
-        }}>
-          {data.time}
-        </p>
-        <div style={{ width: 18, height: 1, background: theme.flourishBg, margin: `${preview ? 8 : 14}px auto` }} />
-        <p style={{
-          fontFamily: serif,
-          fontSize: preview ? 11 : 15,
-          color: theme.textBody,
-          letterSpacing: "0.1em",
-          lineHeight: 1.8,
+          lineHeight: 1.7,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
         }}>
           {data.venue}
         </p>
@@ -1206,28 +1290,31 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: preview ? 10 : 18 }}>
 
             {/* 신랑 줄 */}
-            <p style={{ fontFamily: serif, fontSize: preview ? 10 : 13, color: theme.parentColor, letterSpacing: "0.04em", lineHeight: preview ? 2.0 : 2.4, textAlign: "center" }}>
+            <p style={{ fontFamily: serif, fontSize: preview ? 10 : 13, color: theme.parentColor, letterSpacing: "0.04em", lineHeight: preview ? 1.8 : 2.2, textAlign: "center" }}>
               {data.groomParents && parentsLine(data.groomParents, "아들") && (
                 <>{parentsLine(data.groomParents, "아들")}{" "}</>
               )}
               {data.groomName}
             </p>
 
-            {/* 구분선 */}
-            <div style={{ display: "flex", alignItems: "center", gap: preview ? 10 : 16 }}>
-              <div style={{ width: preview ? 20 : 36, height: 1, background: theme.coupleDividerBg }} />
-              <span style={{ fontFamily: serif, color: theme.coupleSymbolColor, fontSize: preview ? 12 : 18 }}>∞</span>
-              <div style={{ width: preview ? 20 : 36, height: 1, background: theme.coupleDividerBg }} />
-            </div>
-
             {/* 신부 줄 */}
-            <p style={{ fontFamily: serif, fontSize: preview ? 10 : 13, color: theme.parentColor, letterSpacing: "0.04em", lineHeight: preview ? 2.0 : 2.4, textAlign: "center" }}>
+            <p style={{ fontFamily: serif, fontSize: preview ? 10 : 13, color: theme.parentColor, letterSpacing: "0.04em", lineHeight: preview ? 1.8 : 2.2, textAlign: "center" }}>
               {data.brideParents && parentsLine(data.brideParents, "딸") && (
                 <>{parentsLine(data.brideParents, "딸")}{" "}</>
               )}
               {data.brideName}
             </p>
           </div>
+
+          {/* 캘린더 + D-Day */}
+          <WeddingCalendar
+            dateStr={data.date}
+            preview={preview}
+            serif={serif}
+            mono={mono}
+            theme={theme}
+            bgColor={bgColor}
+          />
 
           {/* 연락하기 버튼 */}
           {!preview && (
@@ -1264,10 +1351,12 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         <FadeIn>
           <p style={sTitle}>GALLERY</p>
 
-          {/* Mini film strip — horizontal infinite scroll */}
-          {photos.length > 0 ? (
+          {/* Mini film strip — 사진 없으면 샘플로 표시, 있으면 클릭 가능 */}
+          {(() => {
+            const hasSamples = photos.length === 0;
+            return (
             <div
-              onClick={() => !preview && setAlbumOpen(true)}
+              onClick={() => !preview && !hasSamples && setAlbumOpen(true)}
               style={{
                 position: "relative",
                 width: "100%",
@@ -1277,7 +1366,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                 background: "#000",
                 border: "1px solid #222",
                 boxShadow: "0 0 20px rgba(255,255,255,0.03), 0 0 40px rgba(212,175,55,0.05)",
-                cursor: preview ? "default" : "pointer",
+                cursor: (!preview && !hasSamples) ? "pointer" : "default",
               }}
             >
               {/* Left/right fade mask */}
@@ -1300,7 +1389,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                     !preview
                       ? {
                           animationName: "filmStripScroll",
-                          animationDuration: `${Math.max(photos.length * 2.5, 5)}s`,
+                          animationDuration: `${Math.max(galleryPhotos.length * 2.5, 5)}s`,
                           animationTimingFunction: "linear",
                           animationIterationCount: "infinite",
                         }
@@ -1308,7 +1397,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                   ),
                 } as React.CSSProperties}
               >
-                {(preview ? photos.slice(0, 4) : [...photos, ...photos]).map((src, i) => (
+                {(preview ? galleryPhotos.slice(0, 4) : [...galleryPhotos, ...galleryPhotos]).map((src, i) => (
                   <div
                     key={i}
                     style={{
@@ -1346,15 +1435,15 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                           letterSpacing: "0.1em",
                         }}
                       >
-                        {String((i % photos.length) + 1).padStart(2, "0")}
+                        {String((i % galleryPhotos.length) + 1).padStart(2, "0")}
                       </div>
                     </div>
                     <Perforations count={preview ? 4 : 5} />
                   </div>
                 ))}
               </div>
-              {/* 클릭 힌트 (비프리뷰) */}
-              {!preview && (
+              {/* 클릭 힌트 (실제 사진이 있을 때만) */}
+              {!preview && photos.length > 0 && (
                 <div style={{
                   position: "absolute",
                   bottom: 6,
@@ -1370,29 +1459,8 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                 </div>
               )}
             </div>
-          ) : (
-            /* 사진 없을 때 플레이스홀더 */
-            <div
-              style={{
-                width: "100%",
-                height: preview ? 90 : 130,
-                marginBottom: preview ? 14 : 22,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-                background: "#0a0a0a",
-                border: "1px dashed #222",
-                borderRadius: 4,
-              }}
-            >
-              <span style={{ fontFamily: "monospace", fontSize: preview ? 16 : 24, opacity: 0.2 }}>🎞</span>
-              <p style={{ fontFamily: serif, fontSize: preview ? 9 : 12, color: "#333", letterSpacing: "0.1em" }}>
-                사진을 추가해 주세요
-              </p>
-            </div>
-          )}
+            );
+          })()}
         </FadeIn>
       </section>
       </div>
@@ -1405,7 +1473,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         <FadeIn>
           <p style={sTitle}>LOCATION</p>
 
-          {/* Date + Time + Venue big display */}
+          {/* Venue display (날짜 제거, 예식장만 표시) */}
           <div
             style={{
               textAlign: "center",
@@ -1419,42 +1487,6 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               boxShadow: theme.cardShadow,
             } as React.CSSProperties}
           >
-            <p
-              style={{
-                fontFamily: serif,
-                fontSize: preview ? 13 : 19,
-                color: theme.accentColor,
-                textShadow: theme.accentShadow,
-                letterSpacing: "0.14em",
-                fontWeight: 400,
-                marginBottom: 4,
-              }}
-            >
-              {data.date}
-            </p>
-            <p
-              style={{
-                fontFamily: serif,
-                fontSize: preview ? 11 : 14,
-                color: theme.textMuted,
-                letterSpacing: "0.12em",
-                marginBottom: preview ? 10 : 20,
-              }}
-            >
-              {data.time}
-            </p>
-
-            {/* Accent rule */}
-            <div
-              style={{
-                width: 24,
-                height: 1,
-                background: theme.flourishBg,
-                margin: "0 auto",
-                marginBottom: preview ? 10 : 20,
-              }}
-            />
-
             <p
               style={{
                 fontFamily: serif,
@@ -1487,9 +1519,9 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
 
           {/* Naver + Kakao navigation buttons */}
           {!preview && (
-            <div style={{ display: "flex", gap: 9, marginTop: 0 }}>
+            <div style={{ display: "flex", gap: 9, marginTop: preview ? 10 : 18 }}>
               <a
-                href={`https://map.naver.com/v5/search/${encodeURIComponent(data.address)}`}
+                href={`https://map.naver.com/v5/search/${encodeURIComponent(data.roadAddress || data.address)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
@@ -1515,7 +1547,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                 네이버 지도
               </a>
               <a
-                href={`https://map.kakao.com/link/search/${encodeURIComponent(data.address)}`}
+                href={`https://map.kakao.com/link/search/${encodeURIComponent(data.roadAddress || data.address)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
