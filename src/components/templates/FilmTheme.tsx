@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useMemo } from "react";
+import React, { useRef, useState, useMemo } from "react";
 import {
   motion,
   AnimatePresence,
@@ -83,6 +83,8 @@ export interface WeddingData {
   bridePhone?: string;
   // GuestBook section visibility
   showGuestBook?: boolean;
+  // Hero SVG shape
+  heroSvgShape?: "heart" | "laurel" | "lace" | "lark";
   // Extended accounts (마음 전하실 곳)
   accounts?: {
     groom?: PersonAccount;
@@ -140,25 +142,41 @@ function Perforations({ count = 10 }: { count?: number }) {
   );
 }
 
-function FilmGrain({ strong = false }: { strong?: boolean }) {
+function FilmGrain({ strong = false, dark = false }: { strong?: boolean; dark?: boolean }) {
   return (
-    <div
-      style={{
-        position: "absolute",
-        inset: 0,
-        opacity: strong ? 0.08 : 0.04, // 농도를 확 낮춰서 은은하게!
-        pointerEvents: "none",
-        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' /%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")`,
-        mixBlendMode: "overlay", // screen보다 훨씬 자연스러운 질감을 줍니다.
-      } as React.CSSProperties}
-    />
+    <>
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          opacity: dark ? 0.42 : (strong ? 0.09 : 0.04),
+          pointerEvents: "none",
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' /%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")`,
+          backgroundSize: dark ? "120px 120px" : "200px 200px",
+          mixBlendMode: dark ? "soft-light" : "overlay",
+        } as React.CSSProperties}
+      />
+      {dark && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            opacity: 0.22,
+            pointerEvents: "none",
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.65' numOctaves='3' /%3E%3C/filter%3E%3Crect width='80' height='80' filter='url(%23g)'/%3E%3C/svg%3E")`,
+            backgroundSize: "80px 80px",
+            mixBlendMode: "screen",
+          } as React.CSSProperties}
+        />
+      )}
+    </>
   );
 }
 
 
 function FadeIn({ children, delay = 0, style }: { children: React.ReactNode; delay?: number; style?: React.CSSProperties }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: false, amount: 0.1 });
+  const isInView = useInView(ref, { once: true, amount: 0.1 });
   return (
     <motion.div
       ref={ref}
@@ -629,7 +647,7 @@ function StaggeredGreeting({
   preview: boolean;
 }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: false, amount: 0.2 });
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
   const lines = text.split("\n");
 
   const containerVariants = {
@@ -855,6 +873,95 @@ const MOCK_MSGS: GuestMsg[] = [
   { id: 6, name: "한소희", message: "평생 함께 웃으며 살아요", at: "2026.04.08" },
 ];
 
+// Polaroid hanging anchor points in SVG viewBox coords (300 × 320)
+const POLAROID_ANCHORS = [
+  { x: 150, y: 52, rot: -6 },
+  { x: 68,  y: 108, rot: -18 },
+  { x: 232, y: 104, rot: 16 },
+  { x: 42,  y: 78, rot: -24 },
+  { x: 258, y: 74, rot: 20 },
+  { x: 112, y: 62, rot: -10 },
+  { x: 188, y: 58, rot: 12 },
+  { x: 80,  y: 170, rot: -28 },
+  { x: 220, y: 166, rot: 24 },
+];
+
+function PolaroidTreeSVG({ theme }: { theme: SectionTheme }) {
+  const trunk    = "#7a4f2c";
+  const branch   = "#8b6040";
+  const darkLeaf = "#3d6b42";
+  const midLeaf  = "#4e8454";
+  const ltLeaf   = "#63a06a";
+  const hiLeaf   = "#7dbf80";
+
+  return (
+    <svg viewBox="0 0 300 320" style={{ width: "100%", height: "100%" }} fill="none">
+      {/* ── trunk ── */}
+      <path d="M150 320 C148 295 146 268 150 238 C154 208 152 185 150 160" stroke={trunk} strokeWidth="11" strokeLinecap="round"/>
+      {/* roots */}
+      <path d="M150 300 C135 308 118 314 104 318" stroke={trunk} strokeWidth="4.5" strokeLinecap="round"/>
+      <path d="M150 300 C165 310 182 316 196 320" stroke={trunk} strokeWidth="4.5" strokeLinecap="round"/>
+      {/* ── main branches ── */}
+      <path d="M150 200 C128 180 98 160 68 140" stroke={branch} strokeWidth="8" strokeLinecap="round"/>
+      <path d="M150 200 C172 180 202 160 232 140" stroke={branch} strokeWidth="8" strokeLinecap="round"/>
+      <path d="M150 172 C136 150 116 132 92 115" stroke={branch} strokeWidth="6" strokeLinecap="round"/>
+      <path d="M150 172 C164 150 184 132 208 115" stroke={branch} strokeWidth="6" strokeLinecap="round"/>
+      <path d="M150 185 C150 158 150 132 150 105" stroke={branch} strokeWidth="5.5" strokeLinecap="round"/>
+      {/* ── sub branches ── */}
+      <path d="M68 140 C52 120 38 105 28 88" stroke={branch} strokeWidth="3.5" strokeLinecap="round"/>
+      <path d="M68 140 C62 118 56 98 48 78" stroke={branch} strokeWidth="3" strokeLinecap="round"/>
+      <path d="M92 115 C78 95 65 78 55 60" stroke={branch} strokeWidth="2.8" strokeLinecap="round"/>
+      <path d="M92 115 C98 92 102 70 104 48" stroke={branch} strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M150 105 C140 82 132 60 124 38" stroke={branch} strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M150 105 C160 82 168 60 176 38" stroke={branch} strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M208 115 C222 95 235 78 245 60" stroke={branch} strokeWidth="2.8" strokeLinecap="round"/>
+      <path d="M208 115 C202 92 198 70 196 48" stroke={branch} strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M232 140 C248 120 262 105 272 88" stroke={branch} strokeWidth="3.5" strokeLinecap="round"/>
+      <path d="M232 140 C238 118 244 98 252 78" stroke={branch} strokeWidth="3" strokeLinecap="round"/>
+      {/* ── leaf clusters ── */}
+      {/* top canopy */}
+      <ellipse cx="150" cy="42" rx="50" ry="46" fill={midLeaf} opacity="0.92"/>
+      <ellipse cx="122" cy="55" rx="40" ry="36" fill={darkLeaf} opacity="0.88"/>
+      <ellipse cx="178" cy="52" rx="40" ry="34" fill={darkLeaf} opacity="0.9"/>
+      <ellipse cx="150" cy="28" rx="36" ry="30" fill={ltLeaf} opacity="0.85"/>
+      <ellipse cx="108" cy="40" rx="28" ry="25" fill={ltLeaf} opacity="0.8"/>
+      <ellipse cx="192" cy="38" rx="28" ry="24" fill={ltLeaf} opacity="0.82"/>
+      <ellipse cx="150" cy="18" rx="24" ry="22" fill={hiLeaf} opacity="0.7"/>
+      {/* left cluster */}
+      <ellipse cx="46" cy="72" rx="34" ry="30" fill={midLeaf} opacity="0.9"/>
+      <ellipse cx="30" cy="62" rx="26" ry="24" fill={darkLeaf} opacity="0.85"/>
+      <ellipse cx="62" cy="62" rx="26" ry="23" fill={ltLeaf} opacity="0.82"/>
+      <ellipse cx="44" cy="52" rx="20" ry="18" fill={hiLeaf} opacity="0.7"/>
+      {/* left-mid cluster */}
+      <ellipse cx="70" cy="108" rx="32" ry="28" fill={midLeaf} opacity="0.88"/>
+      <ellipse cx="52" cy="98" rx="25" ry="22" fill={darkLeaf} opacity="0.83"/>
+      <ellipse cx="88" cy="100" rx="24" ry="21" fill={ltLeaf} opacity="0.8"/>
+      {/* right cluster */}
+      <ellipse cx="254" cy="72" rx="34" ry="30" fill={midLeaf} opacity="0.9"/>
+      <ellipse cx="270" cy="62" rx="26" ry="24" fill={darkLeaf} opacity="0.85"/>
+      <ellipse cx="238" cy="62" rx="26" ry="23" fill={ltLeaf} opacity="0.82"/>
+      <ellipse cx="256" cy="52" rx="20" ry="18" fill={hiLeaf} opacity="0.7"/>
+      {/* right-mid cluster */}
+      <ellipse cx="230" cy="108" rx="32" ry="28" fill={midLeaf} opacity="0.88"/>
+      <ellipse cx="248" cy="98" rx="25" ry="22" fill={darkLeaf} opacity="0.83"/>
+      <ellipse cx="212" cy="100" rx="24" ry="21" fill={ltLeaf} opacity="0.8"/>
+      {/* center-top branch clusters */}
+      <ellipse cx="124" cy="48" rx="22" ry="20" fill={midLeaf} opacity="0.82"/>
+      <ellipse cx="176" cy="45" rx="22" ry="19" fill={midLeaf} opacity="0.82"/>
+      {/* lower left cluster */}
+      <ellipse cx="78" cy="165" rx="26" ry="23" fill={darkLeaf} opacity="0.82"/>
+      <ellipse cx="60" cy="178" rx="20" ry="18" fill={midLeaf} opacity="0.78"/>
+      {/* lower right cluster */}
+      <ellipse cx="222" cy="165" rx="26" ry="23" fill={darkLeaf} opacity="0.82"/>
+      <ellipse cx="240" cy="178" rx="20" ry="18" fill={midLeaf} opacity="0.78"/>
+      {/* leaf highlight gloss */}
+      <ellipse cx="150" cy="35" rx="20" ry="16" fill={hiLeaf} opacity="0.28"/>
+      <ellipse cx="46" cy="66" rx="14" ry="12" fill={hiLeaf} opacity="0.25"/>
+      <ellipse cx="254" cy="66" rx="14" ry="12" fill={hiLeaf} opacity="0.25"/>
+    </svg>
+  );
+}
+
 function GuestBook({
   preview, serif, mono, theme,
 }: {
@@ -864,7 +971,8 @@ function GuestBook({
   theme: SectionTheme;
 }) {
   const [msgs, setMsgs] = useState<GuestMsg[]>(MOCK_MSGS);
-  const [selected, setSelected] = useState<GuestMsg | null>(null);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
   const [inputName, setInputName] = useState("");
   const [inputMsg, setInputMsg] = useState("");
 
@@ -879,75 +987,101 @@ function GuestBook({
     setInputMsg("");
   };
 
+  // Polaroid size
+  const pw = preview ? 32 : 50;  // polaroid frame width
+  const ph = pw * 1.28;          // height (portrait)
+  const photoH = pw * 0.88;      // photo area height
+
   return (
     <div>
-      {/* Tree SVG decoration */}
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: preview ? 12 : 24, opacity: 0.55 }}>
-        <svg width={preview ? 80 : 120} height={preview ? 60 : 90} viewBox="0 0 120 90" fill="none">
-          {/* trunk */}
-          <path d="M60 90 L60 52" stroke={theme.flourishAccent} strokeWidth="3" strokeLinecap="round"/>
-          {/* main branches */}
-          <path d="M60 52 L38 30" stroke={theme.flourishAccent} strokeWidth="2" strokeLinecap="round"/>
-          <path d="M60 52 L82 30" stroke={theme.flourishAccent} strokeWidth="2" strokeLinecap="round"/>
-          <path d="M60 68 L42 52" stroke={theme.flourishAccent} strokeWidth="1.5" strokeLinecap="round"/>
-          <path d="M60 68 L78 52" stroke={theme.flourishAccent} strokeWidth="1.5" strokeLinecap="round"/>
-          {/* sub branches */}
-          <path d="M38 30 L26 18" stroke={theme.flourishBg} strokeWidth="1.5" strokeLinecap="round"/>
-          <path d="M38 30 L44 14" stroke={theme.flourishBg} strokeWidth="1.5" strokeLinecap="round"/>
-          <path d="M82 30 L94 18" stroke={theme.flourishBg} strokeWidth="1.5" strokeLinecap="round"/>
-          <path d="M82 30 L76 14" stroke={theme.flourishBg} strokeWidth="1.5" strokeLinecap="round"/>
-          <path d="M60 52 L60 32" stroke={theme.flourishBg} strokeWidth="1.5" strokeLinecap="round"/>
-          {/* leaves (dots) */}
-          {[
-            [26, 18], [44, 14], [60, 32], [94, 18], [76, 14],
-            [38, 30], [82, 30], [42, 52], [78, 52],
-          ].map(([cx, cy], i) => (
-            <circle key={i} cx={cx} cy={cy} r={preview ? 3 : 4} fill={theme.accentColor} opacity={0.55} />
-          ))}
-        </svg>
-      </div>
+      {/* Tree + Polaroids */}
+      <div
+        style={{ position: "relative", width: "100%", aspectRatio: "300 / 320", cursor: preview ? "default" : "pointer" }}
+        onClick={() => !preview && msgs.length > 0 && setViewerOpen(true)}
+      >
+        <PolaroidTreeSVG theme={theme} />
 
-      {/* Message cards grid */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: preview ? "1fr 1fr" : "1fr 1fr",
-        gap: preview ? 6 : 10,
-        marginBottom: preview ? 12 : 20,
-      }}>
-        {msgs.map((m) => (
-          <motion.div
-            key={m.id}
-            whileHover={!preview ? { scale: 1.02 } : {}}
-            whileTap={!preview ? { scale: 0.98 } : {}}
-            onClick={() => !preview && setSelected(m)}
-            style={{
-              background: theme.cardBg,
-              border: `1px solid ${theme.cardBorder}`,
-              borderRadius: 10,
-              padding: preview ? "7px 8px" : "12px 14px",
-              cursor: preview ? "default" : "pointer",
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
-            } as React.CSSProperties}
-          >
-            <p style={{
-              fontFamily: serif,
-              fontSize: preview ? 8 : 12,
-              color: theme.textBody,
-              lineHeight: 1.55,
-              marginBottom: preview ? 3 : 6,
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-            } as React.CSSProperties}>
-              {m.message}
-            </p>
-            <p style={{ fontFamily: mono, fontSize: preview ? 6 : 9, color: theme.textMuted, letterSpacing: "0.1em" }}>
-              {m.name} · {m.at}
-            </p>
-          </motion.div>
-        ))}
+        {/* Polaroid frames hanging from branches */}
+        {msgs.slice(0, POLAROID_ANCHORS.length).map((m, i) => {
+          const { x, y, rot } = POLAROID_ANCHORS[i];
+          // Anchor is branch tip; polaroid hangs ~40px (in SVG coords) below
+          const hangY = y + (preview ? 18 : 28);
+          return (
+            <React.Fragment key={m.id}>
+              {/* String */}
+              <svg
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
+                viewBox="0 0 300 320"
+              >
+                <line
+                  x1={x} y1={y + 4}
+                  x2={x} y2={hangY - 2}
+                  stroke="#a0886a"
+                  strokeWidth={preview ? "0.8" : "1"}
+                  opacity="0.65"
+                />
+              </svg>
+              {/* Polaroid */}
+              <div
+                style={{
+                  position: "absolute",
+                  left: `${x / 300 * 100}%`,
+                  top: `${hangY / 320 * 100}%`,
+                  transform: `translate(-50%, 0) rotate(${rot}deg)`,
+                  width: pw,
+                  background: "#fefefe",
+                  borderRadius: preview ? 2 : 3,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.22), 0 0 0 0.5px rgba(0,0,0,0.08)",
+                  padding: preview ? "2px 2px 6px" : "3px 3px 10px",
+                  pointerEvents: "none",
+                }}
+              >
+                {/* Photo area */}
+                <div style={{
+                  width: "100%",
+                  height: photoH,
+                  background: "linear-gradient(135deg, #f5ede3 0%, #ecddd0 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  overflow: "hidden",
+                }}>
+                  <span style={{ fontSize: preview ? 7 : 11, color: "#d4a8a0" }}>♥</span>
+                </div>
+                {/* Name */}
+                <p style={{
+                  textAlign: "center",
+                  fontFamily: mono,
+                  fontSize: preview ? 4 : 6,
+                  color: "#888",
+                  marginTop: 2,
+                  lineHeight: 1.2,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}>
+                  {m.name}
+                </p>
+              </div>
+            </React.Fragment>
+          );
+        })}
+
+        {/* Tap hint */}
+        {!preview && msgs.length > 0 && (
+          <div style={{
+            position: "absolute",
+            bottom: 6,
+            right: 8,
+            fontFamily: mono,
+            fontSize: 7,
+            color: theme.textMuted,
+            letterSpacing: "0.18em",
+            pointerEvents: "none",
+          }}>
+            TAP TO READ
+          </div>
+        )}
       </div>
 
       {/* Input form */}
@@ -960,6 +1094,7 @@ function GuestBook({
           display: "flex",
           flexDirection: "column",
           gap: 10,
+          marginTop: 16,
         }}>
           <p style={{ fontFamily: mono, fontSize: 9, letterSpacing: "0.4em", color: theme.textMuted, textTransform: "uppercase", marginBottom: 2 }}>
             방명록 남기기
@@ -1021,40 +1156,94 @@ function GuestBook({
         </div>
       )}
 
-      {/* Message detail modal */}
+      {/* Swipe Viewer Modal */}
       <AnimatePresence>
-        {selected && (
+        {viewerOpen && (
           <>
             <motion.div
               key="gb-backdrop"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setSelected(null)}
-              style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 400 }}
+              onClick={() => setViewerOpen(false)}
+              style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.78)", zIndex: 400 }}
             />
             <motion.div
-              key="gb-sheet"
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 32, stiffness: 320 }}
-              style={{
-                position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 401,
-                background: "#f8f8f4",
-                borderRadius: "20px 20px 0 0",
-                padding: "24px 24px 44px",
-              }}
+              key="gb-viewer"
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              style={{ position: "fixed", inset: 0, zIndex: 401, display: "flex", flexDirection: "column" }}
             >
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
-                <div style={{ width: 36, height: 4, background: "#d0c8c0", borderRadius: 2 }} />
+              {/* Header */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 22px" }}>
+                <p style={{ fontFamily: mono, fontSize: 9, letterSpacing: "0.45em", color: "rgba(255,255,255,0.5)", textTransform: "uppercase" }}>
+                  방명록 · {msgs.length}개
+                </p>
+                <button
+                  onClick={() => setViewerOpen(false)}
+                  style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                >
+                  <X size={14} />
+                </button>
               </div>
-              <p style={{ fontFamily: mono, fontSize: 8, letterSpacing: "0.35em", color: "#9a9490", textTransform: "uppercase", marginBottom: 6 }}>
-                {selected.name} · {selected.at}
-              </p>
-              <p style={{ fontFamily: serif, fontSize: 16, color: "#3a2f28", lineHeight: 1.8, letterSpacing: "0.04em" }}>
-                {selected.message}
-              </p>
+
+              {/* Swipeable cards */}
+              <div
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  overflowX: "scroll",
+                  scrollSnapType: "x mandatory",
+                  scrollBehavior: "smooth",
+                  padding: "0 calc(50% - 140px)",
+                  gap: 24,
+                } as React.CSSProperties}
+                className="hide-scrollbar"
+              >
+                {msgs.map((m, i) => (
+                  <div
+                    key={m.id}
+                    style={{
+                      scrollSnapAlign: "center",
+                      scrollSnapStop: "always",
+                      flexShrink: 0,
+                      width: 280,
+                      background: "#fefefe",
+                      borderRadius: 4,
+                      boxShadow: "0 8px 40px rgba(0,0,0,0.5)",
+                      padding: "12px 12px 28px",
+                      transform: `rotate(${(i % 3 - 1) * 2.5}deg)`,
+                    }}
+                  >
+                    {/* Large photo area */}
+                    <div style={{
+                      width: "100%",
+                      aspectRatio: "1/1",
+                      background: "linear-gradient(135deg, #f5ede3 0%, #e8d5c6 50%, #ecddd0 100%)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginBottom: 12,
+                    }}>
+                      <span style={{ fontSize: 32, color: "#d4a8a0", opacity: 0.8 }}>♥</span>
+                    </div>
+                    {/* Message */}
+                    <p style={{ fontFamily: serif, fontSize: 14, color: "#2a2a2a", lineHeight: 1.75, letterSpacing: "0.03em", marginBottom: 10 }}>
+                      {m.message}
+                    </p>
+                    <p style={{ fontFamily: mono, fontSize: 9, color: "#aaa", letterSpacing: "0.12em", textAlign: "right" }}>
+                      {m.name} · {m.at}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ textAlign: "center", padding: "14px 0 28px" }}>
+                <span style={{ fontFamily: mono, fontSize: 9, letterSpacing: "0.3em", color: "rgba(255,255,255,0.3)" }}>← SWIPE →</span>
+              </div>
             </motion.div>
           </>
         )}
@@ -1140,22 +1329,29 @@ function WeddingCalendar({
           const isSun = i % 7 === 0;
           return (
             <div key={i} style={{
+              position: "relative",
               height: preview ? 16 : 28,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              borderRadius: "50%",
-              fontSize: preview ? 7 : 11,
-              fontFamily: mono,
-              fontWeight: isWedding ? 700 : 400,
-              background: isWedding ? theme.accentColor : "transparent",
-              color: isWedding
-                ? (isLight ? "#fff" : "#050505")
-                : (cell
-                    ? (isSun ? "rgba(200,60,60,0.65)" : theme.textBody)
-                    : "transparent"),
             }}>
-              {cell ?? ""}
+              {isWedding && (
+                <svg viewBox="0 0 24 24" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+                  <path d="M12 20C12 20 3 14 3 8C3 5.2 5.2 3 8 3C9.6 3 11 3.8 12 5C13 3.8 14.4 3 16 3C18.8 3 21 5.2 21 8C21 14 12 20 12 20Z" fill="#ffb6c1"/>
+                </svg>
+              )}
+              <span style={{
+                position: "relative",
+                zIndex: 1,
+                fontSize: preview ? 7 : 11,
+                fontFamily: mono,
+                fontWeight: isWedding ? 700 : 400,
+                color: isWedding
+                  ? "#b5405a"
+                  : (cell ? (isSun ? "rgba(200,60,60,0.65)" : theme.textBody) : "transparent"),
+              }}>
+                {cell ?? ""}
+              </span>
             </div>
           );
         })}
@@ -1434,13 +1630,56 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         )}
       </section>
 
-      {/* ── 예식 정보 요약 (히어로 직하단) ─────────────────────────────── */}
+      {/* ── 예식 정보 요약 (히어로 직하단) */}
       <div style={{
         textAlign: "center",
-        padding: preview ? "12px 18px" : "28px 28px",
+        padding: preview ? "14px 18px" : "32px 28px",
         borderTop: `1px solid ${theme.sectionBorder}`,
         borderBottom: `1px solid ${theme.sectionBorder}`,
       }}>
+        {/* SVG 장식 먼저 */}
+        {(() => {
+          const svgColor = LIGHT_BG_SET.has(bgColor.toLowerCase()) ? theme.flourishAccent : "#D4AF37";
+          const shape = data.heroSvgShape || "heart";
+          const paths: Record<string, string> = {
+            heart:  "M44 18 C44 18 36 12 36 8 C36 5.8 37.8 4 40 4 C41.4 4 42.6 4.7 43.3 5.8 C43.5 6.1 43.8 6.3 44 6.3 C44.2 6.3 44.5 6.1 44.7 5.8 C45.4 4.7 46.6 4 48 4 C50.2 4 52 5.8 52 8 C52 12 44 18 44 18 Z",
+            laurel: "M36 14 C32 12 28 9 26 5 M36 14 C35 11 34 8 33 4 M52 14 C56 12 60 9 62 5 M52 14 C53 11 54 8 55 4 M36 14 C38 14 40 14 44 14 C48 14 50 14 52 14",
+            lace:   "M16 12 Q22 6 28 12 Q34 18 40 12 Q46 6 52 12 Q58 18 64 12 Q70 6 76 12",
+            lark:   "M28 12 C34 8 40 8 44 11 C48 8 54 8 60 12 M44 11 L44 19 M38 14 L44 11 L50 14",
+          };
+          const isClosedShape = shape === "heart";
+          return (
+            <div style={{ margin: `0 auto ${preview ? 8 : 16}px`, width: preview ? 56 : 88, height: preview ? 18 : 28, position: "relative" }}>
+              <svg viewBox="0 0 88 24" width="100%" height="100%" fill="none">
+                <motion.path
+                  d={paths[shape]}
+                  stroke={svgColor}
+                  strokeWidth={isClosedShape ? "0" : "1.5"}
+                  fill={isClosedShape ? "none" : "none"}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  whileInView={{ pathLength: 1, opacity: 1 }}
+                  viewport={{ once: true, amount: 0.5 }}
+                  transition={{ duration: 1.6, ease: "easeInOut", delay: 0.3 }}
+                />
+                {isClosedShape && (
+                  <motion.path
+                    d={paths[shape]}
+                    stroke={svgColor}
+                    strokeWidth="1.2"
+                    fill="none"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    whileInView={{ pathLength: 1, opacity: 1 }}
+                    viewport={{ once: true, amount: 0.5 }}
+                    transition={{ duration: 1.6, ease: "easeInOut", delay: 0.3 }}
+                  />
+                )}
+              </svg>
+            </div>
+          );
+        })()}
+
         <p style={{
           fontFamily: serif,
           fontSize: preview ? 10 : 15,
@@ -1451,28 +1690,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         }}>
           {data.date} · {data.time}
         </p>
-
-        {/* 애니메이션 하트 SVG 구분선 */}
-        <div style={{ margin: `${preview ? 6 : 12}px auto`, width: preview ? 56 : 88, height: preview ? 16 : 24, position: "relative" }}>
-          <svg viewBox="0 0 88 24" width="100%" height="100%" fill="none">
-            <motion.path
-              d="M0 12 L32 12 M56 12 L88 12"
-              stroke={theme.flourishBg}
-              strokeWidth="1"
-            />
-            <motion.path
-              d="M44 18 C44 18 36 12 36 8 C36 5.8 37.8 4 40 4 C41.4 4 42.6 4.7 43.3 5.8 C43.5 6.1 43.8 6.3 44 6.3 C44.2 6.3 44.5 6.1 44.7 5.8 C45.4 4.7 46.6 4 48 4 C50.2 4 52 5.8 52 8 C52 12 44 18 44 18 Z"
-              stroke={theme.flourishAccent}
-              strokeWidth="1.2"
-              fill="none"
-              initial={{ pathLength: 0, opacity: 0 }}
-              whileInView={{ pathLength: 1, opacity: 1 }}
-              viewport={{ once: false, amount: 0.5 }}
-              transition={{ duration: 1.4, ease: "easeInOut", delay: 0.2 }}
-            />
-          </svg>
-        </div>
-
+        <div style={{ width: 16, height: 1, background: theme.flourishBg, margin: `${preview ? 5 : 9}px auto` }} />
         <p style={{
           fontFamily: serif,
           fontSize: preview ? 10 : 14,
@@ -1573,17 +1791,17 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             {/* 신랑 줄 */}
             <p style={{ fontFamily: serif, fontSize: preview ? 10 : 13, color: theme.parentColor, letterSpacing: "0.04em", lineHeight: preview ? 1.8 : 2.2, textAlign: "center" }}>
               {data.groomParents && parentsLine(data.groomParents, "아들") && (
-                <>{parentsLine(data.groomParents, "아들")}{" "}</>
+                <span style={{ fontWeight: 400 }}>{parentsLine(data.groomParents, "아들")}{" "}</span>
               )}
-              {data.groomName}
+              <span style={{ fontSize: preview ? 12 : 16, fontWeight: 700, color: theme.textBody }}>{data.groomName}</span>
             </p>
 
             {/* 신부 줄 */}
             <p style={{ fontFamily: serif, fontSize: preview ? 10 : 13, color: theme.parentColor, letterSpacing: "0.04em", lineHeight: preview ? 1.8 : 2.2, textAlign: "center" }}>
               {data.brideParents && parentsLine(data.brideParents, "딸") && (
-                <>{parentsLine(data.brideParents, "딸")}{" "}</>
+                <span style={{ fontWeight: 400 }}>{parentsLine(data.brideParents, "딸")}{" "}</span>
               )}
-              {data.brideName}
+              <span style={{ fontSize: preview ? 12 : 16, fontWeight: 700, color: theme.textBody }}>{data.brideName}</span>
             </p>
           </div>
 
@@ -1790,25 +2008,31 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             <p
               style={{
                 fontFamily: serif,
-                fontSize: preview ? 13 : 18,
+                fontSize: data.venue.length > 14 ? (preview ? 11 : 15) : (preview ? 13 : 18),
                 color: theme.accentColor,
                 textShadow: theme.accentShadow,
                 letterSpacing: "0.12em",
                 fontWeight: 400,
-                marginBottom: 5,
+                marginBottom: 4,
+                wordBreak: "keep-all" as React.CSSProperties["wordBreak"],
+                lineHeight: 1.5,
               }}
             >
               {data.venue}
+              {(() => {
+                const detail = data.address.slice((data.roadAddress || "").length).trim().replace(/^[, ]+/, "");
+                return detail ? <span style={{ fontSize: preview ? 9 : 12, color: theme.textMuted, fontWeight: 400, marginLeft: 5 }}>({detail})</span> : null;
+              })()}
             </p>
             <p
               style={{
-                fontFamily: sans,
+                fontFamily: "Pretendard, -apple-system, sans-serif",
                 fontSize: preview ? 10 : 12,
                 color: theme.textMuted,
                 letterSpacing: "0.04em",
               }}
             >
-              {data.address}
+              {data.roadAddress || data.address}
             </p>
           </div>
 
@@ -2395,7 +2619,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       )}
 
       {/* ── DARK BG GRAIN OVERLAY ──────────────────────────────────────────── */}
-      {!LIGHT_BG_SET.has(bgColor.toLowerCase()) && <FilmGrain />}
+      {!LIGHT_BG_SET.has(bgColor.toLowerCase()) && <FilmGrain dark />}
     </div>
   );
 }

@@ -154,8 +154,8 @@ function buildTime(d: DateState) {
 const DEFAULT: WeddingData = {
   groomName: "000",
   brideName: "000",
-  groomParents: { fatherLastName: "000", fatherFirstName: "", motherLastName: "000", motherFirstName: "" },
-  brideParents: { fatherLastName: "000", fatherFirstName: "", motherLastName: "000", motherFirstName: "" },
+  groomParents: { fatherLastName: "000", fatherFirstName: "", motherLastName: "000", motherFirstName: "", fatherPhone: "010-0000-0000", motherPhone: "010-0000-0000" },
+  brideParents: { fatherLastName: "000", fatherFirstName: "", motherLastName: "000", motherFirstName: "", fatherPhone: "010-0000-0000", motherPhone: "010-0000-0000" },
   date: buildDate(INIT_DATE),
   time: buildTime(INIT_DATE),
   venue: "그랜드 인터컨티넨탈 서울 파르나스",
@@ -170,6 +170,9 @@ const DEFAULT: WeddingData = {
     bus: "145 · 148 · 341번 삼성역 하차 후 도보 3분",
     car: "건물 내 무료 주차 · 웨딩 참석 시 3시간 무료",
   },
+  groomPhone: "010-0000-0000",
+  bridePhone: "010-0000-0000",
+  heroSvgShape: "heart",
   photos: [],
   showGreeting: true,
   showCouple: true,
@@ -712,6 +715,30 @@ export default function DashboardPage() {
                   );
                 })}
               </div>
+
+              {/* SVG 장식 모양 선택 */}
+              <p className="text-[10px] text-gray-400 font-mono tracking-widest mt-5 mb-2">히어로 장식 모양</p>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { id: "heart",  icon: "♥", label: "하트" },
+                  { id: "laurel", icon: "🌿", label: "월계수" },
+                  { id: "lace",   icon: "〰", label: "레이스" },
+                  { id: "lark",   icon: "🐦", label: "종달새" },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => set("heroSvgShape", opt.id as WeddingData["heroSvgShape"])}
+                    className={`flex flex-col items-center gap-1 p-2.5 rounded-lg border text-center transition-all ${
+                      (data.heroSvgShape || "heart") === opt.id
+                        ? "border-gray-900 bg-gray-900 text-white"
+                        : "border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    <span className="text-[18px]">{opt.icon}</span>
+                    <p className="text-[10px]">{opt.label}</p>
+                  </button>
+                ))}
+              </div>
             </AccSection>
 
             {/* 섹션 순서 변경 */}
@@ -1200,20 +1227,20 @@ export default function DashboardPage() {
             <div
               className="relative"
               style={{
-                width: 400,
-                height: 812,
+                width: 360,
+                height: 720,
                 background: "#111",
-                borderRadius: 52,
-                padding: 12,
+                borderRadius: 46,
+                padding: 10,
                 boxShadow:
                   "0 0 0 1px #2a2a2a, inset 0 0 0 1px #1a1a1a, 0 32px 80px rgba(0,0,0,0.25)",
               }}
             >
               {/* Side buttons */}
-              <div className="absolute -left-[3px] top-[137px] w-[3px] h-10 bg-[#2a2a2a] rounded-l-sm" />
-              <div className="absolute -left-[3px] top-[194px] w-[3px] h-[60px] bg-[#2a2a2a] rounded-l-sm" />
-              <div className="absolute -left-[3px] top-[269px] w-[3px] h-[60px] bg-[#2a2a2a] rounded-l-sm" />
-              <div className="absolute -right-[3px] top-[200px] w-[3px] h-20 bg-[#2a2a2a] rounded-r-sm" />
+              <div className="absolute -left-[3px] top-[124px] w-[3px] h-10 bg-[#2a2a2a] rounded-l-sm" />
+              <div className="absolute -left-[3px] top-[175px] w-[3px] h-[60px] bg-[#2a2a2a] rounded-l-sm" />
+              <div className="absolute -left-[3px] top-[243px] w-[3px] h-[60px] bg-[#2a2a2a] rounded-l-sm" />
+              <div className="absolute -right-[3px] top-[180px] w-[3px] h-20 bg-[#2a2a2a] rounded-r-sm" />
 
               {/* Screen */}
               <div
@@ -1234,7 +1261,7 @@ export default function DashboardPage() {
 
                 {/* 390px 실제 모바일 너비로 렌더링 후 zoom으로 축소 */}
                 <div className="hide-scrollbar" style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
-                  <div style={{ width: 390, zoom: 376 / 390 } as React.CSSProperties}>
+                  <div style={{ width: 390, zoom: 340 / 390 } as React.CSSProperties}>
                     <InvitationView data={data} theme={currentTheme} />
                   </div>
                 </div>
