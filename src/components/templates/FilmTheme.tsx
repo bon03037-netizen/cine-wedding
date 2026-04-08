@@ -39,10 +39,10 @@ export interface TransportInfo {
   car?: string;
 }
 
-export type SectionId = "greeting" | "couple" | "gallery" | "map" | "transport" | "accounts";
+export type SectionId = "greeting" | "couple" | "gallery" | "map" | "transport" | "accounts" | "guestbook";
 
 export const DEFAULT_SECTIONS_ORDER: SectionId[] = [
-  "greeting", "couple", "gallery", "map", "transport", "accounts",
+  "greeting", "couple", "gallery", "map", "transport", "accounts", "guestbook",
 ];
 
 export interface WeddingData {
@@ -81,6 +81,8 @@ export interface WeddingData {
   // Contact phone numbers
   groomPhone?: string;
   bridePhone?: string;
+  // GuestBook section visibility
+  showGuestBook?: boolean;
   // Extended accounts (마음 전하실 곳)
   accounts?: {
     groom?: PersonAccount;
@@ -156,7 +158,7 @@ function FilmGrain({ strong = false }: { strong?: boolean }) {
 
 function FadeIn({ children, delay = 0, style }: { children: React.ReactNode; delay?: number; style?: React.CSSProperties }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.1 });
+  const isInView = useInView(ref, { once: false, amount: 0.1 });
   return (
     <motion.div
       ref={ref}
@@ -680,42 +682,60 @@ function ContactGroup({
 }) {
   return (
     <div>
-      <p style={{ fontFamily: mono, fontSize: 9, letterSpacing: "0.35em", color: "#D4AF37", textTransform: "uppercase", marginBottom: 10 }}>
+      <p style={{ fontFamily: mono, fontSize: 9, letterSpacing: "0.35em", color: "#6b4c2a", textTransform: "uppercase", marginBottom: 10 }}>
         {title}
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {contacts.map((c, i) => (
-          <a
+          <div
             key={i}
-            href={`tel:${c.phone}`}
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
               padding: "12px 16px",
-              background: "rgba(255,255,255,0.05)",
+              background: "rgba(255,255,255,0.72)",
               borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.09)",
-              textDecoration: "none",
+              border: "1px solid rgba(0,0,0,0.07)",
             }}
           >
             <div>
-              <p style={{ fontFamily: mono, fontSize: 9, color: "#7a7a7a", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 3 }}>
+              <p style={{ fontFamily: mono, fontSize: 9, color: "#9a9490", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 3 }}>
                 {c.role}
               </p>
-              <p style={{ fontFamily: serif, fontSize: 16, color: "#d4d4d4", letterSpacing: "0.1em" }}>
+              <p style={{ fontFamily: serif, fontSize: 16, color: "#3a2f28", letterSpacing: "0.1em" }}>
                 {c.name}
               </p>
             </div>
-            <div style={{
-              width: 40, height: 40, borderRadius: "50%",
-              background: "rgba(212,175,55,0.14)",
-              border: "1px solid rgba(212,175,55,0.28)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <Phone size={15} color="#D4AF37" />
+            <div style={{ display: "flex", gap: 8 }}>
+              <a
+                href={`sms:${c.phone}`}
+                style={{
+                  width: 40, height: 40, borderRadius: "50%",
+                  background: "rgba(107,76,42,0.08)",
+                  border: "1px solid rgba(107,76,42,0.18)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  textDecoration: "none",
+                }}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b4c2a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+              </a>
+              <a
+                href={`tel:${c.phone}`}
+                style={{
+                  width: 40, height: 40, borderRadius: "50%",
+                  background: "rgba(107,76,42,0.08)",
+                  border: "1px solid rgba(107,76,42,0.18)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  textDecoration: "none",
+                }}
+              >
+                <Phone size={15} color="#6b4c2a" />
+              </a>
             </div>
-          </a>
+          </div>
         ))}
       </div>
     </div>
@@ -784,7 +804,7 @@ function ContactModal({
             transition={{ type: "spring", damping: 32, stiffness: 320 }}
             style={{
               position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 301,
-              background: "#111111",
+              background: "#f8f8f4",
               borderRadius: "20px 20px 0 0",
               padding: "20px 20px 44px",
               maxHeight: "80vh",
@@ -793,11 +813,11 @@ function ContactModal({
             className="hide-scrollbar"
           >
             <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
-              <div style={{ width: 36, height: 4, background: "#2e2e2e", borderRadius: 2 }} />
+              <div style={{ width: 36, height: 4, background: "#d0c8c0", borderRadius: 2 }} />
             </div>
             <p style={{
               fontFamily: mono, fontSize: 9, letterSpacing: "0.5em",
-              color: "#505050", textAlign: "center", marginBottom: 24,
+              color: "#9a9490", textAlign: "center", marginBottom: 24,
               textTransform: "uppercase",
             }}>
               연락하기
@@ -814,6 +834,232 @@ function ContactModal({
         </>
       )}
     </AnimatePresence>
+  );
+}
+
+// ── Guest Book ────────────────────────────────────────────────────────────────
+
+interface GuestMsg {
+  id: number;
+  name: string;
+  message: string;
+  at: string;
+}
+
+const MOCK_MSGS: GuestMsg[] = [
+  { id: 1, name: "김민준", message: "축하해요! 행복한 가정 이루세요 ♥", at: "2026.04.05" },
+  { id: 2, name: "이서연", message: "항상 사랑하고 행복하게 살아요!", at: "2026.04.06" },
+  { id: 3, name: "박지호", message: "두 분의 새 출발을 진심으로 축하합니다", at: "2026.04.06" },
+  { id: 4, name: "최유나", message: "오래오래 행복하세요 :)", at: "2026.04.07" },
+  { id: 5, name: "정태영", message: "멋진 결혼 축하드려요!", at: "2026.04.07" },
+  { id: 6, name: "한소희", message: "평생 함께 웃으며 살아요", at: "2026.04.08" },
+];
+
+function GuestBook({
+  preview, serif, mono, theme,
+}: {
+  preview: boolean;
+  serif: string;
+  mono: string;
+  theme: SectionTheme;
+}) {
+  const [msgs, setMsgs] = useState<GuestMsg[]>(MOCK_MSGS);
+  const [selected, setSelected] = useState<GuestMsg | null>(null);
+  const [inputName, setInputName] = useState("");
+  const [inputMsg, setInputMsg] = useState("");
+
+  const handleAdd = () => {
+    const trimName = inputName.trim();
+    const trimMsg = inputMsg.trim();
+    if (!trimName || !trimMsg) return;
+    const now = new Date();
+    const at = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, "0")}.${String(now.getDate()).padStart(2, "0")}`;
+    setMsgs((prev) => [...prev, { id: Date.now(), name: trimName, message: trimMsg, at }]);
+    setInputName("");
+    setInputMsg("");
+  };
+
+  return (
+    <div>
+      {/* Tree SVG decoration */}
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: preview ? 12 : 24, opacity: 0.55 }}>
+        <svg width={preview ? 80 : 120} height={preview ? 60 : 90} viewBox="0 0 120 90" fill="none">
+          {/* trunk */}
+          <path d="M60 90 L60 52" stroke={theme.flourishAccent} strokeWidth="3" strokeLinecap="round"/>
+          {/* main branches */}
+          <path d="M60 52 L38 30" stroke={theme.flourishAccent} strokeWidth="2" strokeLinecap="round"/>
+          <path d="M60 52 L82 30" stroke={theme.flourishAccent} strokeWidth="2" strokeLinecap="round"/>
+          <path d="M60 68 L42 52" stroke={theme.flourishAccent} strokeWidth="1.5" strokeLinecap="round"/>
+          <path d="M60 68 L78 52" stroke={theme.flourishAccent} strokeWidth="1.5" strokeLinecap="round"/>
+          {/* sub branches */}
+          <path d="M38 30 L26 18" stroke={theme.flourishBg} strokeWidth="1.5" strokeLinecap="round"/>
+          <path d="M38 30 L44 14" stroke={theme.flourishBg} strokeWidth="1.5" strokeLinecap="round"/>
+          <path d="M82 30 L94 18" stroke={theme.flourishBg} strokeWidth="1.5" strokeLinecap="round"/>
+          <path d="M82 30 L76 14" stroke={theme.flourishBg} strokeWidth="1.5" strokeLinecap="round"/>
+          <path d="M60 52 L60 32" stroke={theme.flourishBg} strokeWidth="1.5" strokeLinecap="round"/>
+          {/* leaves (dots) */}
+          {[
+            [26, 18], [44, 14], [60, 32], [94, 18], [76, 14],
+            [38, 30], [82, 30], [42, 52], [78, 52],
+          ].map(([cx, cy], i) => (
+            <circle key={i} cx={cx} cy={cy} r={preview ? 3 : 4} fill={theme.accentColor} opacity={0.55} />
+          ))}
+        </svg>
+      </div>
+
+      {/* Message cards grid */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: preview ? "1fr 1fr" : "1fr 1fr",
+        gap: preview ? 6 : 10,
+        marginBottom: preview ? 12 : 20,
+      }}>
+        {msgs.map((m) => (
+          <motion.div
+            key={m.id}
+            whileHover={!preview ? { scale: 1.02 } : {}}
+            whileTap={!preview ? { scale: 0.98 } : {}}
+            onClick={() => !preview && setSelected(m)}
+            style={{
+              background: theme.cardBg,
+              border: `1px solid ${theme.cardBorder}`,
+              borderRadius: 10,
+              padding: preview ? "7px 8px" : "12px 14px",
+              cursor: preview ? "default" : "pointer",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+            } as React.CSSProperties}
+          >
+            <p style={{
+              fontFamily: serif,
+              fontSize: preview ? 8 : 12,
+              color: theme.textBody,
+              lineHeight: 1.55,
+              marginBottom: preview ? 3 : 6,
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            } as React.CSSProperties}>
+              {m.message}
+            </p>
+            <p style={{ fontFamily: mono, fontSize: preview ? 6 : 9, color: theme.textMuted, letterSpacing: "0.1em" }}>
+              {m.name} · {m.at}
+            </p>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Input form */}
+      {!preview && (
+        <div style={{
+          background: theme.sectionBg,
+          border: `1px solid ${theme.sectionBorder}`,
+          borderRadius: 12,
+          padding: "16px 18px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+        }}>
+          <p style={{ fontFamily: mono, fontSize: 9, letterSpacing: "0.4em", color: theme.textMuted, textTransform: "uppercase", marginBottom: 2 }}>
+            방명록 남기기
+          </p>
+          <input
+            value={inputName}
+            onChange={(e) => setInputName(e.target.value)}
+            placeholder="이름"
+            style={{
+              fontFamily: serif,
+              fontSize: 13,
+              color: theme.textBody,
+              background: theme.cardBg,
+              border: `1px solid ${theme.cardBorder}`,
+              borderRadius: 8,
+              padding: "9px 12px",
+              outline: "none",
+              width: "100%",
+              boxSizing: "border-box",
+            } as React.CSSProperties}
+          />
+          <textarea
+            value={inputMsg}
+            onChange={(e) => setInputMsg(e.target.value)}
+            placeholder="축하 메시지를 남겨주세요"
+            rows={3}
+            style={{
+              fontFamily: serif,
+              fontSize: 13,
+              color: theme.textBody,
+              background: theme.cardBg,
+              border: `1px solid ${theme.cardBorder}`,
+              borderRadius: 8,
+              padding: "9px 12px",
+              outline: "none",
+              resize: "none",
+              width: "100%",
+              boxSizing: "border-box",
+              lineHeight: 1.65,
+            } as React.CSSProperties}
+          />
+          <button
+            onClick={handleAdd}
+            style={{
+              fontFamily: mono,
+              fontSize: 11,
+              letterSpacing: "0.25em",
+              color: theme.accentColor,
+              background: "none",
+              border: `1px solid ${theme.accentColor}`,
+              borderRadius: 999,
+              padding: "9px 0",
+              cursor: "pointer",
+              textTransform: "uppercase",
+            }}
+          >
+            남기기
+          </button>
+        </div>
+      )}
+
+      {/* Message detail modal */}
+      <AnimatePresence>
+        {selected && (
+          <>
+            <motion.div
+              key="gb-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelected(null)}
+              style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 400 }}
+            />
+            <motion.div
+              key="gb-sheet"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 32, stiffness: 320 }}
+              style={{
+                position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 401,
+                background: "#f8f8f4",
+                borderRadius: "20px 20px 0 0",
+                padding: "24px 24px 44px",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
+                <div style={{ width: 36, height: 4, background: "#d0c8c0", borderRadius: 2 }} />
+              </div>
+              <p style={{ fontFamily: mono, fontSize: 8, letterSpacing: "0.35em", color: "#9a9490", textTransform: "uppercase", marginBottom: 6 }}>
+                {selected.name} · {selected.at}
+              </p>
+              <p style={{ fontFamily: serif, fontSize: 16, color: "#3a2f28", lineHeight: 1.8, letterSpacing: "0.04em" }}>
+                {selected.message}
+              </p>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -1194,7 +1440,6 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         padding: preview ? "12px 18px" : "28px 28px",
         borderTop: `1px solid ${theme.sectionBorder}`,
         borderBottom: `1px solid ${theme.sectionBorder}`,
-        margin: preview ? "0" : "0",
       }}>
         <p style={{
           fontFamily: serif,
@@ -1206,7 +1451,28 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         }}>
           {data.date} · {data.time}
         </p>
-        <div style={{ width: 16, height: 1, background: theme.flourishBg, margin: `${preview ? 6 : 10}px auto` }} />
+
+        {/* 애니메이션 하트 SVG 구분선 */}
+        <div style={{ margin: `${preview ? 6 : 12}px auto`, width: preview ? 56 : 88, height: preview ? 16 : 24, position: "relative" }}>
+          <svg viewBox="0 0 88 24" width="100%" height="100%" fill="none">
+            <motion.path
+              d="M0 12 L32 12 M56 12 L88 12"
+              stroke={theme.flourishBg}
+              strokeWidth="1"
+            />
+            <motion.path
+              d="M44 18 C44 18 36 12 36 8 C36 5.8 37.8 4 40 4 C41.4 4 42.6 4.7 43.3 5.8 C43.5 6.1 43.8 6.3 44 6.3 C44.2 6.3 44.5 6.1 44.7 5.8 C45.4 4.7 46.6 4 48 4 C50.2 4 52 5.8 52 8 C52 12 44 18 44 18 Z"
+              stroke={theme.flourishAccent}
+              strokeWidth="1.2"
+              fill="none"
+              initial={{ pathLength: 0, opacity: 0 }}
+              whileInView={{ pathLength: 1, opacity: 1 }}
+              viewport={{ once: false, amount: 0.5 }}
+              transition={{ duration: 1.4, ease: "easeInOut", delay: 0.2 }}
+            />
+          </svg>
+        </div>
+
         <p style={{
           fontFamily: serif,
           fontSize: preview ? 10 : 14,
@@ -1219,6 +1485,21 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         }}>
           {data.venue}
         </p>
+        {data.address && (
+          <p style={{
+            fontFamily: "Pretendard, -apple-system, sans-serif",
+            fontSize: preview ? 9 : 12,
+            color: theme.textLabel,
+            letterSpacing: "0.03em",
+            lineHeight: 1.6,
+            marginTop: preview ? 3 : 5,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}>
+            {data.address}
+          </p>
+        )}
       </div>
 
       {/* ── 섹션 컨테이너 (순서 + 가시성) ─────────────────────────────── */}
@@ -1306,19 +1587,9 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             </p>
           </div>
 
-          {/* 캘린더 + D-Day */}
-          <WeddingCalendar
-            dateStr={data.date}
-            preview={preview}
-            serif={serif}
-            mono={mono}
-            theme={theme}
-            bgColor={bgColor}
-          />
-
           {/* 연락하기 버튼 */}
           {!preview && (
-            <div style={{ display: "flex", justifyContent: "center", marginTop: 36 }}>
+            <div style={{ display: "flex", justifyContent: "center", marginTop: preview ? 14 : 28 }}>
               <motion.button
                 onClick={() => setContactOpen(true)}
                 whileHover={{ scale: 1.04 }}
@@ -1339,6 +1610,35 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               </motion.button>
             </div>
           )}
+
+          {/* 구분선 */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center", marginTop: preview ? 12 : 24 }}>
+            <div style={{ flex: 1, maxWidth: preview ? 32 : 56, height: 1, background: theme.flourishBg }} />
+            <span style={{ color: theme.flourishAccent, fontSize: preview ? 8 : 11 }}>✦</span>
+            <div style={{ flex: 1, maxWidth: preview ? 32 : 56, height: 1, background: theme.flourishBg }} />
+          </div>
+
+          {/* 날짜 텍스트 */}
+          <p style={{
+            fontFamily: serif,
+            fontSize: preview ? 10 : 14,
+            color: theme.textBody,
+            letterSpacing: "0.1em",
+            textAlign: "center",
+            marginTop: preview ? 8 : 16,
+          }}>
+            {data.date}
+          </p>
+
+          {/* 캘린더 + D-Day */}
+          <WeddingCalendar
+            dateStr={data.date}
+            preview={preview}
+            serif={serif}
+            mono={mono}
+            theme={theme}
+            bgColor={bgColor}
+          />
         </FadeIn>
       </section>
       </div>
@@ -1619,7 +1919,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                     <p
                       style={{
                         fontFamily: mono,
-                        fontSize: preview ? 9 : 11,
+                        fontSize: preview ? 8 : 10,
                         color: theme.textMuted,
                         letterSpacing: "0.15em",
                         textTransform: "uppercase",
@@ -1632,7 +1932,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                     <p
                       style={{
                         fontFamily: serif,
-                        fontSize: preview ? 12 : 15,
+                        fontSize: preview ? 11 : 13,
                         color: theme.textBody,
                         lineHeight: 1.9,
                       }}
@@ -1665,7 +1965,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                     <p
                       style={{
                         fontFamily: mono,
-                        fontSize: preview ? 9 : 11,
+                        fontSize: preview ? 8 : 10,
                         color: theme.textMuted,
                         letterSpacing: "0.15em",
                         textTransform: "uppercase",
@@ -1678,7 +1978,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                     <p
                       style={{
                         fontFamily: serif,
-                        fontSize: preview ? 12 : 15,
+                        fontSize: preview ? 11 : 13,
                         color: theme.textBody,
                         lineHeight: 1.9,
                       }}
@@ -1711,7 +2011,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                     <p
                       style={{
                         fontFamily: mono,
-                        fontSize: preview ? 9 : 11,
+                        fontSize: preview ? 8 : 10,
                         color: theme.textMuted,
                         letterSpacing: "0.15em",
                         textTransform: "uppercase",
@@ -1724,7 +2024,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                     <p
                       style={{
                         fontFamily: serif,
-                        fontSize: preview ? 12 : 15,
+                        fontSize: preview ? 11 : 13,
                         color: theme.textBody,
                         lineHeight: 1.9,
                       }}
@@ -1752,13 +2052,24 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             <p
               style={{
                 ...slabel,
-                fontSize: preview ? 12 : 22,
+                fontSize: preview ? 9 : 14,
                 letterSpacing: "0.18em",
-                color: "#9a9a9a",
-                marginBottom: preview ? 16 : 36,
+                color: theme.textMuted,
+                marginBottom: preview ? 4 : 8,
               }}
             >
               마음 전하실 곳
+            </p>
+            <p style={{
+              fontFamily: serif,
+              fontSize: preview ? 8 : 11,
+              color: theme.textLabel,
+              textAlign: "center",
+              letterSpacing: "0.03em",
+              lineHeight: 1.7,
+              marginBottom: preview ? 12 : 24,
+            }}>
+              참석이 어려우신 분들께서는{"\n"}마음만 전달해 주시면 감사하겠습니다.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: preview ? 8 : 12 }}>
 
@@ -1797,7 +2108,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                           fontWeight: 400,
                         }}
                       >
-                        신랑측 계좌번호
+                        신랑측에게
                       </p>
                     </div>
                     {!preview && (
@@ -1917,7 +2228,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                           fontWeight: 400,
                         }}
                       >
-                        신부측 계좌번호
+                        신부측에게
                       </p>
                     </div>
                     {!preview && (
@@ -2008,6 +2319,18 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       </div>
       )}
 
+      {/* ── § 8  방명록 ───────────────────────────────────────────────────── */}
+      {data.showGuestBook !== false && (
+      <div style={{ order: orderOf("guestbook") }}>
+        <section style={{ ...sp }}>
+          <FadeIn>
+            <p style={{ ...slabel, marginBottom: preview ? 6 : 14 }}>방 명 록</p>
+            <GuestBook preview={preview} serif={serif} mono={mono} theme={theme} />
+          </FadeIn>
+        </section>
+      </div>
+      )}
+
       </div>{/* end 섹션 컨테이너 */}
 
       {/* ── FOOTER ───────────────────────────────────────────────────────── */}
@@ -2070,6 +2393,9 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       {data.particleEffect && data.particleEffect !== "none" && (
         <FallingParticles type={data.particleEffect} preview={preview} />
       )}
+
+      {/* ── DARK BG GRAIN OVERLAY ──────────────────────────────────────────── */}
+      {!LIGHT_BG_SET.has(bgColor.toLowerCase()) && <FilmGrain />}
     </div>
   );
 }

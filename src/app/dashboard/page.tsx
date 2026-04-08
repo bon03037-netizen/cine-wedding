@@ -152,10 +152,10 @@ function buildTime(d: DateState) {
 // ── Default Data ──────────────────────────────────────────────────────────────
 
 const DEFAULT: WeddingData = {
-  groomName: "이호진",
-  brideName: "차나리",
-  groomParents: { fatherLastName: "이", fatherFirstName: "창영", motherLastName: "정", motherFirstName: "경란" },
-  brideParents: { fatherLastName: "차", fatherFirstName: "강호", motherLastName: "길", motherFirstName: "복동" },
+  groomName: "000",
+  brideName: "000",
+  groomParents: { fatherLastName: "000", fatherFirstName: "", motherLastName: "000", motherFirstName: "" },
+  brideParents: { fatherLastName: "000", fatherFirstName: "", motherLastName: "000", motherFirstName: "" },
   date: buildDate(INIT_DATE),
   time: buildTime(INIT_DATE),
   venue: "그랜드 인터컨티넨탈 서울 파르나스",
@@ -163,8 +163,8 @@ const DEFAULT: WeddingData = {
   roadAddress: "서울특별시 강남구 테헤란로 521",
   greeting:
     "저희 두 사람이 사랑을 맺어\n한 가정을 이루게 되었습니다.\n\n두 사람이 걸어온 길이 하나로 모여\n이제 함께 새로운 길을 걷고자 합니다.\n\n바쁘시더라도 자리를 빛내주시어\n저희의 첫 출발을 축복해 주시면\n더없는 기쁨이 되겠습니다.",
-  groomAccount: { bank: "국민은행", number: "123-456-78-901234", holder: "이호진" },
-  brideAccount: { bank: "신한은행", number: "110-123-456789", holder: "차나리" },
+  groomAccount: { bank: "국민은행", number: "123-456-78-901234", holder: "000" },
+  brideAccount: { bank: "신한은행", number: "110-123-456789", holder: "000" },
   transport: {
     subway: "2호선 삼성역 5·6번 출구에서 도보 5분",
     bus: "145 · 148 · 341번 삼성역 하차 후 도보 3분",
@@ -177,28 +177,30 @@ const DEFAULT: WeddingData = {
   showMap: true,
   showTransport: true,
   showAccounts: true,
+  showGuestBook: true,
   sectionsOrder: [...DEFAULT_SECTIONS_ORDER],
   fontFamily: "nanum-myeongjo",
-  mainBackgroundColor: "#0a0a0a",
+  mainBackgroundColor: "#f8f8f4",
   accounts: {
-    groom:       { bank: "국민은행", accountNumber: "123-456-78-901234", name: "이호진" },
-    groomFather: { bank: "신한은행", accountNumber: "110-123-456789", name: "이창영" },
-    groomMother: { bank: "", accountNumber: "", name: "" },
-    bride:       { bank: "신한은행", accountNumber: "110-123-456789", name: "차나리" },
-    brideFather: { bank: "국민은행", accountNumber: "123-456-78-901234", name: "차강호" },
-    brideMother: { bank: "", accountNumber: "", name: "" },
+    groom:       { bank: "국민은행", accountNumber: "123-456-78-901234", name: "000" },
+    groomFather: { bank: "신한은행", accountNumber: "110-123-456789", name: "000" },
+    groomMother: { bank: "하나은행", accountNumber: "123-456789-01234", name: "000" },
+    bride:       { bank: "신한은행", accountNumber: "110-123-456789", name: "000" },
+    brideFather: { bank: "국민은행", accountNumber: "123-456-78-901234", name: "000" },
+    brideMother: { bank: "우리은행", accountNumber: "1002-123-456789", name: "000" },
   },
 };
 
 // ── 섹션 메타 ────────────────────────────────────────────────────────────────
 
 const SECTION_LABELS: Record<SectionId, string> = {
-  greeting: "초대 문구",
-  couple: "신랑신부 & 혼주",
-  gallery: "갤러리",
-  map: "예식장 & 지도",
+  greeting:  "초대 문구",
+  couple:    "신랑신부 & 혼주",
+  gallery:   "갤러리",
+  map:       "예식장 & 지도",
   transport: "교통 안내",
-  accounts: "계좌 정보",
+  accounts:  "계좌 정보",
+  guestbook: "방명록",
 };
 
 const SECTION_VISIBILITY: Record<SectionId, keyof WeddingData> = {
@@ -208,6 +210,7 @@ const SECTION_VISIBILITY: Record<SectionId, keyof WeddingData> = {
   map:       "showMap",
   transport: "showTransport",
   accounts:  "showAccounts",
+  guestbook: "showGuestBook",
 };
 
 // 에디터 탭 ID → WeddingData 가시성 키 매핑
@@ -1189,7 +1192,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ── Left: Preview ── */}
-        <div className="flex-1 flex items-center justify-center bg-[#f4f4f4] rounded-2xl p-8">
+        <div className="flex-1 flex items-start justify-center overflow-y-auto bg-[#f4f4f4] rounded-2xl p-8">
           <div className="flex flex-col items-center gap-3">
             <p className="text-[10px] text-gray-400 tracking-[0.25em] uppercase font-mono">Live Preview</p>
 
