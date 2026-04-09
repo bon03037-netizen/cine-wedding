@@ -31,7 +31,15 @@ export default function KakaoMap({ address }: KakaoMapProps) {
           if (searchStatus === kakao.maps.services.Status.OK) {
             const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
             if (mapRef.current) {
-              const map = new kakao.maps.Map(mapRef.current, { center: coords, level: 3 });
+              const map = new kakao.maps.Map(mapRef.current, {
+              center: coords,
+              level: 3,
+              draggable: false,
+              scrollwheel: false,
+              disableDoubleClickZoom: true,
+              keyboardShortcuts: false,
+            });
+            map.setZoomable(false);
               new kakao.maps.Marker({ map, position: coords });
               
               const ro = new ResizeObserver(() => {

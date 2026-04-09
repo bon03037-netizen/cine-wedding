@@ -181,6 +181,7 @@ const DEFAULT: WeddingData = {
   showTransport: true,
   showAccounts: true,
   showGuestBook: true,
+  guestbookMode: "tree" as const,
   sectionsOrder: [...DEFAULT_SECTIONS_ORDER],
   fontFamily: "nanum-myeongjo",
   mainBackgroundColor: "#f8f8f4",
@@ -717,7 +718,7 @@ export default function DashboardPage() {
               </div>
 
               {/* SVG 장식 모양 선택 */}
-              <p className="text-[10px] text-gray-400 font-mono tracking-widest mt-5 mb-2">히어로 장식 모양</p>
+              <p className="text-[10px] text-gray-400 font-mono tracking-widest mt-5 mb-2">인트로 장식 모양</p>
               <div className="grid grid-cols-4 gap-2">
                 {[
                   { id: "heart",  icon: "♥", label: "하트" },
@@ -739,6 +740,32 @@ export default function DashboardPage() {
                   </button>
                 ))}
               </div>
+
+              {/* 방명록 모드 */}
+              {data.showGuestBook !== false && (
+                <div className="mt-3">
+                  <p className="text-[10px] text-gray-400 font-mono tracking-widest mb-2">방명록 스타일</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {([
+                      { id: "tree", icon: "🌳", label: "나무" },
+                      { id: "rose", icon: "🌹", label: "장미 덩굴" },
+                    ] as const).map((opt) => (
+                      <button
+                        key={opt.id}
+                        onClick={() => set("guestbookMode", opt.id)}
+                        className={`flex items-center gap-2 p-2.5 rounded-lg border text-left transition-all ${
+                          (data.guestbookMode || "tree") === opt.id
+                            ? "border-gray-900 bg-gray-900 text-white"
+                            : "border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        <span className="text-[18px]">{opt.icon}</span>
+                        <p className="text-xs font-medium">{opt.label}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </AccSection>
 
             {/* 섹션 순서 변경 */}

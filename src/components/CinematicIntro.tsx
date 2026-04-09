@@ -150,8 +150,8 @@ export default function CinematicIntro({
   const complete = useCallback(() => onComplete(), [onComplete]);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setFading(true), 5000);
-    const t2 = setTimeout(() => complete(), 6200);
+    const t1 = setTimeout(() => setFading(true), 1400);
+    const t2 = setTimeout(() => complete(), 2000);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
@@ -162,7 +162,7 @@ export default function CinematicIntro({
     <motion.div
       initial={{ opacity: 1 }}
       animate={{ opacity: fading ? 0 : 1 }}
-      transition={{ duration: 1.2, ease: "easeInOut" }}
+      transition={{ duration: 0.6, ease: "easeInOut" }}
       style={{
         position: contained ? "absolute" : "fixed",
         inset: 0,

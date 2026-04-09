@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useMemo } from "react";
+import React, { useRef, useState, useMemo, useEffect, useContext, createContext } from "react";
 import {
   motion,
   AnimatePresence,
@@ -83,6 +83,7 @@ export interface WeddingData {
   bridePhone?: string;
   // GuestBook section visibility
   showGuestBook?: boolean;
+  guestbookMode?: "tree" | "rose";
   // Hero SVG shape
   heroSvgShape?: "heart" | "laurel" | "lace" | "lark";
   // Extended accounts (마음 전하실 곳)
@@ -113,6 +114,9 @@ export function parentsLine(parents: ParentInfo, relation: "아들" | "딸") {
 }
 
 // ── Shared Atoms ──────────────────────────────────────────────────────────────
+
+// ── Scroll-reset animation context ────────────────────────────────────────────
+const AnimResetCtx = createContext(0);
 
 function Perforations({ count = 10 }: { count?: number }) {
   return (
@@ -175,14 +179,27 @@ function FilmGrain({ strong = false, dark = false }: { strong?: boolean; dark?: 
 
 
 function FadeIn({ children, delay = 0, style }: { children: React.ReactNode; delay?: number; style?: React.CSSProperties }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.1 });
+  const resetKey = useContext(AnimResetCtx);
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: false, amount: 0.1 });
+  const [shown, setShown] = useState(false);
+
+  // When user reaches top, resetKey increments → hide all until re-entered
+  useEffect(() => {
+    setShown(false);
+  }, [resetKey]);
+
+  // When element enters viewport, show it (don't hide on exit)
+  useEffect(() => {
+    if (isInView) setShown(true);
+  }, [isInView]);
+
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 80 }} // 45에서 80으로! 더 밑에서 올라옵니다.
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 1.8, delay, ease: [0.16, 1, 0.3, 1] }} // 시간을 1.3에서 1.8로 늘려 훨씬 우아하게!
+      initial={{ opacity: 0, y: 80 }}
+      animate={shown ? { opacity: 1, y: 0 } : { opacity: 0, y: 80 }}
+      transition={{ duration: 1.8, delay, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
       style={style}
     >
       {children}
@@ -862,52 +879,62 @@ interface GuestMsg {
   name: string;
   message: string;
   at: string;
+  pw: string;
 }
 
 const MOCK_MSGS: GuestMsg[] = [
-  { id: 1, name: "김민준", message: "축하해요! 행복한 가정 이루세요 ♥", at: "2026.04.05" },
-  { id: 2, name: "이서연", message: "항상 사랑하고 행복하게 살아요!", at: "2026.04.06" },
-  { id: 3, name: "박지호", message: "두 분의 새 출발을 진심으로 축하합니다", at: "2026.04.06" },
-  { id: 4, name: "최유나", message: "오래오래 행복하세요 :)", at: "2026.04.07" },
-  { id: 5, name: "정태영", message: "멋진 결혼 축하드려요!", at: "2026.04.07" },
-  { id: 6, name: "한소희", message: "평생 함께 웃으며 살아요", at: "2026.04.08" },
+  { id: 1, name: "김민준", message: "축하해요! 행복한 가정 이루세요 ♥", at: "2026.04.05", pw: "" },
+  { id: 2, name: "이서연", message: "항상 사랑하고 행복하게 살아요!", at: "2026.04.06", pw: "" },
+  { id: 3, name: "박지호", message: "두 분의 새 출발을 진심으로 축하합니다", at: "2026.04.06", pw: "" },
+  { id: 4, name: "최유나", message: "오래오래 행복하세요 :)", at: "2026.04.07", pw: "" },
+  { id: 5, name: "정태영", message: "멋진 결혼 축하드려요!", at: "2026.04.07", pw: "" },
+  { id: 6, name: "한소희", message: "평생 함께 웃으며 살아요", at: "2026.04.08", pw: "" },
 ];
 
-// Polaroid hanging anchor points in SVG viewBox coords (300 × 320)
-const POLAROID_ANCHORS = [
-  { x: 150, y: 52, rot: -6 },
-  { x: 68,  y: 108, rot: -18 },
-  { x: 232, y: 104, rot: 16 },
-  { x: 42,  y: 78, rot: -24 },
-  { x: 258, y: 74, rot: 20 },
-  { x: 112, y: 62, rot: -10 },
-  { x: 188, y: 58, rot: 12 },
-  { x: 80,  y: 170, rot: -28 },
-  { x: 220, y: 166, rot: 24 },
+// ── Memo anchor positions on tree (SVG 300×320 viewBox) ──────────────────────
+const MEMO_ANCHORS = [
+  { x: 150, y: 50,  rot: -6  },
+  { x: 68,  y: 105, rot: -18 },
+  { x: 232, y: 100, rot: 16  },
+  { x: 42,  y: 75,  rot: -24 },
+  { x: 258, y: 70,  rot: 20  },
+  { x: 110, y: 60,  rot: -10 },
+  { x: 190, y: 56,  rot: 12  },
+  { x: 78,  y: 168, rot: -28 },
+  { x: 222, y: 163, rot: 24  },
 ];
 
-function PolaroidTreeSVG({ theme }: { theme: SectionTheme }) {
-  const trunk    = "#7a4f2c";
-  const branch   = "#8b6040";
-  const darkLeaf = "#3d6b42";
-  const midLeaf  = "#4e8454";
-  const ltLeaf   = "#63a06a";
-  const hiLeaf   = "#7dbf80";
+// ── Rose vine anchor positions (SVG 300×360 viewBox) ─────────────────────────
+const ROSE_ANCHORS = [
+  { x: 80,  y: 310, rot: 0   },
+  { x: 220, y: 280, rot: 15  },
+  { x: 60,  y: 240, rot: -10 },
+  { x: 240, y: 210, rot: 20  },
+  { x: 75,  y: 170, rot: -15 },
+  { x: 225, y: 140, rot: 18  },
+  { x: 85,  y: 100, rot: -20 },
+  { x: 215, y: 75,  rot: 22  },
+  { x: 150, y: 45,  rot: 5   },
+];
+
+function LushTreeSVG() {
+  const trunk  = "#7a4f2c";
+  const branch = "#8b6040";
+  const dk     = "#3d6b42";
+  const md     = "#4e8454";
+  const lt     = "#63a06a";
+  const hi     = "#7dbf80";
 
   return (
     <svg viewBox="0 0 300 320" style={{ width: "100%", height: "100%" }} fill="none">
-      {/* ── trunk ── */}
       <path d="M150 320 C148 295 146 268 150 238 C154 208 152 185 150 160" stroke={trunk} strokeWidth="11" strokeLinecap="round"/>
-      {/* roots */}
       <path d="M150 300 C135 308 118 314 104 318" stroke={trunk} strokeWidth="4.5" strokeLinecap="round"/>
       <path d="M150 300 C165 310 182 316 196 320" stroke={trunk} strokeWidth="4.5" strokeLinecap="round"/>
-      {/* ── main branches ── */}
       <path d="M150 200 C128 180 98 160 68 140" stroke={branch} strokeWidth="8" strokeLinecap="round"/>
       <path d="M150 200 C172 180 202 160 232 140" stroke={branch} strokeWidth="8" strokeLinecap="round"/>
       <path d="M150 172 C136 150 116 132 92 115" stroke={branch} strokeWidth="6" strokeLinecap="round"/>
       <path d="M150 172 C164 150 184 132 208 115" stroke={branch} strokeWidth="6" strokeLinecap="round"/>
       <path d="M150 185 C150 158 150 132 150 105" stroke={branch} strokeWidth="5.5" strokeLinecap="round"/>
-      {/* ── sub branches ── */}
       <path d="M68 140 C52 120 38 105 28 88" stroke={branch} strokeWidth="3.5" strokeLinecap="round"/>
       <path d="M68 140 C62 118 56 98 48 78" stroke={branch} strokeWidth="3" strokeLinecap="round"/>
       <path d="M92 115 C78 95 65 78 55 60" stroke={branch} strokeWidth="2.8" strokeLinecap="round"/>
@@ -918,63 +945,137 @@ function PolaroidTreeSVG({ theme }: { theme: SectionTheme }) {
       <path d="M208 115 C202 92 198 70 196 48" stroke={branch} strokeWidth="2.5" strokeLinecap="round"/>
       <path d="M232 140 C248 120 262 105 272 88" stroke={branch} strokeWidth="3.5" strokeLinecap="round"/>
       <path d="M232 140 C238 118 244 98 252 78" stroke={branch} strokeWidth="3" strokeLinecap="round"/>
-      {/* ── leaf clusters ── */}
-      {/* top canopy */}
-      <ellipse cx="150" cy="42" rx="50" ry="46" fill={midLeaf} opacity="0.92"/>
-      <ellipse cx="122" cy="55" rx="40" ry="36" fill={darkLeaf} opacity="0.88"/>
-      <ellipse cx="178" cy="52" rx="40" ry="34" fill={darkLeaf} opacity="0.9"/>
-      <ellipse cx="150" cy="28" rx="36" ry="30" fill={ltLeaf} opacity="0.85"/>
-      <ellipse cx="108" cy="40" rx="28" ry="25" fill={ltLeaf} opacity="0.8"/>
-      <ellipse cx="192" cy="38" rx="28" ry="24" fill={ltLeaf} opacity="0.82"/>
-      <ellipse cx="150" cy="18" rx="24" ry="22" fill={hiLeaf} opacity="0.7"/>
-      {/* left cluster */}
-      <ellipse cx="46" cy="72" rx="34" ry="30" fill={midLeaf} opacity="0.9"/>
-      <ellipse cx="30" cy="62" rx="26" ry="24" fill={darkLeaf} opacity="0.85"/>
-      <ellipse cx="62" cy="62" rx="26" ry="23" fill={ltLeaf} opacity="0.82"/>
-      <ellipse cx="44" cy="52" rx="20" ry="18" fill={hiLeaf} opacity="0.7"/>
-      {/* left-mid cluster */}
-      <ellipse cx="70" cy="108" rx="32" ry="28" fill={midLeaf} opacity="0.88"/>
-      <ellipse cx="52" cy="98" rx="25" ry="22" fill={darkLeaf} opacity="0.83"/>
-      <ellipse cx="88" cy="100" rx="24" ry="21" fill={ltLeaf} opacity="0.8"/>
-      {/* right cluster */}
-      <ellipse cx="254" cy="72" rx="34" ry="30" fill={midLeaf} opacity="0.9"/>
-      <ellipse cx="270" cy="62" rx="26" ry="24" fill={darkLeaf} opacity="0.85"/>
-      <ellipse cx="238" cy="62" rx="26" ry="23" fill={ltLeaf} opacity="0.82"/>
-      <ellipse cx="256" cy="52" rx="20" ry="18" fill={hiLeaf} opacity="0.7"/>
-      {/* right-mid cluster */}
-      <ellipse cx="230" cy="108" rx="32" ry="28" fill={midLeaf} opacity="0.88"/>
-      <ellipse cx="248" cy="98" rx="25" ry="22" fill={darkLeaf} opacity="0.83"/>
-      <ellipse cx="212" cy="100" rx="24" ry="21" fill={ltLeaf} opacity="0.8"/>
-      {/* center-top branch clusters */}
-      <ellipse cx="124" cy="48" rx="22" ry="20" fill={midLeaf} opacity="0.82"/>
-      <ellipse cx="176" cy="45" rx="22" ry="19" fill={midLeaf} opacity="0.82"/>
-      {/* lower left cluster */}
-      <ellipse cx="78" cy="165" rx="26" ry="23" fill={darkLeaf} opacity="0.82"/>
-      <ellipse cx="60" cy="178" rx="20" ry="18" fill={midLeaf} opacity="0.78"/>
-      {/* lower right cluster */}
-      <ellipse cx="222" cy="165" rx="26" ry="23" fill={darkLeaf} opacity="0.82"/>
-      <ellipse cx="240" cy="178" rx="20" ry="18" fill={midLeaf} opacity="0.78"/>
-      {/* leaf highlight gloss */}
-      <ellipse cx="150" cy="35" rx="20" ry="16" fill={hiLeaf} opacity="0.28"/>
-      <ellipse cx="46" cy="66" rx="14" ry="12" fill={hiLeaf} opacity="0.25"/>
-      <ellipse cx="254" cy="66" rx="14" ry="12" fill={hiLeaf} opacity="0.25"/>
+      <ellipse cx="150" cy="42" rx="50" ry="46" fill={md} opacity="0.92"/>
+      <ellipse cx="122" cy="55" rx="40" ry="36" fill={dk} opacity="0.88"/>
+      <ellipse cx="178" cy="52" rx="40" ry="34" fill={dk} opacity="0.9"/>
+      <ellipse cx="150" cy="28" rx="36" ry="30" fill={lt} opacity="0.85"/>
+      <ellipse cx="108" cy="40" rx="28" ry="25" fill={lt} opacity="0.8"/>
+      <ellipse cx="192" cy="38" rx="28" ry="24" fill={lt} opacity="0.82"/>
+      <ellipse cx="150" cy="18" rx="24" ry="22" fill={hi} opacity="0.7"/>
+      <ellipse cx="46"  cy="72"  rx="34" ry="30" fill={md} opacity="0.9"/>
+      <ellipse cx="30"  cy="62"  rx="26" ry="24" fill={dk} opacity="0.85"/>
+      <ellipse cx="62"  cy="62"  rx="26" ry="23" fill={lt} opacity="0.82"/>
+      <ellipse cx="44"  cy="52"  rx="20" ry="18" fill={hi} opacity="0.7"/>
+      <ellipse cx="70"  cy="108" rx="32" ry="28" fill={md} opacity="0.88"/>
+      <ellipse cx="52"  cy="98"  rx="25" ry="22" fill={dk} opacity="0.83"/>
+      <ellipse cx="88"  cy="100" rx="24" ry="21" fill={lt} opacity="0.8"/>
+      <ellipse cx="254" cy="72"  rx="34" ry="30" fill={md} opacity="0.9"/>
+      <ellipse cx="270" cy="62"  rx="26" ry="24" fill={dk} opacity="0.85"/>
+      <ellipse cx="238" cy="62"  rx="26" ry="23" fill={lt} opacity="0.82"/>
+      <ellipse cx="256" cy="52"  rx="20" ry="18" fill={hi} opacity="0.7"/>
+      <ellipse cx="230" cy="108" rx="32" ry="28" fill={md} opacity="0.88"/>
+      <ellipse cx="248" cy="98"  rx="25" ry="22" fill={dk} opacity="0.83"/>
+      <ellipse cx="212" cy="100" rx="24" ry="21" fill={lt} opacity="0.8"/>
+      <ellipse cx="124" cy="48"  rx="22" ry="20" fill={md} opacity="0.82"/>
+      <ellipse cx="176" cy="45"  rx="22" ry="19" fill={md} opacity="0.82"/>
+      <ellipse cx="78"  cy="165" rx="26" ry="23" fill={dk} opacity="0.82"/>
+      <ellipse cx="60"  cy="178" rx="20" ry="18" fill={md} opacity="0.78"/>
+      <ellipse cx="222" cy="165" rx="26" ry="23" fill={dk} opacity="0.82"/>
+      <ellipse cx="240" cy="178" rx="20" ry="18" fill={md} opacity="0.78"/>
+      <ellipse cx="150" cy="35"  rx="20" ry="16" fill={hi} opacity="0.28"/>
+      <ellipse cx="46"  cy="66"  rx="14" ry="12" fill={hi} opacity="0.25"/>
+      <ellipse cx="254" cy="66"  rx="14" ry="12" fill={hi} opacity="0.25"/>
+    </svg>
+  );
+}
+
+function RoseSVG({ x, cy, rot, bloom }: { x: number; cy: number; rot: number; bloom: boolean }) {
+  // A simple 5-petal rose
+  const petal = (angle: number) => {
+    const rad = (angle * Math.PI) / 180;
+    const px = Math.cos(rad) * 7;
+    const py = Math.sin(rad) * 7;
+    return (
+      <ellipse
+        key={angle}
+        cx={px}
+        cy={py - 4}
+        rx="4.5"
+        ry="6.5"
+        fill="#c0392b"
+        opacity="0.88"
+        transform={`rotate(${angle}, 0, 0)`}
+      />
+    );
+  };
+  return (
+    <motion.g
+      transform={`translate(${x}, ${cy}) rotate(${rot})`}
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: bloom ? 1 : 0, opacity: bloom ? 1 : 0 }}
+      transition={{ duration: 0.8, ease: [0.34, 1.56, 0.64, 1] }}
+      style={{ originX: "0px", originY: "0px" }}
+    >
+      {[0, 72, 144, 216, 288].map((a) => petal(a))}
+      <circle cx="0" cy="0" r="3.5" fill="#7b0c0c" />
+      <circle cx="0" cy="0" r="1.8" fill="#a01818" opacity="0.6" />
+    </motion.g>
+  );
+}
+
+function RoseVineSVG({ count }: { count: number }) {
+  return (
+    <svg viewBox="0 0 300 360" style={{ width: "100%", height: "100%" }} fill="none">
+      {/* Main vine */}
+      <path
+        d="M150 360 C130 340 160 310 140 280 C120 250 170 220 150 190 C130 160 165 130 145 100 C125 70 155 45 150 20"
+        stroke="#5a8a30"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+      {/* Side tendrils */}
+      <path d="M140 280 C110 270 90 260 80 245" stroke="#5a8a30" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M140 280 C155 268 175 258 185 242" stroke="#5a8a30" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M148 190 C118 180 98 168 85 152" stroke="#5a8a30" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M148 190 C168 178 188 168 198 155" stroke="#5a8a30" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M146 100 C122 90 105 78 95 63" stroke="#5a8a30" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M146 100 C166 90 182 78 195 63" stroke="#5a8a30" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M155 330 C175 322 195 315 210 308" stroke="#5a8a30" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M145 330 C125 322 105 315 90 308" stroke="#5a8a30" strokeWidth="2" strokeLinecap="round"/>
+      {/* Leaves */}
+      {[
+        { x: 80,  y: 245, r: 25 }, { x: 185, y: 242, r: -20 },
+        { x: 85,  y: 152, r: 30 }, { x: 198, y: 155, r: -25 },
+        { x: 95,  y: 63,  r: 20 }, { x: 195, y: 63,  r: -20 },
+        { x: 210, y: 308, r: -15 }, { x: 90,  y: 308, r: 15  },
+      ].map((l, i) => (
+        <ellipse
+          key={i}
+          cx={l.x}
+          cy={l.y}
+          rx="12"
+          ry="7"
+          fill="#4a8f28"
+          opacity="0.75"
+          transform={`rotate(${l.r}, ${l.x}, ${l.y})`}
+        />
+      ))}
+      {/* Roses */}
+      {ROSE_ANCHORS.slice(0, count).map((a, i) => (
+        <RoseSVG key={i} x={a.x} cy={a.y} rot={a.rot} bloom={i < count} />
+      ))}
     </svg>
   );
 }
 
 function GuestBook({
-  preview, serif, mono, theme,
+  preview, serif, mono, theme, mode,
 }: {
   preview: boolean;
   serif: string;
   mono: string;
   theme: SectionTheme;
+  mode: "tree" | "rose";
 }) {
   const [msgs, setMsgs] = useState<GuestMsg[]>(MOCK_MSGS);
   const [viewerOpen, setViewerOpen] = useState(false);
-  const [viewerIndex, setViewerIndex] = useState(0);
+  const [viewerIdx, setViewerIdx] = useState(0);
   const [inputName, setInputName] = useState("");
   const [inputMsg, setInputMsg] = useState("");
+  const [inputPw, setInputPw] = useState("");
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deletePw, setDeletePw] = useState("");
+  const [deleteErr, setDeleteErr] = useState(false);
 
   const handleAdd = () => {
     const trimName = inputName.trim();
@@ -982,30 +1083,60 @@ function GuestBook({
     if (!trimName || !trimMsg) return;
     const now = new Date();
     const at = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, "0")}.${String(now.getDate()).padStart(2, "0")}`;
-    setMsgs((prev) => [...prev, { id: Date.now(), name: trimName, message: trimMsg, at }]);
+    setMsgs((prev) => [...prev, { id: Date.now(), name: trimName, message: trimMsg, at, pw: inputPw.trim() }]);
     setInputName("");
     setInputMsg("");
+    setInputPw("");
   };
 
-  // Polaroid size
-  const pw = preview ? 32 : 50;  // polaroid frame width
-  const ph = pw * 1.28;          // height (portrait)
-  const photoH = pw * 0.88;      // photo area height
+  const handleDelete = (id: number) => {
+    const m = msgs.find((x) => x.id === id);
+    if (!m) return;
+    if (m.pw && m.pw !== deletePw) {
+      setDeleteErr(true);
+      return;
+    }
+    setMsgs((prev) => prev.filter((x) => x.id !== id));
+    setDeleteId(null);
+    setDeletePw("");
+    setDeleteErr(false);
+  };
+
+  // Memo frame dimensions
+  const mw = preview ? 30 : 46;
+  const mh = mw * 1.4;
+
+  const inputStyle = {
+    fontFamily: serif,
+    fontSize: 13,
+    color: theme.textBody,
+    background: theme.cardBg,
+    border: `1px solid ${theme.cardBorder}`,
+    borderRadius: 8,
+    padding: "9px 12px",
+    outline: "none",
+    width: "100%",
+    boxSizing: "border-box" as const,
+  };
 
   return (
     <div>
-      {/* Tree + Polaroids */}
+      {/* ── Tree or Rose illustration ── */}
       <div
-        style={{ position: "relative", width: "100%", aspectRatio: "300 / 320", cursor: preview ? "default" : "pointer" }}
+        style={{
+          position: "relative",
+          width: "100%",
+          aspectRatio: mode === "tree" ? "300 / 320" : "300 / 360",
+          cursor: preview ? "default" : "pointer",
+        }}
         onClick={() => !preview && msgs.length > 0 && setViewerOpen(true)}
       >
-        <PolaroidTreeSVG theme={theme} />
+        {mode === "tree" ? <LushTreeSVG /> : <RoseVineSVG count={msgs.length} />}
 
-        {/* Polaroid frames hanging from branches */}
-        {msgs.slice(0, POLAROID_ANCHORS.length).map((m, i) => {
-          const { x, y, rot } = POLAROID_ANCHORS[i];
-          // Anchor is branch tip; polaroid hangs ~40px (in SVG coords) below
-          const hangY = y + (preview ? 18 : 28);
+        {/* ── Memo cards (tree mode) ── */}
+        {mode === "tree" && msgs.slice(0, MEMO_ANCHORS.length).map((m, i) => {
+          const { x, y, rot } = MEMO_ANCHORS[i];
+          const hangY = y + (preview ? 16 : 24);
           return (
             <React.Fragment key={m.id}>
               {/* String */}
@@ -1013,53 +1144,43 @@ function GuestBook({
                 style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
                 viewBox="0 0 300 320"
               >
-                <line
-                  x1={x} y1={y + 4}
-                  x2={x} y2={hangY - 2}
-                  stroke="#a0886a"
-                  strokeWidth={preview ? "0.8" : "1"}
-                  opacity="0.65"
-                />
+                <line x1={x} y1={y + 3} x2={x} y2={hangY - 1} stroke="#a0886a" strokeWidth={preview ? "0.8" : "1"} opacity="0.6"/>
               </svg>
-              {/* Polaroid */}
+              {/* Memo */}
               <div
                 style={{
                   position: "absolute",
-                  left: `${x / 300 * 100}%`,
-                  top: `${hangY / 320 * 100}%`,
+                  left: `${(x / 300) * 100}%`,
+                  top: `${(hangY / 320) * 100}%`,
                   transform: `translate(-50%, 0) rotate(${rot}deg)`,
-                  width: pw,
-                  background: "#fefefe",
+                  width: mw,
+                  height: mh,
+                  background: "linear-gradient(160deg, #fffef9 0%, #fdf8ee 100%)",
                   borderRadius: preview ? 2 : 3,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.22), 0 0 0 0.5px rgba(0,0,0,0.08)",
-                  padding: preview ? "2px 2px 6px" : "3px 3px 10px",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.18), 0 0 0 0.5px rgba(180,160,100,0.2)",
+                  padding: preview ? "3px" : "5px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 2,
                   pointerEvents: "none",
+                  overflow: "hidden",
                 }}
               >
-                {/* Photo area */}
-                <div style={{
-                  width: "100%",
-                  height: photoH,
-                  background: "linear-gradient(135deg, #f5ede3 0%, #ecddd0 100%)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  overflow: "hidden",
-                }}>
-                  <span style={{ fontSize: preview ? 7 : 11, color: "#d4a8a0" }}>♥</span>
-                </div>
-                {/* Name */}
+                {/* Top colored strip */}
+                <div style={{ height: preview ? 3 : 5, background: "rgba(212,175,55,0.4)", borderRadius: 1, flexShrink: 0 }}/>
                 <p style={{
-                  textAlign: "center",
                   fontFamily: mono,
                   fontSize: preview ? 4 : 6,
-                  color: "#888",
-                  marginTop: 2,
-                  lineHeight: 1.2,
+                  color: "#8a7a5a",
+                  lineHeight: 1.3,
                   overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}>
+                  display: "-webkit-box",
+                  WebkitLineClamp: preview ? 2 : 3,
+                  WebkitBoxOrient: "vertical",
+                } as React.CSSProperties}>
+                  {m.message}
+                </p>
+                <p style={{ fontFamily: mono, fontSize: preview ? 3.5 : 5, color: "#b0a88a", marginTop: "auto" }}>
                   {m.name}
                 </p>
               </div>
@@ -1070,21 +1191,16 @@ function GuestBook({
         {/* Tap hint */}
         {!preview && msgs.length > 0 && (
           <div style={{
-            position: "absolute",
-            bottom: 6,
-            right: 8,
-            fontFamily: mono,
-            fontSize: 7,
-            color: theme.textMuted,
-            letterSpacing: "0.18em",
-            pointerEvents: "none",
+            position: "absolute", bottom: 6, right: 8,
+            fontFamily: mono, fontSize: 7, color: theme.textMuted,
+            letterSpacing: "0.18em", pointerEvents: "none",
           }}>
             TAP TO READ
           </div>
         )}
       </div>
 
-      {/* Input form */}
+      {/* ── Input form ── */}
       {!preview && (
         <div style={{
           background: theme.sectionBg,
@@ -1096,153 +1212,132 @@ function GuestBook({
           gap: 10,
           marginTop: 16,
         }}>
-          <p style={{ fontFamily: mono, fontSize: 9, letterSpacing: "0.4em", color: theme.textMuted, textTransform: "uppercase", marginBottom: 2 }}>
-            방명록 남기기
+          <p style={{ fontFamily: mono, fontSize: 9, letterSpacing: "0.4em", color: theme.textMuted, textTransform: "uppercase" }}>
+            {mode === "rose" ? "장미를 꽃피워주세요 🌹" : "방명록 남기기"}
           </p>
-          <input
-            value={inputName}
-            onChange={(e) => setInputName(e.target.value)}
-            placeholder="이름"
-            style={{
-              fontFamily: serif,
-              fontSize: 13,
-              color: theme.textBody,
-              background: theme.cardBg,
-              border: `1px solid ${theme.cardBorder}`,
-              borderRadius: 8,
-              padding: "9px 12px",
-              outline: "none",
-              width: "100%",
-              boxSizing: "border-box",
-            } as React.CSSProperties}
-          />
+          <input value={inputName} onChange={(e) => setInputName(e.target.value)} placeholder="이름" style={inputStyle} />
           <textarea
             value={inputMsg}
             onChange={(e) => setInputMsg(e.target.value)}
             placeholder="축하 메시지를 남겨주세요"
             rows={3}
-            style={{
-              fontFamily: serif,
-              fontSize: 13,
-              color: theme.textBody,
-              background: theme.cardBg,
-              border: `1px solid ${theme.cardBorder}`,
-              borderRadius: 8,
-              padding: "9px 12px",
-              outline: "none",
-              resize: "none",
-              width: "100%",
-              boxSizing: "border-box",
-              lineHeight: 1.65,
-            } as React.CSSProperties}
+            style={{ ...inputStyle, resize: "none", lineHeight: 1.65 } as React.CSSProperties}
+          />
+          <input
+            value={inputPw}
+            onChange={(e) => setInputPw(e.target.value)}
+            placeholder="삭제용 비밀번호 (선택)"
+            type="password"
+            style={{ ...inputStyle, fontSize: 12 }}
           />
           <button
             onClick={handleAdd}
             style={{
-              fontFamily: mono,
-              fontSize: 11,
-              letterSpacing: "0.25em",
-              color: theme.accentColor,
-              background: "none",
-              border: `1px solid ${theme.accentColor}`,
-              borderRadius: 999,
-              padding: "9px 0",
-              cursor: "pointer",
-              textTransform: "uppercase",
+              fontFamily: mono, fontSize: 11, letterSpacing: "0.25em",
+              color: theme.accentColor, background: "none",
+              border: `1px solid ${theme.accentColor}`, borderRadius: 999,
+              padding: "9px 0", cursor: "pointer", textTransform: "uppercase",
             }}
           >
-            남기기
+            {mode === "rose" ? "장미 한 송이 피우기 🌹" : "남기기"}
           </button>
         </div>
       )}
 
-      {/* Swipe Viewer Modal */}
+      {/* ── Message Viewer Modal ── */}
       <AnimatePresence>
         {viewerOpen && (
           <>
             <motion.div
-              key="gb-backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setViewerOpen(false)}
-              style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.78)", zIndex: 400 }}
+              key="gb-bd"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => { setViewerOpen(false); setDeleteId(null); setDeletePw(""); setDeleteErr(false); }}
+              style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.82)", zIndex: 400 }}
             />
             <motion.div
-              key="gb-viewer"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.96 }}
-              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              style={{ position: "fixed", inset: 0, zIndex: 401, display: "flex", flexDirection: "column" }}
+              key="gb-modal"
+              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 280 }}
+              style={{
+                position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 401,
+                background: "#f8f8f4", borderRadius: "20px 20px 0 0",
+                maxHeight: "88vh", display: "flex", flexDirection: "column",
+              }}
             >
-              {/* Header */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 22px" }}>
-                <p style={{ fontFamily: mono, fontSize: 9, letterSpacing: "0.45em", color: "rgba(255,255,255,0.5)", textTransform: "uppercase" }}>
-                  방명록 · {msgs.length}개
-                </p>
+              {/* Modal header */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px 12px", flexShrink: 0 }}>
+                <div>
+                  <div style={{ width: 36, height: 4, background: "#d0c8c0", borderRadius: 2, margin: "0 auto 12px" }} />
+                  <p style={{ fontFamily: mono, fontSize: 9, letterSpacing: "0.45em", color: "#9a9490", textTransform: "uppercase" }}>
+                    방명록 · {msgs.length}개
+                  </p>
+                </div>
                 <button
-                  onClick={() => setViewerOpen(false)}
-                  style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                  onClick={() => { setViewerOpen(false); setDeleteId(null); setDeletePw(""); setDeleteErr(false); }}
+                  style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.1)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
                 >
-                  <X size={14} />
+                  <X size={14} color="#666" />
                 </button>
               </div>
 
-              {/* Swipeable cards */}
-              <div
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  overflowX: "scroll",
-                  scrollSnapType: "x mandatory",
-                  scrollBehavior: "smooth",
-                  padding: "0 calc(50% - 140px)",
-                  gap: 24,
-                } as React.CSSProperties}
-                className="hide-scrollbar"
-              >
-                {msgs.map((m, i) => (
+              {/* Scrollable messages */}
+              <div style={{ overflowY: "auto", padding: "0 20px 40px", display: "flex", flexDirection: "column", gap: 14 }} className="hide-scrollbar">
+                {msgs.map((m) => (
                   <div
                     key={m.id}
                     style={{
-                      scrollSnapAlign: "center",
-                      scrollSnapStop: "always",
-                      flexShrink: 0,
-                      width: 280,
-                      background: "#fefefe",
-                      borderRadius: 4,
-                      boxShadow: "0 8px 40px rgba(0,0,0,0.5)",
-                      padding: "12px 12px 28px",
-                      transform: `rotate(${(i % 3 - 1) * 2.5}deg)`,
+                      background: "#fff",
+                      borderRadius: 14,
+                      padding: "16px 18px",
+                      boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
+                      border: "1px solid rgba(0,0,0,0.06)",
                     }}
                   >
-                    {/* Large photo area */}
-                    <div style={{
-                      width: "100%",
-                      aspectRatio: "1/1",
-                      background: "linear-gradient(135deg, #f5ede3 0%, #e8d5c6 50%, #ecddd0 100%)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginBottom: 12,
-                    }}>
-                      <span style={{ fontSize: 32, color: "#d4a8a0", opacity: 0.8 }}>♥</span>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                      <div>
+                        <p style={{ fontFamily: serif, fontSize: 15, color: "#2a2a2a", fontWeight: 600 }}>{m.name}</p>
+                        <p style={{ fontFamily: mono, fontSize: 9, color: "#bbb", letterSpacing: "0.1em", marginTop: 2 }}>{m.at}</p>
+                      </div>
+                      {m.pw !== undefined && (
+                        <button
+                          onClick={() => { setDeleteId(deleteId === m.id ? null : m.id); setDeletePw(""); setDeleteErr(false); }}
+                          style={{ fontSize: 11, color: "#ccc", background: "none", border: "none", cursor: "pointer", padding: "4px 6px" }}
+                        >
+                          🗑️
+                        </button>
+                      )}
                     </div>
-                    {/* Message */}
-                    <p style={{ fontFamily: serif, fontSize: 14, color: "#2a2a2a", lineHeight: 1.75, letterSpacing: "0.03em", marginBottom: 10 }}>
+                    <p style={{ fontFamily: serif, fontSize: 14, color: "#3a3a3a", lineHeight: 1.75, letterSpacing: "0.02em" }}>
                       {m.message}
                     </p>
-                    <p style={{ fontFamily: mono, fontSize: 9, color: "#aaa", letterSpacing: "0.12em", textAlign: "right" }}>
-                      {m.name} · {m.at}
-                    </p>
+                    {/* Delete confirmation */}
+                    {deleteId === m.id && (
+                      <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center" }}>
+                        <input
+                          value={deletePw}
+                          onChange={(e) => { setDeletePw(e.target.value); setDeleteErr(false); }}
+                          placeholder={m.pw ? "비밀번호 입력" : "비밀번호 없이 삭제됩니다"}
+                          type="password"
+                          style={{
+                            flex: 1, fontFamily: mono, fontSize: 11, padding: "6px 10px",
+                            border: `1px solid ${deleteErr ? "#e53e3e" : "#ddd"}`, borderRadius: 6, outline: "none",
+                            color: "#333",
+                          }}
+                        />
+                        <button
+                          onClick={() => handleDelete(m.id)}
+                          style={{
+                            fontFamily: mono, fontSize: 10, padding: "6px 12px",
+                            background: "#e53e3e", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer",
+                          }}
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    )}
+                    {deleteErr && <p style={{ fontFamily: mono, fontSize: 10, color: "#e53e3e", marginTop: 4 }}>비밀번호가 맞지 않습니다.</p>}
                   </div>
                 ))}
-              </div>
-
-              <div style={{ textAlign: "center", padding: "14px 0 28px" }}>
-                <span style={{ fontFamily: mono, fontSize: 9, letterSpacing: "0.3em", color: "rgba(255,255,255,0.3)" }}>← SWIPE →</span>
               </div>
             </motion.div>
           </>
@@ -1461,6 +1556,22 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
   const [groomAccOpen, setGroomAccOpen] = useState(false);
   const [brideAccOpen, setBrideAccOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
+
+  // ── Scroll-reset: when user reaches page top, re-arm all FadeIn animations
+  const [animResetKey, setAnimResetKey] = useState(0);
+  useEffect(() => {
+    if (preview) return;
+    let wasAtTop = true;
+    const onScroll = () => {
+      const atTop = window.scrollY < 80;
+      if (atTop && !wasAtTop) {
+        setAnimResetKey((k) => k + 1);
+      }
+      wasAtTop = atTop;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [preview]);
   const photos = data.photos ?? [];
   // 업로드 사진이 없으면 샘플 이미지로 필름롤 표시
   const galleryPhotos = photos.length > 0 ? photos : GALLERY_SAMPLES;
@@ -1501,6 +1612,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
   const orderOf = (id: SectionId) => sectionOrder.indexOf(id);
 
   return (
+    <AnimResetCtx.Provider value={animResetKey}>
     <div
       style={{
         background: bgColor,
@@ -1643,9 +1755,9 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
           const shape = data.heroSvgShape || "heart";
           const paths: Record<string, string> = {
             heart:  "M44 18 C44 18 36 12 36 8 C36 5.8 37.8 4 40 4 C41.4 4 42.6 4.7 43.3 5.8 C43.5 6.1 43.8 6.3 44 6.3 C44.2 6.3 44.5 6.1 44.7 5.8 C45.4 4.7 46.6 4 48 4 C50.2 4 52 5.8 52 8 C52 12 44 18 44 18 Z",
-            laurel: "M36 14 C32 12 28 9 26 5 M36 14 C35 11 34 8 33 4 M52 14 C56 12 60 9 62 5 M52 14 C53 11 54 8 55 4 M36 14 C38 14 40 14 44 14 C48 14 50 14 52 14",
-            lace:   "M16 12 Q22 6 28 12 Q34 18 40 12 Q46 6 52 12 Q58 18 64 12 Q70 6 76 12",
-            lark:   "M28 12 C34 8 40 8 44 11 C48 8 54 8 60 12 M44 11 L44 19 M38 14 L44 11 L50 14",
+            laurel: "M44 20 C38 17 30 13 26 8 C24 4 27 2 30 4 C33 6 36 9 38 12 M44 20 C50 17 58 13 62 8 C64 4 61 2 58 4 C55 6 52 9 50 12 M38 12 C40 11 42 10 44 10 C46 10 48 11 50 12",
+            lace:   "M12 12 C14 7 18 4 22 7 C26 10 26 14 30 14 C34 14 34 10 38 7 C42 4 46 7 48 12 C50 17 54 20 58 17 C62 14 62 10 66 7 C70 4 74 7 76 12",
+            lark:   "M26 14 C30 9 36 8 44 11 M44 11 C52 8 58 9 62 14 M44 11 L44 20 M36 11 C38 9 41 9 44 10 M44 10 C47 9 50 9 52 11 M44 20 C42 18 40 17 38 16 M44 20 C46 18 48 17 50 16",
           };
           const isClosedShape = shape === "heart";
           return (
@@ -2293,7 +2405,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               lineHeight: 1.7,
               marginBottom: preview ? 12 : 24,
             }}>
-              참석이 어려우신 분들께서는{"\n"}마음만 전달해 주시면 감사하겠습니다.
+              멀리서도 축하의 마음을 전하고 싶으신 분들을 위해{"\n"}계좌번호를 안내드립니다. 소중한 축하에 깊이 감사드립니다.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: preview ? 8 : 12 }}>
 
@@ -2549,7 +2661,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         <section style={{ ...sp }}>
           <FadeIn>
             <p style={{ ...slabel, marginBottom: preview ? 6 : 14 }}>방 명 록</p>
-            <GuestBook preview={preview} serif={serif} mono={mono} theme={theme} />
+            <GuestBook preview={preview} serif={serif} mono={mono} theme={theme} mode={data.guestbookMode || "tree"} />
           </FadeIn>
         </section>
       </div>
@@ -2621,5 +2733,6 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       {/* ── DARK BG GRAIN OVERLAY ──────────────────────────────────────────── */}
       {!LIGHT_BG_SET.has(bgColor.toLowerCase()) && <FilmGrain dark />}
     </div>
+    </AnimResetCtx.Provider>
   );
 }
