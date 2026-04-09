@@ -904,18 +904,6 @@ const MEMO_ANCHORS = [
   { x: 222, y: 163, rot: 24  },
 ];
 
-// ── Rose vine anchor positions (SVG 300×400 viewBox) ─────────────────────────
-const ROSE_ANCHORS = [
-  { x: 65,  y: 322, rot: -12 },
-  { x: 152, y: 326, rot: 10  },
-  { x: 98,  y: 275, rot: -18 },
-  { x: 185, y: 270, rot: 15  },
-  { x: 62,  y: 213, rot: -22 },
-  { x: 152, y: 218, rot: 20  },
-  { x: 106, y: 160, rot: -15 },
-  { x: 198, y: 156, rot: 18  },
-  { x: 150, y: 8,   rot: 5   },
-];
 
 function LushTreeSVG() {
   const tr1 = "#4e2810";
@@ -1063,224 +1051,119 @@ function LushTreeSVG() {
   );
 }
 
-function RoseSVG({ x, cy, rot, bloom, idx }: { x: number; cy: number; rot: number; bloom: boolean; idx: number }) {
+// ── Rose positions on vine background image (% units) ────────────────────────
+const ROSE_POSITIONS = [
+  { x: 14, y: 18 },
+  { x: 72, y: 12 },
+  { x: 42, y: 7  },
+  { x: 88, y: 28 },
+  { x: 8,  y: 44 },
+  { x: 58, y: 34 },
+  { x: 82, y: 52 },
+  { x: 26, y: 62 },
+  { x: 50, y: 50 },
+  { x: 10, y: 76 },
+  { x: 66, y: 68 },
+  { x: 90, y: 74 },
+  { x: 32, y: 86 },
+  { x: 76, y: 88 },
+  { x: 54, y: 80 },
+  { x: 22, y: 32 },
+  { x: 94, y: 46 },
+  { x: 44, y: 72 },
+];
+
+function RoseFlower({
+  msg,
+  idx,
+  xPct,
+  yPct,
+  onClick,
+  preview,
+}: {
+  msg: GuestMsg;
+  idx: number;
+  xPct: number;
+  yPct: number;
+  onClick: () => void;
+  preview: boolean;
+}) {
+  const size = preview ? 20 : 34;
   return (
-    <motion.g
-      transform={`translate(${x}, ${cy})`}
-      initial={{ scale: 0, rotate: rot - 40, opacity: 0 }}
-      animate={{ scale: bloom ? 1 : 0, rotate: bloom ? rot : rot - 40, opacity: bloom ? 1 : 0 }}
+    <motion.div
+      initial={{ scale: 0, rotate: -50, opacity: 0 }}
+      animate={{ scale: 1, rotate: 0, opacity: 1 }}
       transition={{
         type: "spring",
-        damping: 9,
-        stiffness: 170,
-        delay: bloom ? idx * 0.13 : 0,
+        damping: 8,
+        stiffness: 155,
+        delay: idx * 0.12,
         opacity: { duration: 0.25 },
       } as any}
-      style={{ originX: "0px", originY: "0px", filter: "drop-shadow(1px 2px 4px rgba(0,0,0,0.38))" }}
+      onClick={!preview ? onClick : undefined}
+      title={!preview ? msg.name : undefined}
+      style={{
+        position: "absolute",
+        left: `${xPct}%`,
+        top: `${yPct}%`,
+        width: size,
+        height: size,
+        transform: "translate(-50%, -50%)",
+        cursor: preview ? "default" : "pointer",
+        zIndex: 2,
+        filter: preview
+          ? "drop-shadow(0 1px 2px rgba(120,0,20,0.45))"
+          : "drop-shadow(0 0 5px rgba(200,20,40,0.70)) drop-shadow(0 0 12px rgba(180,0,30,0.40))",
+      }}
     >
-      {/* Outer petals – 5, large, deep crimson */}
-      {[0, 72, 144, 216, 288].map((a) => (
-        <g key={`op${a}`} transform={`rotate(${a})`}>
-          <ellipse cx="0" cy="-14" rx="5.8" ry="9.5" fill="#7a1020" opacity="0.92"/>
-        </g>
-      ))}
-      {/* Second petal ring – 5, rotated 36°, slightly brighter */}
-      {[36, 108, 180, 252, 324].map((a) => (
-        <g key={`sp${a}`} transform={`rotate(${a})`}>
-          <ellipse cx="0" cy="-11" rx="5.2" ry="8" fill="#9c1a2e" opacity="0.88"/>
-        </g>
-      ))}
-      {/* Third petal ring – 5, small inner */}
-      {[18, 90, 162, 234, 306].map((a) => (
-        <g key={`tp${a}`} transform={`rotate(${a})`}>
-          <ellipse cx="0" cy="-7" rx="4" ry="6" fill="#be2840" opacity="0.84"/>
-        </g>
-      ))}
-      {/* Innermost petals – 5, curled */}
-      {[0, 72, 144, 216, 288].map((a) => (
-        <g key={`cp${a}`} transform={`rotate(${a})`}>
-          <ellipse cx="0" cy="-4" rx="2.5" ry="4" fill="#d64058" opacity="0.78"/>
-        </g>
-      ))}
-      {/* Center */}
-      <circle r="5" fill="#4a0810"/>
-      <circle r="3.2" fill="#6a1018" opacity="0.85"/>
-      <circle r="1.6" fill="#8a2030" opacity="0.65"/>
-      {/* Stamens */}
-      {[0, 51, 102, 153, 204, 255, 306].map((a) => (
-        <circle
-          key={a}
-          cx={Math.cos((a * Math.PI) / 180) * 2.6}
-          cy={Math.sin((a * Math.PI) / 180) * 2.6}
-          r="0.7"
-          fill="#e8c870"
-          opacity="0.65"
-        />
-      ))}
-      {/* Sepal (green base) */}
-      {[0, 120, 240].map((a) => (
-        <g key={`sep${a}`} transform={`rotate(${a})`}>
-          <ellipse cx="0" cy="6" rx="2.5" ry="4.5" fill="#2d6a2a" opacity="0.70"/>
-        </g>
-      ))}
-    </motion.g>
-  );
-}
-
-function RoseVineSVG({ count }: { count: number }) {
-  const leafColors = ["#173d22", "#235c34", "#317848", "#469460", "#1e5230"];
-  const leafDark   = ["#0e2a18", "#1a4428", "#264c30", "#32643c", "#152e1c"];
-
-  const leaves = [
-    // Junction 1 (y≈338, x≈108)
-    { x: 86,  y: 330, rx: 15, ry: 6.5, rot: -38, c: 0 },
-    { x: 78,  y: 322, rx: 12, ry: 5.5, rot: -58, c: 2 },
-    { x: 132, y: 328, rx: 14, ry: 6,   rot: 28,  c: 1 },
-    { x: 142, y: 318, rx: 11, ry: 5,   rot: 46,  c: 3 },
-    { x: 100, y: 346, rx: 10, ry: 4.5, rot: -18, c: 4 },
-    // Junction 2 (y≈285, x≈142)
-    { x: 118, y: 278, rx: 14, ry: 6,   rot: -32, c: 1 },
-    { x: 108, y: 270, rx: 12, ry: 5.5, rot: -52, c: 4 },
-    { x: 164, y: 274, rx: 15, ry: 6.5, rot: 30,  c: 0 },
-    { x: 172, y: 266, rx: 12, ry: 5,   rot: 48,  c: 2 },
-    { x: 148, y: 293, rx: 10, ry: 4,   rot: 8,   c: 3 },
-    // Junction 3 (y≈228, x≈106)
-    { x: 84,  y: 222, rx: 14, ry: 6,   rot: -34, c: 2 },
-    { x: 75,  y: 214, rx: 11, ry: 5,   rot: -54, c: 0 },
-    { x: 132, y: 220, rx: 13, ry: 5.5, rot: 32,  c: 3 },
-    { x: 142, y: 212, rx: 11, ry: 4.5, rot: 50,  c: 1 },
-    { x: 110, y: 238, rx: 9,  ry: 4,   rot: -10, c: 4 },
-    // Junction 4 (y≈173, x≈152)
-    { x: 128, y: 166, rx: 14, ry: 6,   rot: -30, c: 0 },
-    { x: 118, y: 158, rx: 11, ry: 5,   rot: -50, c: 2 },
-    { x: 176, y: 162, rx: 14, ry: 6,   rot: 34,  c: 1 },
-    { x: 186, y: 154, rx: 11, ry: 4.5, rot: 52,  c: 3 },
-    // Junction 5 (y≈118, x≈120)
-    { x: 96,  y: 110, rx: 13, ry: 5.5, rot: -36, c: 3 },
-    { x: 88,  y: 102, rx: 10, ry: 4.5, rot: -56, c: 1 },
-    { x: 150, y: 108, rx: 13, ry: 5.5, rot: 32,  c: 0 },
-    { x: 158, y: 100, rx: 10, ry: 4,   rot: 50,  c: 2 },
-    { x: 124, y: 126, rx: 9,  ry: 3.5, rot: -12, c: 4 },
-    // Junction 6 (y≈64, x≈160)
-    { x: 134, y: 58,  rx: 12, ry: 5,   rot: -28, c: 2 },
-    { x: 126, y: 50,  rx: 10, ry: 4.2, rot: -46, c: 0 },
-    { x: 188, y: 54,  rx: 12, ry: 5,   rot: 36,  c: 1 },
-    { x: 198, y: 46,  rx: 10, ry: 4,   rot: 54,  c: 3 },
-    // Along main vine extras
-    { x: 128, y: 360, rx: 10, ry: 4,   rot: -22, c: 1 },
-    { x: 168, y: 356, rx: 10, ry: 4,   rot: 20,  c: 3 },
-    { x: 152, y: 250, rx: 9,  ry: 3.5, rot: 12,  c: 4 },
-    { x: 136, y: 148, rx: 9,  ry: 3.5, rot: -16, c: 0 },
-  ];
-
-  return (
-    <svg viewBox="0 0 300 400" style={{ width: "100%", height: "100%" }} fill="none">
-      <defs>
-        <filter id="rv-rose-shadow" x="-40%" y="-40%" width="180%" height="180%">
-          <feDropShadow dx="1" dy="2" stdDeviation="2.5" floodColor="rgba(0,0,0,0.40)" />
-        </filter>
-        <filter id="rv-vine-shadow" x="-15%" y="-15%" width="130%" height="130%">
-          <feDropShadow dx="0.5" dy="1" stdDeviation="1.8" floodColor="rgba(0,0,0,0.28)" />
-        </filter>
-      </defs>
-
-      {/* Main vine – double-stroke for thickness and texture */}
-      <path
-        d="M 148 400 C 142 378 112 360 108 338 C 104 316 140 304 142 282 C 144 260 108 246 106 226 C 104 206 146 192 152 172 C 158 152 120 136 120 116 C 120 96 158 82 162 62 C 166 42 144 26 150 6"
-        stroke="#2a5218"
-        strokeWidth="8"
-        strokeLinecap="round"
-        filter="url(#rv-vine-shadow)"
-      />
-      <path
-        d="M 148 400 C 142 378 112 360 108 338 C 104 316 140 304 142 282 C 144 260 108 246 106 226 C 104 206 146 192 152 172 C 158 152 120 136 120 116 C 120 96 158 82 162 62 C 166 42 144 26 150 6"
-        stroke="#4a8832"
-        strokeWidth="4.5"
-        strokeLinecap="round"
-        opacity="0.55"
-      />
-      <path
-        d="M 148 400 C 142 378 112 360 108 338 C 104 316 140 304 142 282 C 144 260 108 246 106 226 C 104 206 146 192 152 172 C 158 152 120 136 120 116 C 120 96 158 82 162 62 C 166 42 144 26 150 6"
-        stroke="#70b058"
-        strokeWidth="2"
-        strokeLinecap="round"
-        opacity="0.25"
-      />
-
-      {/* Left branches */}
-      <path d="M 108 338 C 92 330 76 324 65 320" stroke="#326820" strokeWidth="5" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
-      <path d="M 108 338 C 92 330 76 324 65 320" stroke="#5a9840" strokeWidth="2.5" strokeLinecap="round" opacity="0.4"/>
-      <path d="M 106 226 C 90 220 74 214 62 210" stroke="#326820" strokeWidth="4.5" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
-      <path d="M 106 226 C 90 220 74 214 62 210" stroke="#5a9840" strokeWidth="2" strokeLinecap="round" opacity="0.4"/>
-      <path d="M 152 172 C 135 164 118 158 106 156" stroke="#326820" strokeWidth="4.5" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
-      <path d="M 120 116 C 104 108 88 102 74 100" stroke="#326820" strokeWidth="4" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
-      <path d="M 162 62 C 146 54 128 48 106 46" stroke="#326820" strokeWidth="3.5" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
-
-      {/* Right branches */}
-      <path d="M 108 338 C 124 328 138 324 152 322" stroke="#326820" strokeWidth="4.5" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
-      <path d="M 108 338 C 124 328 138 324 152 322" stroke="#5a9840" strokeWidth="2" strokeLinecap="round" opacity="0.4"/>
-      <path d="M 142 282 C 158 274 174 268 185 266" stroke="#326820" strokeWidth="4.5" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
-      <path d="M 106 226 C 122 218 138 214 152 214" stroke="#326820" strokeWidth="4.5" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
-      <path d="M 152 172 C 168 162 184 156 198 152" stroke="#326820" strokeWidth="4.5" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
-      <path d="M 120 116 C 136 108 152 104 168 106" stroke="#326820" strokeWidth="4" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
-      <path d="M 162 62 C 178 54 196 48 212 44" stroke="#326820" strokeWidth="3.5" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
-
-      {/* Curling tendrils */}
-      <path d="M 65 320 C 52 314 44 306 50 298 C 56 290 66 296 60 303" stroke="#4a8030" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
-      <path d="M 62 210 C 50 204 42 196 48 188 C 54 180 64 186 58 193" stroke="#4a8030" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
-      <path d="M 185 266 C 198 260 206 251 200 243 C 194 235 184 242 190 249" stroke="#4a8030" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
-      <path d="M 198 152 C 210 146 218 136 212 128 C 206 120 196 128 202 135" stroke="#4a8030" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
-      <path d="M 212 44 C 224 38 232 28 226 20 C 220 12 210 20 216 27" stroke="#4a8030" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
-      <path d="M 106 46 C 94 40 86 30 92 22 C 98 14 108 22 102 29" stroke="#4a8030" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
-
-      {/* Leaves – dark underside shadow layer */}
-      {leaves.map((l, i) => (
-        <ellipse
-          key={`ls${i}`}
-          cx={l.x + 1}
-          cy={l.y + 1.5}
-          rx={l.rx}
-          ry={l.ry}
-          fill={leafDark[l.c]}
-          opacity={0.28}
-          transform={`rotate(${l.rot}, ${l.x + 1}, ${l.y + 1.5})`}
-        />
-      ))}
-      {/* Leaves – main color */}
-      {leaves.map((l, i) => (
-        <ellipse
-          key={`lm${i}`}
-          cx={l.x}
-          cy={l.y}
-          rx={l.rx}
-          ry={l.ry}
-          fill={leafColors[l.c]}
-          opacity={0.72 + (i % 4) * 0.06}
-          transform={`rotate(${l.rot}, ${l.x}, ${l.y})`}
-        />
-      ))}
-      {/* Leaf midribs */}
-      {leaves.slice(0, 20).map((l, i) => {
-        const rad = (l.rot * Math.PI) / 180;
-        const dx = Math.cos(rad) * l.rx * 0.85;
-        const dy = Math.sin(rad) * l.rx * 0.85;
-        return (
-          <line
-            key={`lr${i}`}
-            x1={l.x - dx} y1={l.y - dy}
-            x2={l.x + dx} y2={l.y + dy}
-            stroke={leafDark[l.c]}
-            strokeWidth="0.6"
-            opacity="0.5"
+      <svg viewBox="-20 -20 40 40" width={size} height={size} style={{ overflow: "visible" }}>
+        {/* Outer petals */}
+        {[0, 72, 144, 216, 288].map((a) => (
+          <g key={`op${a}`} transform={`rotate(${a})`}>
+            <ellipse cx="0" cy="-14" rx="5.8" ry="9.5" fill="#7a0e1e" opacity="0.93"/>
+          </g>
+        ))}
+        {/* Second ring */}
+        {[36, 108, 180, 252, 324].map((a) => (
+          <g key={`sp${a}`} transform={`rotate(${a})`}>
+            <ellipse cx="0" cy="-10.5" rx="5.0" ry="8" fill="#a01428" opacity="0.89"/>
+          </g>
+        ))}
+        {/* Third ring */}
+        {[18, 90, 162, 234, 306].map((a) => (
+          <g key={`tp${a}`} transform={`rotate(${a})`}>
+            <ellipse cx="0" cy="-7" rx="3.8" ry="5.8" fill="#c42038" opacity="0.84"/>
+          </g>
+        ))}
+        {/* Innermost curled petals */}
+        {[0, 72, 144, 216, 288].map((a) => (
+          <g key={`cp${a}`} transform={`rotate(${a})`}>
+            <ellipse cx="0" cy="-3.8" rx="2.4" ry="3.8" fill="#de3858" opacity="0.78"/>
+          </g>
+        ))}
+        {/* Center */}
+        <circle r="4.8" fill="#3c0810"/>
+        <circle r="3.0" fill="#5e0e18" opacity="0.88"/>
+        <circle r="1.5" fill="#8a1e2e" opacity="0.65"/>
+        {/* Stamens */}
+        {[0, 51, 102, 153, 204, 255, 306].map((a) => (
+          <circle
+            key={a}
+            cx={Math.cos((a * Math.PI) / 180) * 2.5}
+            cy={Math.sin((a * Math.PI) / 180) * 2.5}
+            r="0.65"
+            fill="#e8c870"
+            opacity="0.68"
           />
-        );
-      })}
-
-      {/* Roses */}
-      {ROSE_ANCHORS.slice(0, count).map((a, i) => (
-        <RoseSVG key={i} x={a.x} cy={a.y} rot={a.rot} bloom={i < count} idx={i} />
-      ))}
-    </svg>
+        ))}
+        {/* Sepals */}
+        {[0, 120, 240].map((a) => (
+          <g key={`sep${a}`} transform={`rotate(${a})`}>
+            <ellipse cx="0" cy="5.8" rx="2.2" ry="4.2" fill="#2a5c1e" opacity="0.72"/>
+          </g>
+        ))}
+      </svg>
+    </motion.div>
   );
 }
 
@@ -1294,8 +1177,10 @@ function GuestBook({
   mode: "tree" | "rose";
 }) {
   const [msgs, setMsgs] = useState<GuestMsg[]>(MOCK_MSGS);
+  // tree mode: open full list viewer
   const [viewerOpen, setViewerOpen] = useState(false);
-  const [viewerIdx, setViewerIdx] = useState(0);
+  // rose mode: open single-message modal
+  const [selectedRoseMsg, setSelectedRoseMsg] = useState<GuestMsg | null>(null);
   const [inputName, setInputName] = useState("");
   const [inputMsg, setInputMsg] = useState("");
   const [inputPw, setInputPw] = useState("");
@@ -1318,17 +1203,22 @@ function GuestBook({
   const handleDelete = (id: number) => {
     const m = msgs.find((x) => x.id === id);
     if (!m) return;
-    if (m.pw && m.pw !== deletePw) {
-      setDeleteErr(true);
-      return;
-    }
+    if (m.pw && m.pw !== deletePw) { setDeleteErr(true); return; }
     setMsgs((prev) => prev.filter((x) => x.id !== id));
+    setDeleteId(null);
+    setDeletePw("");
+    setDeleteErr(false);
+    if (mode === "rose") setSelectedRoseMsg(null);
+  };
+
+  const closeRoseModal = () => {
+    setSelectedRoseMsg(null);
     setDeleteId(null);
     setDeletePw("");
     setDeleteErr(false);
   };
 
-  // Memo frame dimensions
+  // Memo card dimensions (tree mode)
   const mw = preview ? 30 : 46;
   const mh = mw * 1.4;
 
@@ -1347,84 +1237,138 @@ function GuestBook({
 
   return (
     <div>
-      {/* ── Tree or Rose illustration ── */}
-      <div
-        style={{
-          position: "relative",
-          width: "100%",
-          aspectRatio: mode === "tree" ? "300 / 340" : "300 / 400",
-          cursor: preview ? "default" : "pointer",
-        }}
-        onClick={() => !preview && msgs.length > 0 && setViewerOpen(true)}
-      >
-        {mode === "tree" ? <LushTreeSVG /> : <RoseVineSVG count={msgs.length} />}
+      {/* ── Tree illustration ── */}
+      {mode === "tree" && (
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            aspectRatio: "300 / 340",
+            cursor: preview ? "default" : "pointer",
+          }}
+          onClick={() => !preview && msgs.length > 0 && setViewerOpen(true)}
+        >
+          <LushTreeSVG />
 
-        {/* ── Memo cards (tree mode) ── */}
-        {mode === "tree" && msgs.slice(0, MEMO_ANCHORS.length).map((m, i) => {
-          const { x, y, rot } = MEMO_ANCHORS[i];
-          const hangY = y + (preview ? 16 : 24);
-          return (
-            <React.Fragment key={m.id}>
-              {/* String */}
-              <svg
-                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
-                viewBox="0 0 300 320"
-              >
-                <line x1={x} y1={y + 3} x2={x} y2={hangY - 1} stroke="#a0886a" strokeWidth={preview ? "0.8" : "1"} opacity="0.6"/>
-              </svg>
-              {/* Memo */}
-              <div
-                style={{
-                  position: "absolute",
-                  left: `${(x / 300) * 100}%`,
-                  top: `${(hangY / 320) * 100}%`,
-                  transform: `translate(-50%, 0) rotate(${rot}deg)`,
-                  width: mw,
-                  height: mh,
-                  background: "linear-gradient(160deg, #fffef9 0%, #fdf8ee 100%)",
-                  borderRadius: preview ? 2 : 3,
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.18), 0 0 0 0.5px rgba(180,160,100,0.2)",
-                  padding: preview ? "3px" : "5px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 2,
-                  pointerEvents: "none",
-                  overflow: "hidden",
-                }}
-              >
-                {/* Top colored strip */}
-                <div style={{ height: preview ? 3 : 5, background: "rgba(212,175,55,0.4)", borderRadius: 1, flexShrink: 0 }}/>
-                <p style={{
-                  fontFamily: mono,
-                  fontSize: preview ? 4 : 6,
-                  color: "#8a7a5a",
-                  lineHeight: 1.3,
-                  overflow: "hidden",
-                  display: "-webkit-box",
-                  WebkitLineClamp: preview ? 2 : 3,
-                  WebkitBoxOrient: "vertical",
-                } as React.CSSProperties}>
-                  {m.message}
-                </p>
-                <p style={{ fontFamily: mono, fontSize: preview ? 3.5 : 5, color: "#b0a88a", marginTop: "auto" }}>
-                  {m.name}
-                </p>
-              </div>
-            </React.Fragment>
-          );
-        })}
+          {/* Memo cards */}
+          {msgs.slice(0, MEMO_ANCHORS.length).map((m, i) => {
+            const { x, y, rot } = MEMO_ANCHORS[i];
+            const hangY = y + (preview ? 16 : 24);
+            return (
+              <React.Fragment key={m.id}>
+                <svg
+                  style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
+                  viewBox="0 0 300 320"
+                >
+                  <line x1={x} y1={y + 3} x2={x} y2={hangY - 1} stroke="#a0886a" strokeWidth={preview ? "0.8" : "1"} opacity="0.6"/>
+                </svg>
+                <div
+                  style={{
+                    position: "absolute",
+                    left: `${(x / 300) * 100}%`,
+                    top: `${(hangY / 320) * 100}%`,
+                    transform: `translate(-50%, 0) rotate(${rot}deg)`,
+                    width: mw,
+                    height: mh,
+                    background: "linear-gradient(160deg, #fffef9 0%, #fdf8ee 100%)",
+                    borderRadius: preview ? 2 : 3,
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.18), 0 0 0 0.5px rgba(180,160,100,0.2)",
+                    padding: preview ? "3px" : "5px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 2,
+                    pointerEvents: "none",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div style={{ height: preview ? 3 : 5, background: "rgba(212,175,55,0.4)", borderRadius: 1, flexShrink: 0 }}/>
+                  <p style={{
+                    fontFamily: mono,
+                    fontSize: preview ? 4 : 6,
+                    color: "#8a7a5a",
+                    lineHeight: 1.3,
+                    overflow: "hidden",
+                    display: "-webkit-box",
+                    WebkitLineClamp: preview ? 2 : 3,
+                    WebkitBoxOrient: "vertical",
+                  } as React.CSSProperties}>
+                    {m.message}
+                  </p>
+                  <p style={{ fontFamily: mono, fontSize: preview ? 3.5 : 5, color: "#b0a88a", marginTop: "auto" }}>
+                    {m.name}
+                  </p>
+                </div>
+              </React.Fragment>
+            );
+          })}
 
-        {/* Tap hint */}
-        {!preview && msgs.length > 0 && (
-          <div style={{
-            position: "absolute", bottom: 6, right: 8,
-            fontFamily: mono, fontSize: 7, color: theme.textMuted,
-            letterSpacing: "0.18em", pointerEvents: "none",
-          }}>
-            TAP TO READ
-          </div>
-        )}
-      </div>
+          {!preview && msgs.length > 0 && (
+            <div style={{
+              position: "absolute", bottom: 6, right: 8,
+              fontFamily: mono, fontSize: 7, color: theme.textMuted,
+              letterSpacing: "0.18em", pointerEvents: "none",
+            }}>
+              TAP TO READ
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Rose vine illustration (image background + blooming roses) ── */}
+      {mode === "rose" && (
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            aspectRatio: "1 / 1",
+            overflow: "hidden",
+            borderRadius: 12,
+            background: "#0e1a0e",
+          }}
+        >
+          {/* Background vine image */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/samples/vine-bg.png"
+            alt=""
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }}
+          />
+
+          {/* Blooming roses */}
+          {msgs.map((m, i) => {
+            const pos = i < ROSE_POSITIONS.length
+              ? ROSE_POSITIONS[i]
+              : { x: ((i * 37 + 13) % 68) + 16, y: ((i * 53 + 23) % 68) + 16 };
+            return (
+              <RoseFlower
+                key={m.id}
+                msg={m}
+                idx={i}
+                xPct={pos.x}
+                yPct={pos.y}
+                preview={preview}
+                onClick={() => setSelectedRoseMsg(m)}
+              />
+            );
+          })}
+
+          {/* Prompt when no roses */}
+          {msgs.length === 0 && !preview && (
+            <div style={{
+              position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+              pointerEvents: "none",
+            }}>
+              <p style={{
+                fontFamily: mono, fontSize: 10, color: "rgba(255,255,255,0.50)",
+                letterSpacing: "0.3em", textTransform: "uppercase", textAlign: "center",
+                padding: "0 24px",
+              }}>
+                장미를 피워주세요 🌹
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Input form ── */}
       {!preview && (
@@ -1470,9 +1414,9 @@ function GuestBook({
         </div>
       )}
 
-      {/* ── Message Viewer Modal ── */}
+      {/* ── Tree mode: full list viewer (bottom sheet) ── */}
       <AnimatePresence>
-        {viewerOpen && (
+        {viewerOpen && mode === "tree" && (
           <>
             <motion.div
               key="gb-bd"
@@ -1490,7 +1434,6 @@ function GuestBook({
                 maxHeight: "88vh", display: "flex", flexDirection: "column",
               }}
             >
-              {/* Modal header */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px 12px", flexShrink: 0 }}>
                 <div>
                   <div style={{ width: 36, height: 4, background: "#d0c8c0", borderRadius: 2, margin: "0 auto 12px" }} />
@@ -1505,57 +1448,40 @@ function GuestBook({
                   <X size={14} color="#666" />
                 </button>
               </div>
-
-              {/* Scrollable messages */}
               <div style={{ overflowY: "auto", padding: "0 20px 40px", display: "flex", flexDirection: "column", gap: 14 }} className="hide-scrollbar">
                 {msgs.map((m) => (
                   <div
                     key={m.id}
-                    style={mode === "tree" ? {
+                    style={{
                       background: "linear-gradient(135deg, #fffef5 0%, #fdf5e0 100%)",
                       borderRadius: 6,
                       padding: "20px 18px 16px",
                       boxShadow: "2px 3px 14px rgba(0,0,0,0.14), 0 0 0 5px rgba(210,185,110,0.07)",
                       border: "1px solid #e0ccaa",
                       position: "relative" as const,
-                    } : {
-                      background: "#fff",
-                      borderRadius: 14,
-                      padding: "16px 18px",
-                      boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
-                      border: "1px solid rgba(0,0,0,0.06)",
                     }}
                   >
-                    {mode === "tree" && (
-                      <div style={{ position: "absolute", top: 14, right: 14, width: 26, height: 32, border: "1px solid #c8b882", borderRadius: 2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, opacity: 0.7 }}>
-                        💌
-                      </div>
-                    )}
-                    {mode === "tree" && (
-                      <div style={{ borderBottom: "1px dashed #d4c4a0", marginBottom: 12, paddingBottom: 8, paddingRight: 36 }}>
-                        <p style={{ fontFamily: mono, fontSize: 9, color: "#b09870", letterSpacing: "0.2em", textTransform: "uppercase" as const }}>
-                          {m.at} · {m.name}
-                        </p>
-                      </div>
-                    )}
+                    <div style={{ position: "absolute", top: 14, right: 14, width: 26, height: 32, border: "1px solid #c8b882", borderRadius: 2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, opacity: 0.7 }}>
+                      💌
+                    </div>
+                    <div style={{ borderBottom: "1px dashed #d4c4a0", marginBottom: 12, paddingBottom: 8, paddingRight: 36 }}>
+                      <p style={{ fontFamily: mono, fontSize: 9, color: "#b09870", letterSpacing: "0.2em", textTransform: "uppercase" as const }}>
+                        {m.at} · {m.name}
+                      </p>
+                    </div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-                      <div>
-                        <p style={{ fontFamily: serif, fontSize: 15, color: "#2a2a2a", fontWeight: 600 }}>{m.name}</p>
-                        <p style={{ fontFamily: mono, fontSize: 9, color: "#bbb", letterSpacing: "0.1em", marginTop: 2 }}>{m.at}</p>
-                      </div>
+                      <p style={{ fontFamily: serif, fontSize: 14, color: "#3a3a3a", lineHeight: 1.75, letterSpacing: "0.02em", flex: 1 }}>
+                        {m.message}
+                      </p>
                       {m.pw !== undefined && (
                         <button
                           onClick={() => { setDeleteId(deleteId === m.id ? null : m.id); setDeletePw(""); setDeleteErr(false); }}
-                          style={{ fontSize: 11, color: "#ccc", background: "none", border: "none", cursor: "pointer", padding: "4px 6px" }}
+                          style={{ fontSize: 11, color: "#ccc", background: "none", border: "none", cursor: "pointer", padding: "4px 6px", flexShrink: 0 }}
                         >
                           🗑️
                         </button>
                       )}
                     </div>
-                    <p style={{ fontFamily: serif, fontSize: 14, color: "#3a3a3a", lineHeight: 1.75, letterSpacing: "0.02em" }}>
-                      {m.message}
-                    </p>
-                    {/* Delete confirmation */}
                     {deleteId === m.id && (
                       <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center" }}>
                         <input
@@ -1563,18 +1489,11 @@ function GuestBook({
                           onChange={(e) => { setDeletePw(e.target.value); setDeleteErr(false); }}
                           placeholder={m.pw ? "비밀번호 입력" : "비밀번호 없이 삭제됩니다"}
                           type="password"
-                          style={{
-                            flex: 1, fontFamily: mono, fontSize: 11, padding: "6px 10px",
-                            border: `1px solid ${deleteErr ? "#e53e3e" : "#ddd"}`, borderRadius: 6, outline: "none",
-                            color: "#333",
-                          }}
+                          style={{ flex: 1, fontFamily: mono, fontSize: 11, padding: "6px 10px", border: `1px solid ${deleteErr ? "#e53e3e" : "#ddd"}`, borderRadius: 6, outline: "none", color: "#333" }}
                         />
                         <button
                           onClick={() => handleDelete(m.id)}
-                          style={{
-                            fontFamily: mono, fontSize: 10, padding: "6px 12px",
-                            background: "#e53e3e", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer",
-                          }}
+                          style={{ fontFamily: mono, fontSize: 10, padding: "6px 12px", background: "#e53e3e", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer" }}
                         >
                           삭제
                         </button>
@@ -1584,6 +1503,116 @@ function GuestBook({
                   </div>
                 ))}
               </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ── Rose mode: single-message modal ── */}
+      <AnimatePresence>
+        {selectedRoseMsg && mode === "rose" && (
+          <>
+            <motion.div
+              key="rose-bd"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={closeRoseModal}
+              style={{ position: "fixed", inset: 0, background: "rgba(10,5,5,0.80)", zIndex: 400 }}
+            />
+            <motion.div
+              key="rose-modal"
+              initial={{ scale: 0.82, opacity: 0, y: 24 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.82, opacity: 0, y: 24 }}
+              transition={{ type: "spring", damping: 22, stiffness: 280 }}
+              style={{
+                position: "fixed",
+                top: "50%",
+                left: "50%",
+                zIndex: 401,
+                background: "linear-gradient(160deg, #fff8f5 0%, #fff0ee 100%)",
+                borderRadius: 22,
+                padding: "32px 28px 28px",
+                width: "min(340px, 90vw)",
+                boxShadow: "0 24px 64px rgba(0,0,0,0.35), 0 0 0 1px rgba(180,80,100,0.14)",
+                transform: "translate(-50%, -50%)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              {/* Rose icon */}
+              <svg viewBox="-20 -20 40 40" width={52} height={52} style={{ marginBottom: 16, filter: "drop-shadow(0 2px 8px rgba(150,0,30,0.4))" }}>
+                {[0, 72, 144, 216, 288].map((a) => (
+                  <g key={`op${a}`} transform={`rotate(${a})`}><ellipse cx="0" cy="-14" rx="5.8" ry="9.5" fill="#7a0e1e" opacity="0.93"/></g>
+                ))}
+                {[36, 108, 180, 252, 324].map((a) => (
+                  <g key={`sp${a}`} transform={`rotate(${a})`}><ellipse cx="0" cy="-10.5" rx="5.0" ry="8" fill="#a01428" opacity="0.89"/></g>
+                ))}
+                {[18, 90, 162, 234, 306].map((a) => (
+                  <g key={`tp${a}`} transform={`rotate(${a})`}><ellipse cx="0" cy="-7" rx="3.8" ry="5.8" fill="#c42038" opacity="0.84"/></g>
+                ))}
+                {[0, 72, 144, 216, 288].map((a) => (
+                  <g key={`cp${a}`} transform={`rotate(${a})`}><ellipse cx="0" cy="-3.8" rx="2.4" ry="3.8" fill="#de3858" opacity="0.78"/></g>
+                ))}
+                <circle r="4.8" fill="#3c0810"/>
+                <circle r="3.0" fill="#5e0e18" opacity="0.88"/>
+              </svg>
+
+              {/* Message */}
+              <p style={{
+                fontFamily: serif, fontSize: 16, color: "#2a1a1e",
+                lineHeight: 1.82, letterSpacing: "0.02em", textAlign: "center",
+                marginBottom: 20,
+              }}>
+                {selectedRoseMsg.message}
+              </p>
+
+              {/* Divider */}
+              <div style={{ width: "100%", borderTop: "1px solid rgba(180,130,140,0.25)", marginBottom: 16 }} />
+
+              {/* Footer */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                <div>
+                  <p style={{ fontFamily: serif, fontSize: 14, fontWeight: 600, color: "#5a2830" }}>{selectedRoseMsg.name}</p>
+                  <p style={{ fontFamily: mono, fontSize: 9, color: "#c0a0a8", letterSpacing: "0.12em", marginTop: 2 }}>{selectedRoseMsg.at}</p>
+                </div>
+                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  {selectedRoseMsg.pw !== undefined && deleteId !== selectedRoseMsg.id && (
+                    <button
+                      onClick={() => { setDeleteId(selectedRoseMsg.id); setDeletePw(""); setDeleteErr(false); }}
+                      style={{ fontSize: 13, color: "#d0a0a8", background: "none", border: "none", cursor: "pointer" }}
+                    >
+                      🗑️
+                    </button>
+                  )}
+                  <button
+                    onClick={closeRoseModal}
+                    style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.10)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                  >
+                    <X size={13} color="#888" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Delete confirmation */}
+              {deleteId === selectedRoseMsg.id && (
+                <div style={{ width: "100%", marginTop: 12, display: "flex", gap: 8, alignItems: "center" }}>
+                  <input
+                    value={deletePw}
+                    onChange={(e) => { setDeletePw(e.target.value); setDeleteErr(false); }}
+                    placeholder={selectedRoseMsg.pw ? "비밀번호 입력" : "비밀번호 없이 삭제됩니다"}
+                    type="password"
+                    style={{ flex: 1, fontFamily: mono, fontSize: 11, padding: "7px 10px", border: `1px solid ${deleteErr ? "#e53e3e" : "#e0c8cc"}`, borderRadius: 8, outline: "none", color: "#3a2020" }}
+                  />
+                  <button
+                    onClick={() => handleDelete(selectedRoseMsg.id)}
+                    style={{ fontFamily: mono, fontSize: 10, padding: "7px 14px", background: "#c53030", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer" }}
+                  >
+                    삭제
+                  </button>
+                </div>
+              )}
+              {deleteErr && <p style={{ fontFamily: mono, fontSize: 10, color: "#e53e3e", marginTop: 6, width: "100%" }}>비밀번호가 맞지 않습니다.</p>}
             </motion.div>
           </>
         )}
