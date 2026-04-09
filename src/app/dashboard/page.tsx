@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { Heart, ChevronDown, Upload, X, Plus, Film, GripVertical } from "lucide-react";
 import { WeddingData, SectionId, DEFAULT_SECTIONS_ORDER } from "@/components/templates/FilmTheme";
 import InvitationView from "@/components/InvitationView";
+import KakaoShareButton from "@/components/KakaoShareButton";
 import CinematicIntro from "@/components/CinematicIntro";
 import {
   DndContext,
@@ -1347,6 +1348,21 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* 실제 카카오톡 공유 테스트 버튼 */}
+                <KakaoShareButton
+                  title={data.kakaoShareTitle || `${data.groomName} ♥ ${data.brideName} 결혼합니다`}
+                  description={data.kakaoShareDesc || `${data.date} · ${data.time}\n${data.venue}`}
+                  imageUrl={data.kakaoShareImage}
+                  linkUrl={typeof window !== "undefined" ? window.location.href : "/"}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold text-[#3c1e1e] transition-opacity hover:opacity-80"
+                  style={{ background: "#FEE500" }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#3c1e1e">
+                    <path d="M12 3C6.48 3 2 6.92 2 11.77c0 3.1 1.73 5.83 4.37 7.49-.19.65-.68 2.34-.78 2.7-.12.44.16.44.34.32.14-.1 1.89-1.24 2.66-1.74.78.1 1.58.16 2.41.16 5.52 0 10-3.92 10-8.77C22 6.92 17.52 3 12 3z" />
+                  </svg>
+                  실제 카카오톡으로 테스트하기
+                </KakaoShareButton>
               </div>
             </AccSection>
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Serif_KR, Nanum_Myeongjo, Gowun_Dodum, Nanum_Gothic } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const notoSerifKR = Noto_Serif_KR({
@@ -48,8 +49,17 @@ export default function RootLayout({
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
         />
       </head>
-      <body className={`${notoSerifKR.variable} ${nanumMyeongjo.variable} ${gowunDodum.variable} ${nanumGothic.variable} antialiased`}>
+      <body
+        className={`${notoSerifKR.variable} ${nanumMyeongjo.variable} ${gowunDodum.variable} ${nanumGothic.variable} antialiased`}
+      >
         {children}
+        {/* 카카오 JavaScript SDK — lazyOnload로 비동기 로드 */}
+        <Script
+          src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
+          integrity="sha384-TiCmbVXZbxeUKRNDg-Nmg22zePe10Fwt//Dkpsg1fE2uIeL1QZdBjIfXkE8O2P8n"
+          crossOrigin="anonymous"
+          strategy="lazyOnload"
+        />
       </body>
     </html>
   );
