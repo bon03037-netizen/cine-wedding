@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useMemo, useEffect, useContext, createContext } from "react";
+import React, { useRef, useState, useMemo, useEffect } from "react";
 import {
   motion,
   AnimatePresence,
@@ -8,6 +8,7 @@ import {
 } from "framer-motion";
 import { X, Copy, Check, ChevronDown, Phone } from "lucide-react";
 import KakaoMap from "../KakaoMap";
+import KakaoShareButton from "../KakaoShareButton";
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface AccountInfo {
@@ -123,9 +124,6 @@ export function parentsLine(parents: ParentInfo, relation: "아들" | "딸") {
 
 // ── Shared Atoms ──────────────────────────────────────────────────────────────
 
-// ── Scroll-reset animation context ────────────────────────────────────────────
-const AnimResetCtx = createContext(0);
-
 function Perforations({ count = 10 }: { count?: number }) {
   return (
     <div
@@ -187,26 +185,15 @@ function FilmGrain({ strong = false, dark = false }: { strong?: boolean; dark?: 
 
 
 function FadeIn({ children, delay = 0, style }: { children: React.ReactNode; delay?: number; style?: React.CSSProperties }) {
-  const resetKey = useContext(AnimResetCtx);
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: false, amount: 0.1 });
-  const [shown, setShown] = useState(false);
-
-  // When user reaches top, resetKey increments → hide all until re-entered
-  useEffect(() => {
-    setShown(false);
-  }, [resetKey]);
-
-  // When element enters viewport, show it (don't hide on exit)
-  useEffect(() => {
-    if (isInView) setShown(true);
-  }, [isInView]);
+  // once: true — 뷰포트 진입 시 딱 한 번만 실행, 스크롤해도 재실행 없음
+  const isInView = useInView(ref, { once: true, amount: 0.1 });
 
   return (
     <motion.div
       ref={ref}
       initial={{ opacity: 0, y: 80 }}
-      animate={shown ? { opacity: 1, y: 0 } : { opacity: 0, y: 80 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 80 }}
       transition={{ duration: 1.8, delay, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
       style={style}
     >
@@ -1692,21 +1679,6 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
   const [brideAccOpen, setBrideAccOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
 
-  // ── Scroll-reset: when user reaches page top, re-arm all FadeIn animations
-  const [animResetKey, setAnimResetKey] = useState(0);
-  useEffect(() => {
-    if (preview) return;
-    let wasAtTop = true;
-    const onScroll = () => {
-      const atTop = window.scrollY < 80;
-      if (atTop && !wasAtTop) {
-        setAnimResetKey((k) => k + 1);
-      }
-      wasAtTop = atTop;
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [preview]);
   const photos = data.photos ?? [];
   // 업로드 사진이 없으면 샘플 이미지로 필름롤 표시
   const galleryPhotos = photos.length > 0 ? photos : GALLERY_SAMPLES;
@@ -1747,7 +1719,6 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
   const orderOf = (id: SectionId) => sectionOrder.indexOf(id);
 
   return (
-    <AnimResetCtx.Provider value={animResetKey}>
     <div
       style={{
         background: bgColor,
@@ -2321,7 +2292,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       <div style={{ order: orderOf("transport") }}>
         <section style={{ ...sp }}>
           <FadeIn>
-            <p style={{ ...slabel, fontSize: preview ? 18 : 36, fontFamily: serif }}>오시는 길</p>
+            <p style={{ ...slabel, fontSize: preview ? 10 : 16, fontFamily: serif }}>오시는 길</p>
             <div
               style={{
                 display: "flex",
@@ -2489,7 +2460,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             <p
               style={{
                 ...slabel,
-                fontSize: preview ? 18 : 36,
+                fontSize: preview ? 10 : 16,
                 letterSpacing: "0.18em",
                 fontFamily: serif,
                 color: theme.textMuted,
@@ -2817,6 +2788,20 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             {data.groomName} · {data.brideName}
           </p>
         )}
+
+        {/* ── 카카오톡 공유 버튼 — 방문자 전용 ── */}
+        {!preview && (
+          <div style={{ padding: "20px 28px 4px" }}>
+            <KakaoShareButton
+              groomName={data.groomName}
+              brideName={data.brideName}
+              date={data.date}
+              time={data.time}
+              venue={data.venue}
+              imageUrl={data.mainImage || "/samples/main-sample.jpg"}
+            />
+          </div>
+        )}
       </footer>
 
       {/* ── FILM ALBUM MODAL ─────────────────────────────────────────────── */}
@@ -2850,6 +2835,5 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       {/* ── DARK BG GRAIN OVERLAY ──────────────────────────────────────────── */}
       {!LIGHT_BG_SET.has(bgColor.toLowerCase()) && <FilmGrain dark />}
     </div>
-    </AnimResetCtx.Provider>
   );
 }

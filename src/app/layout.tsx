@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Serif_KR, Nanum_Myeongjo, Gowun_Dodum, Nanum_Gothic } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
+import KakaoInit from "@/components/KakaoInit";
 
 const notoSerifKR = Noto_Serif_KR({
   weight: ["300", "400"],
@@ -38,9 +38,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ko">
       <head>
@@ -53,13 +51,8 @@ export default function RootLayout({
         className={`${notoSerifKR.variable} ${nanumMyeongjo.variable} ${gowunDodum.variable} ${nanumGothic.variable} antialiased`}
       >
         {children}
-        {/* 카카오 JavaScript SDK — lazyOnload로 비동기 로드 */}
-        <Script
-          src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
-          integrity="sha384-TiCmbVXZbxeUKRNDg-Nmg22zePe10Fwt//Dkpsg1fE2uIeL1QZdBjIfXkE8O2P8n"
-          crossOrigin="anonymous"
-          strategy="lazyOnload"
-        />
+        {/* Kakao SDK: afterInteractive 로드 후 onLoad에서 단 한 번 init */}
+        <KakaoInit />
       </body>
     </html>
   );
