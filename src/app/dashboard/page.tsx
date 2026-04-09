@@ -425,6 +425,7 @@ export default function DashboardPage() {
   const [open, setOpen] = useState<Record<string, boolean>>({
     sections: false, greeting: true, couple: false, datetime: false,
     venue: false, photos: false, accounts: false, transport: false, font: false,
+    guestbook: false, kakao: false, og: false,
   });
   const [showGreetingSamples, setShowGreetingSamples] = useState(false);
   const [introPreviewKey, setIntroPreviewKey] = useState(0);
@@ -436,6 +437,8 @@ export default function DashboardPage() {
 
   const mainImgRef = useRef<HTMLInputElement>(null);
   const photosRef = useRef<HTMLInputElement>(null);
+  const kakaoImgRef = useRef<HTMLInputElement>(null);
+  const ogImgRef = useRef<HTMLInputElement>(null);
 
   const toggleSection = (id: string) =>
     setOpen((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -524,6 +527,32 @@ export default function DashboardPage() {
 
   const removePhoto = (i: number) =>
     setData((prev) => ({ ...prev, photos: (prev.photos ?? []).filter((_, idx) => idx !== i) }));
+
+  const handleKakaoImg = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!isAllowedImage(file)) { alert("JPG, JPEG, PNG 파일만 업로드할 수 있습니다."); e.target.value = ""; return; }
+    const compressed = await compressImage(file, 1200, 0.85);
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`;
+    const { error } = await supabase.storage.from('wedding-photos').upload(fileName, compressed);
+    if (error) { alert('이미지 업로드 실패: ' + error.message); return; }
+    const { data: urlData } = supabase.storage.from('wedding-photos').getPublicUrl(fileName);
+    set("kakaoShareImage", urlData.publicUrl);
+    e.target.value = "";
+  };
+
+  const handleOgImg = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!isAllowedImage(file)) { alert("JPG, JPEG, PNG 파일만 업로드할 수 있습니다."); e.target.value = ""; return; }
+    const compressed = await compressImage(file, 1200, 0.85);
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.jpg`;
+    const { error } = await supabase.storage.from('wedding-photos').upload(fileName, compressed);
+    if (error) { alert('이미지 업로드 실패: ' + error.message); return; }
+    const { data: urlData } = supabase.storage.from('wedding-photos').getPublicUrl(fileName);
+    set("ogImage", urlData.publicUrl);
+    e.target.value = "";
+  };
 
   const handleSave = async () => {
     const tempSlug = "toast-" + Date.now();
@@ -741,31 +770,37 @@ export default function DashboardPage() {
                 ))}
               </div>
 
-              {/* 방명록 모드 */}
-              {data.showGuestBook !== false && (
-                <div className="mt-3">
-                  <p className="text-[10px] text-gray-400 font-mono tracking-widest mb-2">방명록 스타일</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {([
-                      { id: "tree", icon: "🌳", label: "나무" },
-                      { id: "rose", icon: "🌹", label: "장미 덩굴" },
-                    ] as const).map((opt) => (
-                      <button
-                        key={opt.id}
-                        onClick={() => set("guestbookMode", opt.id)}
-                        className={`flex items-center gap-2 p-2.5 rounded-lg border text-left transition-all ${
-                          (data.guestbookMode || "tree") === opt.id
-                            ? "border-gray-900 bg-gray-900 text-white"
-                            : "border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50"
-                        }`}
-                      >
-                        <span className="text-[18px]">{opt.icon}</span>
-                        <p className="text-xs font-medium">{opt.label}</p>
-                      </button>
-                    ))}
-                  </div>
+            </AccSection>
+
+            {/* ── 방명록 설정 ── */}
+            <AccSection
+              id="guestbook" title="방명록 설정" icon="📝"
+              openMap={open} onToggle={toggleSection}
+              isOn={data.showGuestBook !== false}
+              onToggleVisibility={() => toggleVisibility("showGuestBook")}
+            >
+              <div className="mt-2">
+                <p className="text-[10px] text-gray-400 font-mono tracking-widest mb-2">방명록 스타일</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {([
+                    { id: "tree", icon: "🌳", label: "나무" },
+                    { id: "rose", icon: "🌹", label: "장미 덩굴" },
+                  ] as const).map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => set("guestbookMode", opt.id)}
+                      className={`flex items-center gap-2 p-2.5 rounded-lg border text-left transition-all ${
+                        (data.guestbookMode || "tree") === opt.id
+                          ? "border-gray-900 bg-gray-900 text-white"
+                          : "border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50"
+                      }`}
+                    >
+                      <span className="text-[18px]">{opt.icon}</span>
+                      <p className="text-xs font-medium">{opt.label}</p>
+                    </button>
+                  ))}
                 </div>
-              )}
+              </div>
             </AccSection>
 
             {/* 섹션 순서 변경 */}
@@ -1238,6 +1273,152 @@ export default function DashboardPage() {
                     placeholder="주차 안내 및 경로"
                   />
                 </Field>
+              </div>
+            </AccSection>
+
+            {/* ── 카카오톡 공유 설정 ── */}
+            <input ref={kakaoImgRef} type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" onChange={handleKakaoImg} className="hidden" />
+            <AccSection id="kakao" title="카카오톡 공유 설정" icon="💬" openMap={open} onToggle={toggleSection}>
+              <div className="mt-2 space-y-3">
+                {/* 썸네일 업로드 */}
+                <Field label="썸네일 이미지">
+                  {data.kakaoShareImage ? (
+                    <div className="relative rounded-lg overflow-hidden group cursor-pointer" onClick={() => kakaoImgRef.current?.click()}>
+                      <img src={data.kakaoShareImage} alt="" className="w-full h-24 object-cover" />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <Upload size={13} color="white" />
+                        <span className="text-white text-xs">이미지 변경</span>
+                      </div>
+                      <button onClick={(e) => { e.stopPropagation(); set("kakaoShareImage", undefined); }}
+                        className="absolute top-1.5 right-1.5 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <X size={10} color="white" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button onClick={() => kakaoImgRef.current?.click()}
+                      className="w-full h-20 border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center gap-1.5 text-gray-400 hover:border-gray-300 hover:text-gray-500 transition-colors">
+                      <Upload size={14} />
+                      <span className="text-[11px] text-center leading-relaxed">썸네일 비율 권장:<br/>세로형(3:4) 900×1200 / 정사각형(1:1) 1080×1080<br/>가로형(3:2) 1500×1000</span>
+                    </button>
+                  )}
+                </Field>
+                {/* 제목 */}
+                <Field label="공유 제목">
+                  <input
+                    type="text"
+                    value={data.kakaoShareTitle ?? `${data.groomName} ♥ ${data.brideName} 결혼합니다`}
+                    onChange={(e) => set("kakaoShareTitle", e.target.value)}
+                    className={inputCls}
+                    placeholder={`${data.groomName} ♥ ${data.brideName} 결혼합니다`}
+                  />
+                </Field>
+                {/* 내용 */}
+                <Field label="공유 내용">
+                  <textarea
+                    value={data.kakaoShareDesc ?? `${data.date} · ${data.time}\n${data.venue}`}
+                    onChange={(e) => set("kakaoShareDesc", e.target.value)}
+                    rows={2}
+                    className={`${inputCls} resize-none`}
+                    placeholder="청첩장 내용 요약"
+                  />
+                </Field>
+                {/* 미리보기 */}
+                <div>
+                  <p className="text-[10px] text-gray-400 font-mono tracking-widest mb-2">미리보기</p>
+                  <div className="rounded-xl overflow-hidden border border-gray-100 bg-[#f9f9f9]" style={{ maxWidth: 300 }}>
+                    {data.kakaoShareImage && (
+                      <img src={data.kakaoShareImage} alt="" className="w-full h-36 object-cover" />
+                    )}
+                    {!data.kakaoShareImage && (
+                      <div className="w-full h-36 bg-gradient-to-br from-yellow-50 to-amber-100 flex items-center justify-center">
+                        <span className="text-3xl">💌</span>
+                      </div>
+                    )}
+                    <div className="p-3">
+                      <p className="text-[13px] font-semibold text-gray-900 mb-1 leading-snug">
+                        {data.kakaoShareTitle || `${data.groomName} ♥ ${data.brideName} 결혼합니다`}
+                      </p>
+                      <p className="text-[11px] text-gray-500 leading-relaxed whitespace-pre-line mb-2.5">
+                        {data.kakaoShareDesc || `${data.date} · ${data.time}\n${data.venue}`}
+                      </p>
+                      <div className="bg-[#FEE500] rounded-lg py-2 text-center">
+                        <span className="text-[12px] font-bold text-[#3c1e1e]">청첩장 확인하기</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </AccSection>
+
+            {/* ── URL 링크 공유 설정 (OG) ── */}
+            <input ref={ogImgRef} type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" onChange={handleOgImg} className="hidden" />
+            <AccSection id="og" title="URL 링크 공유 설정" icon="🔗" openMap={open} onToggle={toggleSection}>
+              <div className="mt-2 space-y-3">
+                {/* 썸네일 업로드 */}
+                <Field label="썸네일 이미지">
+                  {data.ogImage ? (
+                    <div className="relative rounded-lg overflow-hidden group cursor-pointer" onClick={() => ogImgRef.current?.click()}>
+                      <img src={data.ogImage} alt="" className="w-full h-24 object-cover" />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <Upload size={13} color="white" />
+                        <span className="text-white text-xs">이미지 변경</span>
+                      </div>
+                      <button onClick={(e) => { e.stopPropagation(); set("ogImage", undefined); }}
+                        className="absolute top-1.5 right-1.5 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <X size={10} color="white" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button onClick={() => ogImgRef.current?.click()}
+                      className="w-full h-20 border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center gap-1.5 text-gray-400 hover:border-gray-300 hover:text-gray-500 transition-colors">
+                      <Upload size={14} />
+                      <span className="text-[11px]">권장 사이즈: 가로 1200px × 세로 630px (1.91:1 비율)</span>
+                    </button>
+                  )}
+                </Field>
+                {/* 공유 제목 */}
+                <Field label="공유 제목">
+                  <input
+                    type="text"
+                    value={data.ogTitle ?? `${data.groomName} ♥ ${data.brideName} 결혼합니다`}
+                    onChange={(e) => set("ogTitle", e.target.value)}
+                    className={inputCls}
+                    placeholder={`${data.groomName} ♥ ${data.brideName} 결혼합니다`}
+                  />
+                </Field>
+                {/* 공유 내용 */}
+                <Field label="공유 내용 (설명)">
+                  <textarea
+                    value={data.ogDesc ?? `${data.date} · ${data.time} | ${data.venue}`}
+                    onChange={(e) => set("ogDesc", e.target.value)}
+                    rows={2}
+                    className={`${inputCls} resize-none`}
+                    placeholder="링크 미리보기에 표시될 설명"
+                  />
+                </Field>
+                {/* 링크 미리보기 */}
+                <div>
+                  <p className="text-[10px] text-gray-400 font-mono tracking-widest mb-2">미리보기</p>
+                  <div className="rounded-xl overflow-hidden border border-gray-200 bg-white" style={{ maxWidth: 300 }}>
+                    <div className="flex gap-0">
+                      <div className="w-24 h-20 shrink-0 bg-gray-100 overflow-hidden">
+                        {data.ogImage
+                          ? <img src={data.ogImage} alt="" className="w-full h-full object-cover" />
+                          : <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center"><span className="text-xl">🔗</span></div>
+                        }
+                      </div>
+                      <div className="p-2.5 flex-1 min-w-0">
+                        <p className="text-[12px] font-semibold text-gray-900 truncate">
+                          {data.ogTitle || `${data.groomName} ♥ ${data.brideName} 결혼합니다`}
+                        </p>
+                        <p className="text-[10px] text-gray-400 mt-0.5 line-clamp-2 leading-relaxed">
+                          {data.ogDesc || `${data.date} · ${data.time} | ${data.venue}`}
+                        </p>
+                        <p className="text-[10px] text-gray-300 mt-1">cinewedding.com</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </AccSection>
 

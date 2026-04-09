@@ -86,6 +86,14 @@ export interface WeddingData {
   guestbookMode?: "tree" | "rose";
   // Hero SVG shape
   heroSvgShape?: "heart" | "ribbon" | "lace" | "lark";
+  // Social sharing — KakaoTalk
+  kakaoShareTitle?: string;
+  kakaoShareDesc?: string;
+  kakaoShareImage?: string;
+  // Social sharing — URL / OG
+  ogTitle?: string;
+  ogDesc?: string;
+  ogImage?: string;
   // Extended accounts (마음 전하실 곳)
   accounts?: {
     groom?: PersonAccount;
@@ -1188,11 +1196,18 @@ function GuestBook({
             position: "relative",
             width: "100%",
             aspectRatio: "300 / 340",
+            overflow: "hidden",
+            borderRadius: 12,
             cursor: preview ? "default" : "pointer",
           }}
           onClick={() => !preview && msgs.length > 0 && setViewerOpen(true)}
         >
-          <LushTreeSVG />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/samples/tree-bg.png"
+            alt=""
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }}
+          />
 
           {/* Memo cards */}
           {msgs.slice(0, MEMO_ANCHORS.length).map((m, i) => {
@@ -1916,21 +1931,6 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         }}>
           {data.venue}
         </p>
-        {data.address && (
-          <p style={{
-            fontFamily: "Pretendard, -apple-system, sans-serif",
-            fontSize: preview ? 9 : 12,
-            color: theme.textLabel,
-            letterSpacing: "0.03em",
-            lineHeight: 1.6,
-            marginTop: preview ? 3 : 5,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}>
-            {data.address}
-          </p>
-        )}
       </div>
 
       {/* ── 섹션 컨테이너 (순서 + 가시성) ─────────────────────────────── */}
@@ -2321,7 +2321,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       <div style={{ order: orderOf("transport") }}>
         <section style={{ ...sp }}>
           <FadeIn>
-            <p style={{ ...slabel, fontSize: preview ? 18 : 36 }}>오시는 길</p>
+            <p style={{ ...slabel, fontSize: preview ? 18 : 36, fontFamily: serif }}>오시는 길</p>
             <div
               style={{
                 display: "flex",
@@ -2491,6 +2491,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
                 ...slabel,
                 fontSize: preview ? 18 : 36,
                 letterSpacing: "0.18em",
+                fontFamily: serif,
                 color: theme.textMuted,
                 marginBottom: preview ? 4 : 8,
               }}
@@ -2762,7 +2763,21 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       <div style={{ order: orderOf("guestbook") }}>
         <section style={{ ...sp }}>
           <FadeIn>
-            <p style={{ ...slabel, marginBottom: preview ? 6 : 14 }}>방 명 록</p>
+            {/* 방명록 구분선 */}
+            <div style={{
+              height: 1,
+              background: theme.flourishBg,
+              marginBottom: preview ? 14 : 32,
+            }} />
+            {/* 방명록 제목 */}
+            <p style={{
+              fontFamily: serif,
+              fontSize: preview ? 14 : 24,
+              letterSpacing: "0.28em",
+              color: theme.textPrimary,
+              textAlign: "center",
+              marginBottom: preview ? 8 : 20,
+            }}>방명록</p>
             <GuestBook preview={preview} serif={serif} mono={mono} theme={theme} mode={data.guestbookMode || "tree"} />
           </FadeIn>
         </section>
