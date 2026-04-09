@@ -904,155 +904,381 @@ const MEMO_ANCHORS = [
   { x: 222, y: 163, rot: 24  },
 ];
 
-// ── Rose vine anchor positions (SVG 300×360 viewBox) ─────────────────────────
+// ── Rose vine anchor positions (SVG 300×400 viewBox) ─────────────────────────
 const ROSE_ANCHORS = [
-  { x: 80,  y: 310, rot: 0   },
-  { x: 220, y: 280, rot: 15  },
-  { x: 60,  y: 240, rot: -10 },
-  { x: 240, y: 210, rot: 20  },
-  { x: 75,  y: 170, rot: -15 },
-  { x: 225, y: 140, rot: 18  },
-  { x: 85,  y: 100, rot: -20 },
-  { x: 215, y: 75,  rot: 22  },
-  { x: 150, y: 45,  rot: 5   },
+  { x: 65,  y: 322, rot: -12 },
+  { x: 152, y: 326, rot: 10  },
+  { x: 98,  y: 275, rot: -18 },
+  { x: 185, y: 270, rot: 15  },
+  { x: 62,  y: 213, rot: -22 },
+  { x: 152, y: 218, rot: 20  },
+  { x: 106, y: 160, rot: -15 },
+  { x: 198, y: 156, rot: 18  },
+  { x: 150, y: 8,   rot: 5   },
 ];
 
 function LushTreeSVG() {
-  const trunk  = "#7a4f2c";
-  const branch = "#8b6040";
-  const dk     = "#3d6b42";
-  const md     = "#4e8454";
-  const lt     = "#63a06a";
-  const hi     = "#7dbf80";
+  const tr1 = "#4e2810";
+  const tr2 = "#6e3c1c";
+  const tr3 = "#9a6030";
+  const br1 = "#5e3015";
+  const br2 = "#7a4820";
+  const br3 = "#9a6235";
+  const gdk = "#173d22";
+  const gd2 = "#235c34";
+  const gmd = "#317848";
+  const glt = "#469460";
+  const ghi = "#5fb07a";
+  const gvl = "#80cc96";
 
   return (
-    <svg viewBox="0 0 300 320" style={{ width: "100%", height: "100%" }} fill="none">
-      <path d="M150 320 C148 295 146 268 150 238 C154 208 152 185 150 160" stroke={trunk} strokeWidth="11" strokeLinecap="round"/>
-      <path d="M150 300 C135 308 118 314 104 318" stroke={trunk} strokeWidth="4.5" strokeLinecap="round"/>
-      <path d="M150 300 C165 310 182 316 196 320" stroke={trunk} strokeWidth="4.5" strokeLinecap="round"/>
-      <path d="M150 200 C128 180 98 160 68 140" stroke={branch} strokeWidth="8" strokeLinecap="round"/>
-      <path d="M150 200 C172 180 202 160 232 140" stroke={branch} strokeWidth="8" strokeLinecap="round"/>
-      <path d="M150 172 C136 150 116 132 92 115" stroke={branch} strokeWidth="6" strokeLinecap="round"/>
-      <path d="M150 172 C164 150 184 132 208 115" stroke={branch} strokeWidth="6" strokeLinecap="round"/>
-      <path d="M150 185 C150 158 150 132 150 105" stroke={branch} strokeWidth="5.5" strokeLinecap="round"/>
-      <path d="M68 140 C52 120 38 105 28 88" stroke={branch} strokeWidth="3.5" strokeLinecap="round"/>
-      <path d="M68 140 C62 118 56 98 48 78" stroke={branch} strokeWidth="3" strokeLinecap="round"/>
-      <path d="M92 115 C78 95 65 78 55 60" stroke={branch} strokeWidth="2.8" strokeLinecap="round"/>
-      <path d="M92 115 C98 92 102 70 104 48" stroke={branch} strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M150 105 C140 82 132 60 124 38" stroke={branch} strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M150 105 C160 82 168 60 176 38" stroke={branch} strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M208 115 C222 95 235 78 245 60" stroke={branch} strokeWidth="2.8" strokeLinecap="round"/>
-      <path d="M208 115 C202 92 198 70 196 48" stroke={branch} strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M232 140 C248 120 262 105 272 88" stroke={branch} strokeWidth="3.5" strokeLinecap="round"/>
-      <path d="M232 140 C238 118 244 98 252 78" stroke={branch} strokeWidth="3" strokeLinecap="round"/>
-      <ellipse cx="150" cy="42" rx="50" ry="46" fill={md} opacity="0.92"/>
-      <ellipse cx="122" cy="55" rx="40" ry="36" fill={dk} opacity="0.88"/>
-      <ellipse cx="178" cy="52" rx="40" ry="34" fill={dk} opacity="0.9"/>
-      <ellipse cx="150" cy="28" rx="36" ry="30" fill={lt} opacity="0.85"/>
-      <ellipse cx="108" cy="40" rx="28" ry="25" fill={lt} opacity="0.8"/>
-      <ellipse cx="192" cy="38" rx="28" ry="24" fill={lt} opacity="0.82"/>
-      <ellipse cx="150" cy="18" rx="24" ry="22" fill={hi} opacity="0.7"/>
-      <ellipse cx="46"  cy="72"  rx="34" ry="30" fill={md} opacity="0.9"/>
-      <ellipse cx="30"  cy="62"  rx="26" ry="24" fill={dk} opacity="0.85"/>
-      <ellipse cx="62"  cy="62"  rx="26" ry="23" fill={lt} opacity="0.82"/>
-      <ellipse cx="44"  cy="52"  rx="20" ry="18" fill={hi} opacity="0.7"/>
-      <ellipse cx="70"  cy="108" rx="32" ry="28" fill={md} opacity="0.88"/>
-      <ellipse cx="52"  cy="98"  rx="25" ry="22" fill={dk} opacity="0.83"/>
-      <ellipse cx="88"  cy="100" rx="24" ry="21" fill={lt} opacity="0.8"/>
-      <ellipse cx="254" cy="72"  rx="34" ry="30" fill={md} opacity="0.9"/>
-      <ellipse cx="270" cy="62"  rx="26" ry="24" fill={dk} opacity="0.85"/>
-      <ellipse cx="238" cy="62"  rx="26" ry="23" fill={lt} opacity="0.82"/>
-      <ellipse cx="256" cy="52"  rx="20" ry="18" fill={hi} opacity="0.7"/>
-      <ellipse cx="230" cy="108" rx="32" ry="28" fill={md} opacity="0.88"/>
-      <ellipse cx="248" cy="98"  rx="25" ry="22" fill={dk} opacity="0.83"/>
-      <ellipse cx="212" cy="100" rx="24" ry="21" fill={lt} opacity="0.8"/>
-      <ellipse cx="124" cy="48"  rx="22" ry="20" fill={md} opacity="0.82"/>
-      <ellipse cx="176" cy="45"  rx="22" ry="19" fill={md} opacity="0.82"/>
-      <ellipse cx="78"  cy="165" rx="26" ry="23" fill={dk} opacity="0.82"/>
-      <ellipse cx="60"  cy="178" rx="20" ry="18" fill={md} opacity="0.78"/>
-      <ellipse cx="222" cy="165" rx="26" ry="23" fill={dk} opacity="0.82"/>
-      <ellipse cx="240" cy="178" rx="20" ry="18" fill={md} opacity="0.78"/>
-      <ellipse cx="150" cy="35"  rx="20" ry="16" fill={hi} opacity="0.28"/>
-      <ellipse cx="46"  cy="66"  rx="14" ry="12" fill={hi} opacity="0.25"/>
-      <ellipse cx="254" cy="66"  rx="14" ry="12" fill={hi} opacity="0.25"/>
+    <svg viewBox="0 0 300 340" style={{ width: "100%", height: "100%" }} fill="none">
+      {/* Roots */}
+      <path d="M 150 340 C 138 334 122 332 110 337" stroke={tr1} strokeWidth="4.5" strokeLinecap="round"/>
+      <path d="M 150 340 C 162 334 178 332 190 338" stroke={tr1} strokeWidth="4.5" strokeLinecap="round"/>
+      <path d="M 150 340 C 143 336 130 338 120 340" stroke={tr1} strokeWidth="3" strokeLinecap="round"/>
+      <path d="M 150 340 C 157 336 170 338 180 340" stroke={tr1} strokeWidth="3" strokeLinecap="round"/>
+
+      {/* Trunk – layered for texture */}
+      <path d="M 140 340 C 136 312 138 282 140 252 C 142 222 140 202 142 182" stroke={tr1} strokeWidth="18" strokeLinecap="round"/>
+      <path d="M 158 340 C 162 312 160 282 158 252 C 156 222 158 202 158 182" stroke={tr1} strokeWidth="14" strokeLinecap="round"/>
+      <path d="M 148 340 C 145 312 146 282 149 252 C 152 222 149 202 151 182" stroke={tr2} strokeWidth="11" strokeLinecap="round"/>
+      <path d="M 151 336 C 150 308 150 280 151 250 C 152 220 151 200 152 180" stroke={tr3} strokeWidth="3.5" strokeLinecap="round" opacity="0.4"/>
+
+      {/* Main branches */}
+      <path d="M 144 196 C 122 182 96 166 68 152" stroke={br1} strokeWidth="10" strokeLinecap="round"/>
+      <path d="M 154 192 C 178 178 204 164 232 150" stroke={br1} strokeWidth="10" strokeLinecap="round"/>
+      <path d="M 146 174 C 128 158 108 142 84 128" stroke={br1} strokeWidth="8" strokeLinecap="round"/>
+      <path d="M 154 170 C 172 154 192 140 216 126" stroke={br1} strokeWidth="8" strokeLinecap="round"/>
+      <path d="M 150 180 C 150 155 150 128 150 104" stroke={br1} strokeWidth="7" strokeLinecap="round"/>
+
+      {/* Sub-branches far left */}
+      <path d="M 68 152 C 54 136 42 122 34 106" stroke={br2} strokeWidth="5" strokeLinecap="round"/>
+      <path d="M 68 152 C 60 134 54 116 46 100" stroke={br2} strokeWidth="4" strokeLinecap="round"/>
+      <path d="M 88 136 C 80 118 74 98 70 80" stroke={br2} strokeWidth="4" strokeLinecap="round"/>
+      <path d="M 88 136 C 96 118 100 98 102 78" stroke={br2} strokeWidth="3.5" strokeLinecap="round"/>
+
+      {/* Sub-branches far right */}
+      <path d="M 232 150 C 246 134 258 120 266 104" stroke={br2} strokeWidth="5" strokeLinecap="round"/>
+      <path d="M 232 150 C 240 132 246 114 254 98" stroke={br2} strokeWidth="4" strokeLinecap="round"/>
+      <path d="M 212 134 C 220 116 226 96 228 78" stroke={br2} strokeWidth="4" strokeLinecap="round"/>
+      <path d="M 212 134 C 204 116 200 98 198 78" stroke={br2} strokeWidth="3.5" strokeLinecap="round"/>
+
+      {/* Sub-branches center */}
+      <path d="M 150 104 C 140 86 132 68 126 52" stroke={br2} strokeWidth="3.5" strokeLinecap="round"/>
+      <path d="M 150 104 C 160 86 168 68 174 52" stroke={br2} strokeWidth="3.5" strokeLinecap="round"/>
+      <path d="M 150 104 C 150 84 150 64 150 46" stroke={br2} strokeWidth="3" strokeLinecap="round"/>
+
+      {/* Sub-branches mid */}
+      <path d="M 84 128 C 74 110 66 90 60 72" stroke={br2} strokeWidth="3.5" strokeLinecap="round"/>
+      <path d="M 84 128 C 92 110 98 90 102 70" stroke={br2} strokeWidth="3.2" strokeLinecap="round"/>
+      <path d="M 216 126 C 226 108 234 88 240 70" stroke={br2} strokeWidth="3.5" strokeLinecap="round"/>
+      <path d="M 216 126 C 208 108 202 90 198 70" stroke={br2} strokeWidth="3.2" strokeLinecap="round"/>
+
+      {/* Twigs */}
+      <path d="M 34 106 C 28 92 24 78 22 64" stroke={br3} strokeWidth="2.2" strokeLinecap="round"/>
+      <path d="M 34 106 C 40 92 44 76 44 62" stroke={br3} strokeWidth="2" strokeLinecap="round"/>
+      <path d="M 46 100 C 42 86 40 70 42 56" stroke={br3} strokeWidth="2" strokeLinecap="round"/>
+      <path d="M 266 104 C 272 90 276 76 278 62" stroke={br3} strokeWidth="2.2" strokeLinecap="round"/>
+      <path d="M 266 104 C 260 90 256 76 256 62" stroke={br3} strokeWidth="2" strokeLinecap="round"/>
+      <path d="M 254 98 C 258 84 260 68 258 54" stroke={br3} strokeWidth="2" strokeLinecap="round"/>
+      <path d="M 70 80 C 64 66 62 50 64 36" stroke={br3} strokeWidth="2" strokeLinecap="round"/>
+      <path d="M 102 78 C 106 62 108 46 106 32" stroke={br3} strokeWidth="2" strokeLinecap="round"/>
+      <path d="M 228 78 C 234 62 236 46 234 34" stroke={br3} strokeWidth="2" strokeLinecap="round"/>
+      <path d="M 198 78 C 194 62 192 46 194 32" stroke={br3} strokeWidth="2" strokeLinecap="round"/>
+      <path d="M 126 52 C 120 38 118 24 120 12" stroke={br3} strokeWidth="1.8" strokeLinecap="round"/>
+      <path d="M 174 52 C 180 38 182 24 180 12" stroke={br3} strokeWidth="1.8" strokeLinecap="round"/>
+
+      {/* Back foliage (darkest) */}
+      <ellipse cx="150" cy="28"  rx="72" ry="56" fill={gdk} opacity="0.70"/>
+      <ellipse cx="42"  cy="84"  rx="52" ry="44" fill={gdk} opacity="0.68"/>
+      <ellipse cx="258" cy="82"  rx="52" ry="44" fill={gdk} opacity="0.68"/>
+      <ellipse cx="90"  cy="54"  rx="44" ry="38" fill={gdk} opacity="0.66"/>
+      <ellipse cx="210" cy="52"  rx="44" ry="36" fill={gdk} opacity="0.66"/>
+      <ellipse cx="36"  cy="58"  rx="30" ry="26" fill={gdk} opacity="0.70"/>
+      <ellipse cx="264" cy="56"  rx="30" ry="26" fill={gdk} opacity="0.70"/>
+      <ellipse cx="150" cy="166" rx="32" ry="28" fill={gdk} opacity="0.62"/>
+      <ellipse cx="80"  cy="162" rx="26" ry="24" fill={gdk} opacity="0.60"/>
+      <ellipse cx="220" cy="160" rx="26" ry="24" fill={gdk} opacity="0.60"/>
+
+      {/* Mid-dark foliage */}
+      <ellipse cx="150" cy="14"  rx="60" ry="48" fill={gd2} opacity="0.84"/>
+      <ellipse cx="44"  cy="72"  rx="42" ry="36" fill={gd2} opacity="0.82"/>
+      <ellipse cx="256" cy="70"  rx="42" ry="36" fill={gd2} opacity="0.82"/>
+      <ellipse cx="90"  cy="40"  rx="36" ry="32" fill={gd2} opacity="0.80"/>
+      <ellipse cx="210" cy="38"  rx="36" ry="30" fill={gd2} opacity="0.80"/>
+      <ellipse cx="124" cy="36"  rx="32" ry="28" fill={gd2} opacity="0.78"/>
+      <ellipse cx="176" cy="34"  rx="32" ry="27" fill={gd2} opacity="0.78"/>
+      <ellipse cx="64"  cy="98"  rx="34" ry="28" fill={gd2} opacity="0.76"/>
+      <ellipse cx="236" cy="96"  rx="34" ry="28" fill={gd2} opacity="0.76"/>
+      <ellipse cx="150" cy="154" rx="26" ry="22" fill={gd2} opacity="0.70"/>
+
+      {/* Main foliage */}
+      <ellipse cx="150" cy="18"  rx="50" ry="40" fill={gmd} opacity="0.88"/>
+      <ellipse cx="46"  cy="66"  rx="36" ry="32" fill={gmd} opacity="0.86"/>
+      <ellipse cx="254" cy="64"  rx="36" ry="32" fill={gmd} opacity="0.86"/>
+      <ellipse cx="90"  cy="32"  rx="32" ry="28" fill={gmd} opacity="0.84"/>
+      <ellipse cx="210" cy="30"  rx="32" ry="26" fill={gmd} opacity="0.84"/>
+      <ellipse cx="76"  cy="86"  rx="28" ry="24" fill={gmd} opacity="0.82"/>
+      <ellipse cx="224" cy="84"  rx="28" ry="24" fill={gmd} opacity="0.82"/>
+      <ellipse cx="128" cy="48"  rx="28" ry="24" fill={gmd} opacity="0.80"/>
+      <ellipse cx="172" cy="46"  rx="28" ry="23" fill={gmd} opacity="0.80"/>
+      <ellipse cx="50"  cy="48"  rx="26" ry="22" fill={gmd} opacity="0.80"/>
+      <ellipse cx="250" cy="46"  rx="26" ry="22" fill={gmd} opacity="0.80"/>
+      <ellipse cx="150" cy="144" rx="28" ry="22" fill={gmd} opacity="0.72"/>
+      <ellipse cx="84"  cy="148" rx="22" ry="20" fill={gmd} opacity="0.70"/>
+      <ellipse cx="216" cy="146" rx="22" ry="20" fill={gmd} opacity="0.70"/>
+
+      {/* Light foliage */}
+      <ellipse cx="150" cy="6"   rx="40" ry="32" fill={glt} opacity="0.82"/>
+      <ellipse cx="42"  cy="56"  rx="28" ry="25" fill={glt} opacity="0.80"/>
+      <ellipse cx="258" cy="54"  rx="28" ry="25" fill={glt} opacity="0.80"/>
+      <ellipse cx="88"  cy="22"  rx="26" ry="22" fill={glt} opacity="0.78"/>
+      <ellipse cx="212" cy="20"  rx="26" ry="21" fill={glt} opacity="0.78"/>
+      <ellipse cx="124" cy="28"  rx="24" ry="20" fill={glt} opacity="0.76"/>
+      <ellipse cx="176" cy="26"  rx="24" ry="19" fill={glt} opacity="0.76"/>
+      <ellipse cx="66"  cy="70"  rx="22" ry="19" fill={glt} opacity="0.74"/>
+      <ellipse cx="234" cy="68"  rx="22" ry="19" fill={glt} opacity="0.74"/>
+      <ellipse cx="52"  cy="36"  rx="20" ry="17" fill={glt} opacity="0.72"/>
+      <ellipse cx="248" cy="34"  rx="20" ry="17" fill={glt} opacity="0.72"/>
+      <ellipse cx="150" cy="135" rx="22" ry="18" fill={glt} opacity="0.65"/>
+
+      {/* Highlight foliage */}
+      <ellipse cx="136" cy="6"   rx="30" ry="22" fill={ghi} opacity="0.55"/>
+      <ellipse cx="36"  cy="54"  rx="20" ry="17" fill={ghi} opacity="0.52"/>
+      <ellipse cx="264" cy="52"  rx="20" ry="17" fill={ghi} opacity="0.52"/>
+      <ellipse cx="84"  cy="14"  rx="18" ry="15" fill={ghi} opacity="0.50"/>
+      <ellipse cx="216" cy="12"  rx="18" ry="15" fill={ghi} opacity="0.50"/>
+      <ellipse cx="60"  cy="62"  rx="16" ry="14" fill={ghi} opacity="0.48"/>
+      <ellipse cx="240" cy="60"  rx="16" ry="14" fill={ghi} opacity="0.48"/>
+      <ellipse cx="150" cy="126" rx="18" ry="14" fill={ghi} opacity="0.42"/>
+
+      {/* Very light tips */}
+      <ellipse cx="132" cy="2"   rx="20" ry="12" fill={gvl} opacity="0.28"/>
+      <ellipse cx="82"  cy="8"   rx="14" ry="10" fill={gvl} opacity="0.26"/>
+      <ellipse cx="218" cy="6"   rx="14" ry="10" fill={gvl} opacity="0.26"/>
+      <ellipse cx="38"  cy="48"  rx="12" ry="9"  fill={gvl} opacity="0.26"/>
+      <ellipse cx="262" cy="46"  rx="12" ry="9"  fill={gvl} opacity="0.26"/>
     </svg>
   );
 }
 
-function RoseSVG({ x, cy, rot, bloom }: { x: number; cy: number; rot: number; bloom: boolean }) {
-  // A simple 5-petal rose
-  const petal = (angle: number) => {
-    const rad = (angle * Math.PI) / 180;
-    const px = Math.cos(rad) * 7;
-    const py = Math.sin(rad) * 7;
-    return (
-      <ellipse
-        key={angle}
-        cx={px}
-        cy={py - 4}
-        rx="4.5"
-        ry="6.5"
-        fill="#c0392b"
-        opacity="0.88"
-        transform={`rotate(${angle}, 0, 0)`}
-      />
-    );
-  };
+function RoseSVG({ x, cy, rot, bloom, idx }: { x: number; cy: number; rot: number; bloom: boolean; idx: number }) {
   return (
     <motion.g
-      transform={`translate(${x}, ${cy}) rotate(${rot})`}
-      initial={{ scale: 0, opacity: 0 }}
-      animate={{ scale: bloom ? 1 : 0, opacity: bloom ? 1 : 0 }}
-      transition={{ duration: 0.8, ease: [0.34, 1.56, 0.64, 1] }}
-      style={{ originX: "0px", originY: "0px" }}
+      transform={`translate(${x}, ${cy})`}
+      initial={{ scale: 0, rotate: rot - 40, opacity: 0 }}
+      animate={{ scale: bloom ? 1 : 0, rotate: bloom ? rot : rot - 40, opacity: bloom ? 1 : 0 }}
+      transition={{
+        type: "spring",
+        damping: 9,
+        stiffness: 170,
+        delay: bloom ? idx * 0.13 : 0,
+        opacity: { duration: 0.25 },
+      } as any}
+      style={{ originX: "0px", originY: "0px", filter: "drop-shadow(1px 2px 4px rgba(0,0,0,0.38))" }}
     >
-      {[0, 72, 144, 216, 288].map((a) => petal(a))}
-      <circle cx="0" cy="0" r="3.5" fill="#7b0c0c" />
-      <circle cx="0" cy="0" r="1.8" fill="#a01818" opacity="0.6" />
+      {/* Outer petals – 5, large, deep crimson */}
+      {[0, 72, 144, 216, 288].map((a) => (
+        <g key={`op${a}`} transform={`rotate(${a})`}>
+          <ellipse cx="0" cy="-14" rx="5.8" ry="9.5" fill="#7a1020" opacity="0.92"/>
+        </g>
+      ))}
+      {/* Second petal ring – 5, rotated 36°, slightly brighter */}
+      {[36, 108, 180, 252, 324].map((a) => (
+        <g key={`sp${a}`} transform={`rotate(${a})`}>
+          <ellipse cx="0" cy="-11" rx="5.2" ry="8" fill="#9c1a2e" opacity="0.88"/>
+        </g>
+      ))}
+      {/* Third petal ring – 5, small inner */}
+      {[18, 90, 162, 234, 306].map((a) => (
+        <g key={`tp${a}`} transform={`rotate(${a})`}>
+          <ellipse cx="0" cy="-7" rx="4" ry="6" fill="#be2840" opacity="0.84"/>
+        </g>
+      ))}
+      {/* Innermost petals – 5, curled */}
+      {[0, 72, 144, 216, 288].map((a) => (
+        <g key={`cp${a}`} transform={`rotate(${a})`}>
+          <ellipse cx="0" cy="-4" rx="2.5" ry="4" fill="#d64058" opacity="0.78"/>
+        </g>
+      ))}
+      {/* Center */}
+      <circle r="5" fill="#4a0810"/>
+      <circle r="3.2" fill="#6a1018" opacity="0.85"/>
+      <circle r="1.6" fill="#8a2030" opacity="0.65"/>
+      {/* Stamens */}
+      {[0, 51, 102, 153, 204, 255, 306].map((a) => (
+        <circle
+          key={a}
+          cx={Math.cos((a * Math.PI) / 180) * 2.6}
+          cy={Math.sin((a * Math.PI) / 180) * 2.6}
+          r="0.7"
+          fill="#e8c870"
+          opacity="0.65"
+        />
+      ))}
+      {/* Sepal (green base) */}
+      {[0, 120, 240].map((a) => (
+        <g key={`sep${a}`} transform={`rotate(${a})`}>
+          <ellipse cx="0" cy="6" rx="2.5" ry="4.5" fill="#2d6a2a" opacity="0.70"/>
+        </g>
+      ))}
     </motion.g>
   );
 }
 
 function RoseVineSVG({ count }: { count: number }) {
+  const leafColors = ["#173d22", "#235c34", "#317848", "#469460", "#1e5230"];
+  const leafDark   = ["#0e2a18", "#1a4428", "#264c30", "#32643c", "#152e1c"];
+
+  const leaves = [
+    // Junction 1 (y≈338, x≈108)
+    { x: 86,  y: 330, rx: 15, ry: 6.5, rot: -38, c: 0 },
+    { x: 78,  y: 322, rx: 12, ry: 5.5, rot: -58, c: 2 },
+    { x: 132, y: 328, rx: 14, ry: 6,   rot: 28,  c: 1 },
+    { x: 142, y: 318, rx: 11, ry: 5,   rot: 46,  c: 3 },
+    { x: 100, y: 346, rx: 10, ry: 4.5, rot: -18, c: 4 },
+    // Junction 2 (y≈285, x≈142)
+    { x: 118, y: 278, rx: 14, ry: 6,   rot: -32, c: 1 },
+    { x: 108, y: 270, rx: 12, ry: 5.5, rot: -52, c: 4 },
+    { x: 164, y: 274, rx: 15, ry: 6.5, rot: 30,  c: 0 },
+    { x: 172, y: 266, rx: 12, ry: 5,   rot: 48,  c: 2 },
+    { x: 148, y: 293, rx: 10, ry: 4,   rot: 8,   c: 3 },
+    // Junction 3 (y≈228, x≈106)
+    { x: 84,  y: 222, rx: 14, ry: 6,   rot: -34, c: 2 },
+    { x: 75,  y: 214, rx: 11, ry: 5,   rot: -54, c: 0 },
+    { x: 132, y: 220, rx: 13, ry: 5.5, rot: 32,  c: 3 },
+    { x: 142, y: 212, rx: 11, ry: 4.5, rot: 50,  c: 1 },
+    { x: 110, y: 238, rx: 9,  ry: 4,   rot: -10, c: 4 },
+    // Junction 4 (y≈173, x≈152)
+    { x: 128, y: 166, rx: 14, ry: 6,   rot: -30, c: 0 },
+    { x: 118, y: 158, rx: 11, ry: 5,   rot: -50, c: 2 },
+    { x: 176, y: 162, rx: 14, ry: 6,   rot: 34,  c: 1 },
+    { x: 186, y: 154, rx: 11, ry: 4.5, rot: 52,  c: 3 },
+    // Junction 5 (y≈118, x≈120)
+    { x: 96,  y: 110, rx: 13, ry: 5.5, rot: -36, c: 3 },
+    { x: 88,  y: 102, rx: 10, ry: 4.5, rot: -56, c: 1 },
+    { x: 150, y: 108, rx: 13, ry: 5.5, rot: 32,  c: 0 },
+    { x: 158, y: 100, rx: 10, ry: 4,   rot: 50,  c: 2 },
+    { x: 124, y: 126, rx: 9,  ry: 3.5, rot: -12, c: 4 },
+    // Junction 6 (y≈64, x≈160)
+    { x: 134, y: 58,  rx: 12, ry: 5,   rot: -28, c: 2 },
+    { x: 126, y: 50,  rx: 10, ry: 4.2, rot: -46, c: 0 },
+    { x: 188, y: 54,  rx: 12, ry: 5,   rot: 36,  c: 1 },
+    { x: 198, y: 46,  rx: 10, ry: 4,   rot: 54,  c: 3 },
+    // Along main vine extras
+    { x: 128, y: 360, rx: 10, ry: 4,   rot: -22, c: 1 },
+    { x: 168, y: 356, rx: 10, ry: 4,   rot: 20,  c: 3 },
+    { x: 152, y: 250, rx: 9,  ry: 3.5, rot: 12,  c: 4 },
+    { x: 136, y: 148, rx: 9,  ry: 3.5, rot: -16, c: 0 },
+  ];
+
   return (
-    <svg viewBox="0 0 300 360" style={{ width: "100%", height: "100%" }} fill="none">
-      {/* Main vine */}
+    <svg viewBox="0 0 300 400" style={{ width: "100%", height: "100%" }} fill="none">
+      <defs>
+        <filter id="rv-rose-shadow" x="-40%" y="-40%" width="180%" height="180%">
+          <feDropShadow dx="1" dy="2" stdDeviation="2.5" floodColor="rgba(0,0,0,0.40)" />
+        </filter>
+        <filter id="rv-vine-shadow" x="-15%" y="-15%" width="130%" height="130%">
+          <feDropShadow dx="0.5" dy="1" stdDeviation="1.8" floodColor="rgba(0,0,0,0.28)" />
+        </filter>
+      </defs>
+
+      {/* Main vine – double-stroke for thickness and texture */}
       <path
-        d="M150 360 C130 340 160 310 140 280 C120 250 170 220 150 190 C130 160 165 130 145 100 C125 70 155 45 150 20"
-        stroke="#5a8a30"
-        strokeWidth="4"
+        d="M 148 400 C 142 378 112 360 108 338 C 104 316 140 304 142 282 C 144 260 108 246 106 226 C 104 206 146 192 152 172 C 158 152 120 136 120 116 C 120 96 158 82 162 62 C 166 42 144 26 150 6"
+        stroke="#2a5218"
+        strokeWidth="8"
         strokeLinecap="round"
+        filter="url(#rv-vine-shadow)"
       />
-      {/* Side tendrils */}
-      <path d="M140 280 C110 270 90 260 80 245" stroke="#5a8a30" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M140 280 C155 268 175 258 185 242" stroke="#5a8a30" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M148 190 C118 180 98 168 85 152" stroke="#5a8a30" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M148 190 C168 178 188 168 198 155" stroke="#5a8a30" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M146 100 C122 90 105 78 95 63" stroke="#5a8a30" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M146 100 C166 90 182 78 195 63" stroke="#5a8a30" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M155 330 C175 322 195 315 210 308" stroke="#5a8a30" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M145 330 C125 322 105 315 90 308" stroke="#5a8a30" strokeWidth="2" strokeLinecap="round"/>
-      {/* Leaves */}
-      {[
-        { x: 80,  y: 245, r: 25 }, { x: 185, y: 242, r: -20 },
-        { x: 85,  y: 152, r: 30 }, { x: 198, y: 155, r: -25 },
-        { x: 95,  y: 63,  r: 20 }, { x: 195, y: 63,  r: -20 },
-        { x: 210, y: 308, r: -15 }, { x: 90,  y: 308, r: 15  },
-      ].map((l, i) => (
+      <path
+        d="M 148 400 C 142 378 112 360 108 338 C 104 316 140 304 142 282 C 144 260 108 246 106 226 C 104 206 146 192 152 172 C 158 152 120 136 120 116 C 120 96 158 82 162 62 C 166 42 144 26 150 6"
+        stroke="#4a8832"
+        strokeWidth="4.5"
+        strokeLinecap="round"
+        opacity="0.55"
+      />
+      <path
+        d="M 148 400 C 142 378 112 360 108 338 C 104 316 140 304 142 282 C 144 260 108 246 106 226 C 104 206 146 192 152 172 C 158 152 120 136 120 116 C 120 96 158 82 162 62 C 166 42 144 26 150 6"
+        stroke="#70b058"
+        strokeWidth="2"
+        strokeLinecap="round"
+        opacity="0.25"
+      />
+
+      {/* Left branches */}
+      <path d="M 108 338 C 92 330 76 324 65 320" stroke="#326820" strokeWidth="5" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
+      <path d="M 108 338 C 92 330 76 324 65 320" stroke="#5a9840" strokeWidth="2.5" strokeLinecap="round" opacity="0.4"/>
+      <path d="M 106 226 C 90 220 74 214 62 210" stroke="#326820" strokeWidth="4.5" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
+      <path d="M 106 226 C 90 220 74 214 62 210" stroke="#5a9840" strokeWidth="2" strokeLinecap="round" opacity="0.4"/>
+      <path d="M 152 172 C 135 164 118 158 106 156" stroke="#326820" strokeWidth="4.5" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
+      <path d="M 120 116 C 104 108 88 102 74 100" stroke="#326820" strokeWidth="4" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
+      <path d="M 162 62 C 146 54 128 48 106 46" stroke="#326820" strokeWidth="3.5" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
+
+      {/* Right branches */}
+      <path d="M 108 338 C 124 328 138 324 152 322" stroke="#326820" strokeWidth="4.5" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
+      <path d="M 108 338 C 124 328 138 324 152 322" stroke="#5a9840" strokeWidth="2" strokeLinecap="round" opacity="0.4"/>
+      <path d="M 142 282 C 158 274 174 268 185 266" stroke="#326820" strokeWidth="4.5" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
+      <path d="M 106 226 C 122 218 138 214 152 214" stroke="#326820" strokeWidth="4.5" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
+      <path d="M 152 172 C 168 162 184 156 198 152" stroke="#326820" strokeWidth="4.5" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
+      <path d="M 120 116 C 136 108 152 104 168 106" stroke="#326820" strokeWidth="4" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
+      <path d="M 162 62 C 178 54 196 48 212 44" stroke="#326820" strokeWidth="3.5" strokeLinecap="round" filter="url(#rv-vine-shadow)"/>
+
+      {/* Curling tendrils */}
+      <path d="M 65 320 C 52 314 44 306 50 298 C 56 290 66 296 60 303" stroke="#4a8030" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+      <path d="M 62 210 C 50 204 42 196 48 188 C 54 180 64 186 58 193" stroke="#4a8030" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+      <path d="M 185 266 C 198 260 206 251 200 243 C 194 235 184 242 190 249" stroke="#4a8030" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+      <path d="M 198 152 C 210 146 218 136 212 128 C 206 120 196 128 202 135" stroke="#4a8030" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+      <path d="M 212 44 C 224 38 232 28 226 20 C 220 12 210 20 216 27" stroke="#4a8030" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
+      <path d="M 106 46 C 94 40 86 30 92 22 C 98 14 108 22 102 29" stroke="#4a8030" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
+
+      {/* Leaves – dark underside shadow layer */}
+      {leaves.map((l, i) => (
         <ellipse
-          key={i}
-          cx={l.x}
-          cy={l.y}
-          rx="12"
-          ry="7"
-          fill="#4a8f28"
-          opacity="0.75"
-          transform={`rotate(${l.r}, ${l.x}, ${l.y})`}
+          key={`ls${i}`}
+          cx={l.x + 1}
+          cy={l.y + 1.5}
+          rx={l.rx}
+          ry={l.ry}
+          fill={leafDark[l.c]}
+          opacity={0.28}
+          transform={`rotate(${l.rot}, ${l.x + 1}, ${l.y + 1.5})`}
         />
       ))}
+      {/* Leaves – main color */}
+      {leaves.map((l, i) => (
+        <ellipse
+          key={`lm${i}`}
+          cx={l.x}
+          cy={l.y}
+          rx={l.rx}
+          ry={l.ry}
+          fill={leafColors[l.c]}
+          opacity={0.72 + (i % 4) * 0.06}
+          transform={`rotate(${l.rot}, ${l.x}, ${l.y})`}
+        />
+      ))}
+      {/* Leaf midribs */}
+      {leaves.slice(0, 20).map((l, i) => {
+        const rad = (l.rot * Math.PI) / 180;
+        const dx = Math.cos(rad) * l.rx * 0.85;
+        const dy = Math.sin(rad) * l.rx * 0.85;
+        return (
+          <line
+            key={`lr${i}`}
+            x1={l.x - dx} y1={l.y - dy}
+            x2={l.x + dx} y2={l.y + dy}
+            stroke={leafDark[l.c]}
+            strokeWidth="0.6"
+            opacity="0.5"
+          />
+        );
+      })}
+
       {/* Roses */}
       {ROSE_ANCHORS.slice(0, count).map((a, i) => (
-        <RoseSVG key={i} x={a.x} cy={a.y} rot={a.rot} bloom={i < count} />
+        <RoseSVG key={i} x={a.x} cy={a.y} rot={a.rot} bloom={i < count} idx={i} />
       ))}
     </svg>
   );
@@ -1126,7 +1352,7 @@ function GuestBook({
         style={{
           position: "relative",
           width: "100%",
-          aspectRatio: mode === "tree" ? "300 / 320" : "300 / 360",
+          aspectRatio: mode === "tree" ? "300 / 340" : "300 / 400",
           cursor: preview ? "default" : "pointer",
         }}
         onClick={() => !preview && msgs.length > 0 && setViewerOpen(true)}
@@ -1285,7 +1511,14 @@ function GuestBook({
                 {msgs.map((m) => (
                   <div
                     key={m.id}
-                    style={{
+                    style={mode === "tree" ? {
+                      background: "linear-gradient(135deg, #fffef5 0%, #fdf5e0 100%)",
+                      borderRadius: 6,
+                      padding: "20px 18px 16px",
+                      boxShadow: "2px 3px 14px rgba(0,0,0,0.14), 0 0 0 5px rgba(210,185,110,0.07)",
+                      border: "1px solid #e0ccaa",
+                      position: "relative" as const,
+                    } : {
                       background: "#fff",
                       borderRadius: 14,
                       padding: "16px 18px",
@@ -1293,6 +1526,18 @@ function GuestBook({
                       border: "1px solid rgba(0,0,0,0.06)",
                     }}
                   >
+                    {mode === "tree" && (
+                      <div style={{ position: "absolute", top: 14, right: 14, width: 26, height: 32, border: "1px solid #c8b882", borderRadius: 2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, opacity: 0.7 }}>
+                        💌
+                      </div>
+                    )}
+                    {mode === "tree" && (
+                      <div style={{ borderBottom: "1px dashed #d4c4a0", marginBottom: 12, paddingBottom: 8, paddingRight: 36 }}>
+                        <p style={{ fontFamily: mono, fontSize: 9, color: "#b09870", letterSpacing: "0.2em", textTransform: "uppercase" as const }}>
+                          {m.at} · {m.name}
+                        </p>
+                      </div>
+                    )}
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
                       <div>
                         <p style={{ fontFamily: serif, fontSize: 15, color: "#2a2a2a", fontWeight: 600 }}>{m.name}</p>
@@ -2404,8 +2649,9 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
               letterSpacing: "0.03em",
               lineHeight: 1.7,
               marginBottom: preview ? 12 : 24,
+              whiteSpace: "pre-line",
             }}>
-              멀리서도 축하의 마음을 전하고 싶으신 분들을 위해{"\n"}계좌번호를 안내드립니다. 소중한 축하에 깊이 감사드립니다.
+              멀리서도 축하의 마음을{"\n"}전하고 싶으신 분들을 위해{"\n"}계좌번호를 안내드립니다.{"\n\n"}소중한 축하를 보내주셔서 감사드리며,{"\n"}따뜻한 마음에 깊이 감사드립니다.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: preview ? 8 : 12 }}>
 
