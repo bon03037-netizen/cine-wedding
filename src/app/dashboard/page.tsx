@@ -558,7 +558,7 @@ export default function DashboardPage() {
           className="text-base font-semibold text-gray-900"
           style={{ fontFamily: "var(--font-serif-kr), serif" }}
         >
-          Toast Wedding
+          씨네웨딩
         </span>
         <span className="text-gray-200 mx-1.5">|</span>
         <span className="text-gray-400 text-sm">청첩장 편집</span>
@@ -722,7 +722,7 @@ export default function DashboardPage() {
               <div className="grid grid-cols-4 gap-2">
                 {[
                   { id: "heart",  icon: "♥", label: "하트" },
-                  { id: "laurel", icon: "🌿", label: "월계수" },
+                  { id: "ribbon", icon: "🎀", label: "리본" },
                   { id: "lace",   icon: "〰", label: "레이스" },
                   { id: "lark",   icon: "🐦", label: "종달새" },
                 ].map((opt) => (

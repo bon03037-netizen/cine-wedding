@@ -85,7 +85,7 @@ export interface WeddingData {
   showGuestBook?: boolean;
   guestbookMode?: "tree" | "rose";
   // Hero SVG shape
-  heroSvgShape?: "heart" | "laurel" | "lace" | "lark";
+  heroSvgShape?: "heart" | "ribbon" | "lace" | "lark";
   // Extended accounts (마음 전하실 곳)
   accounts?: {
     groom?: PersonAccount;
@@ -1074,25 +1074,21 @@ const ROSE_POSITIONS = [
 ];
 
 function RoseFlower({
-  msg,
   idx,
   xPct,
   yPct,
-  onClick,
   preview,
 }: {
-  msg: GuestMsg;
   idx: number;
   xPct: number;
   yPct: number;
-  onClick: () => void;
   preview: boolean;
 }) {
   const size = preview ? 20 : 34;
   return (
     <motion.div
-      initial={{ scale: 0, rotate: -50, opacity: 0 }}
-      animate={{ scale: 1, rotate: 0, opacity: 1 }}
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
       transition={{
         type: "spring",
         damping: 8,
@@ -1100,8 +1096,6 @@ function RoseFlower({
         delay: idx * 0.12,
         opacity: { duration: 0.25 },
       } as any}
-      onClick={!preview ? onClick : undefined}
-      title={!preview ? msg.name : undefined}
       style={{
         position: "absolute",
         left: `${xPct}%`,
@@ -1109,60 +1103,20 @@ function RoseFlower({
         width: size,
         height: size,
         transform: "translate(-50%, -50%)",
-        cursor: preview ? "default" : "pointer",
+        cursor: "default",
         zIndex: 2,
+        pointerEvents: "none",
         filter: preview
           ? "drop-shadow(0 1px 2px rgba(120,0,20,0.45))"
           : "drop-shadow(0 0 5px rgba(200,20,40,0.70)) drop-shadow(0 0 12px rgba(180,0,30,0.40))",
       }}
     >
-      <svg viewBox="-20 -20 40 40" width={size} height={size} style={{ overflow: "visible" }}>
-        {/* Outer petals */}
-        {[0, 72, 144, 216, 288].map((a) => (
-          <g key={`op${a}`} transform={`rotate(${a})`}>
-            <ellipse cx="0" cy="-14" rx="5.8" ry="9.5" fill="#7a0e1e" opacity="0.93"/>
-          </g>
-        ))}
-        {/* Second ring */}
-        {[36, 108, 180, 252, 324].map((a) => (
-          <g key={`sp${a}`} transform={`rotate(${a})`}>
-            <ellipse cx="0" cy="-10.5" rx="5.0" ry="8" fill="#a01428" opacity="0.89"/>
-          </g>
-        ))}
-        {/* Third ring */}
-        {[18, 90, 162, 234, 306].map((a) => (
-          <g key={`tp${a}`} transform={`rotate(${a})`}>
-            <ellipse cx="0" cy="-7" rx="3.8" ry="5.8" fill="#c42038" opacity="0.84"/>
-          </g>
-        ))}
-        {/* Innermost curled petals */}
-        {[0, 72, 144, 216, 288].map((a) => (
-          <g key={`cp${a}`} transform={`rotate(${a})`}>
-            <ellipse cx="0" cy="-3.8" rx="2.4" ry="3.8" fill="#de3858" opacity="0.78"/>
-          </g>
-        ))}
-        {/* Center */}
-        <circle r="4.8" fill="#3c0810"/>
-        <circle r="3.0" fill="#5e0e18" opacity="0.88"/>
-        <circle r="1.5" fill="#8a1e2e" opacity="0.65"/>
-        {/* Stamens */}
-        {[0, 51, 102, 153, 204, 255, 306].map((a) => (
-          <circle
-            key={a}
-            cx={Math.cos((a * Math.PI) / 180) * 2.5}
-            cy={Math.sin((a * Math.PI) / 180) * 2.5}
-            r="0.65"
-            fill="#e8c870"
-            opacity="0.68"
-          />
-        ))}
-        {/* Sepals */}
-        {[0, 120, 240].map((a) => (
-          <g key={`sep${a}`} transform={`rotate(${a})`}>
-            <ellipse cx="0" cy="5.8" rx="2.2" ry="4.2" fill="#2a5c1e" opacity="0.72"/>
-          </g>
-        ))}
-      </svg>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/samples/rose-icon.png"
+        alt=""
+        style={{ width: size, height: size, objectFit: "contain" }}
+      />
     </motion.div>
   );
 }
@@ -1177,10 +1131,8 @@ function GuestBook({
   mode: "tree" | "rose";
 }) {
   const [msgs, setMsgs] = useState<GuestMsg[]>(MOCK_MSGS);
-  // tree mode: open full list viewer
+  // tree/rose mode: open full list viewer
   const [viewerOpen, setViewerOpen] = useState(false);
-  // rose mode: open single-message modal
-  const [selectedRoseMsg, setSelectedRoseMsg] = useState<GuestMsg | null>(null);
   const [inputName, setInputName] = useState("");
   const [inputMsg, setInputMsg] = useState("");
   const [inputPw, setInputPw] = useState("");
@@ -1205,14 +1157,6 @@ function GuestBook({
     if (!m) return;
     if (m.pw && m.pw !== deletePw) { setDeleteErr(true); return; }
     setMsgs((prev) => prev.filter((x) => x.id !== id));
-    setDeleteId(null);
-    setDeletePw("");
-    setDeleteErr(false);
-    if (mode === "rose") setSelectedRoseMsg(null);
-  };
-
-  const closeRoseModal = () => {
-    setSelectedRoseMsg(null);
     setDeleteId(null);
     setDeletePw("");
     setDeleteErr(false);
@@ -1324,7 +1268,9 @@ function GuestBook({
             overflow: "hidden",
             borderRadius: 12,
             background: "#0e1a0e",
+            cursor: preview ? "default" : "pointer",
           }}
+          onClick={() => !preview && msgs.length > 0 && setViewerOpen(true)}
         >
           {/* Background vine image */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1342,12 +1288,10 @@ function GuestBook({
             return (
               <RoseFlower
                 key={m.id}
-                msg={m}
                 idx={i}
                 xPct={pos.x}
                 yPct={pos.y}
                 preview={preview}
-                onClick={() => setSelectedRoseMsg(m)}
               />
             );
           })}
@@ -1365,6 +1309,17 @@ function GuestBook({
               }}>
                 장미를 피워주세요 🌹
               </p>
+            </div>
+          )}
+
+          {/* TAP TO VIEW ALL hint */}
+          {!preview && msgs.length > 0 && (
+            <div style={{
+              position: "absolute", bottom: 6, right: 8,
+              fontFamily: mono, fontSize: 7, color: "rgba(255,255,255,0.45)",
+              letterSpacing: "0.18em", pointerEvents: "none",
+            }}>
+              TAP TO READ
             </div>
           )}
         </div>
@@ -1414,9 +1369,9 @@ function GuestBook({
         </div>
       )}
 
-      {/* ── Tree mode: full list viewer (bottom sheet) ── */}
+      {/* ── Full list viewer (bottom sheet) — tree & rose ── */}
       <AnimatePresence>
-        {viewerOpen && mode === "tree" && (
+        {viewerOpen && (
           <>
             <motion.div
               key="gb-bd"
@@ -1508,115 +1463,6 @@ function GuestBook({
         )}
       </AnimatePresence>
 
-      {/* ── Rose mode: single-message modal ── */}
-      <AnimatePresence>
-        {selectedRoseMsg && mode === "rose" && (
-          <>
-            <motion.div
-              key="rose-bd"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={closeRoseModal}
-              style={{ position: "fixed", inset: 0, background: "rgba(10,5,5,0.80)", zIndex: 400 }}
-            />
-            <motion.div
-              key="rose-modal"
-              initial={{ scale: 0.82, opacity: 0, y: 24 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.82, opacity: 0, y: 24 }}
-              transition={{ type: "spring", damping: 22, stiffness: 280 }}
-              style={{
-                position: "fixed",
-                top: "50%",
-                left: "50%",
-                zIndex: 401,
-                background: "linear-gradient(160deg, #fff8f5 0%, #fff0ee 100%)",
-                borderRadius: 22,
-                padding: "32px 28px 28px",
-                width: "min(340px, 90vw)",
-                boxShadow: "0 24px 64px rgba(0,0,0,0.35), 0 0 0 1px rgba(180,80,100,0.14)",
-                transform: "translate(-50%, -50%)",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              {/* Rose icon */}
-              <svg viewBox="-20 -20 40 40" width={52} height={52} style={{ marginBottom: 16, filter: "drop-shadow(0 2px 8px rgba(150,0,30,0.4))" }}>
-                {[0, 72, 144, 216, 288].map((a) => (
-                  <g key={`op${a}`} transform={`rotate(${a})`}><ellipse cx="0" cy="-14" rx="5.8" ry="9.5" fill="#7a0e1e" opacity="0.93"/></g>
-                ))}
-                {[36, 108, 180, 252, 324].map((a) => (
-                  <g key={`sp${a}`} transform={`rotate(${a})`}><ellipse cx="0" cy="-10.5" rx="5.0" ry="8" fill="#a01428" opacity="0.89"/></g>
-                ))}
-                {[18, 90, 162, 234, 306].map((a) => (
-                  <g key={`tp${a}`} transform={`rotate(${a})`}><ellipse cx="0" cy="-7" rx="3.8" ry="5.8" fill="#c42038" opacity="0.84"/></g>
-                ))}
-                {[0, 72, 144, 216, 288].map((a) => (
-                  <g key={`cp${a}`} transform={`rotate(${a})`}><ellipse cx="0" cy="-3.8" rx="2.4" ry="3.8" fill="#de3858" opacity="0.78"/></g>
-                ))}
-                <circle r="4.8" fill="#3c0810"/>
-                <circle r="3.0" fill="#5e0e18" opacity="0.88"/>
-              </svg>
-
-              {/* Message */}
-              <p style={{
-                fontFamily: serif, fontSize: 16, color: "#2a1a1e",
-                lineHeight: 1.82, letterSpacing: "0.02em", textAlign: "center",
-                marginBottom: 20,
-              }}>
-                {selectedRoseMsg.message}
-              </p>
-
-              {/* Divider */}
-              <div style={{ width: "100%", borderTop: "1px solid rgba(180,130,140,0.25)", marginBottom: 16 }} />
-
-              {/* Footer */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                <div>
-                  <p style={{ fontFamily: serif, fontSize: 14, fontWeight: 600, color: "#5a2830" }}>{selectedRoseMsg.name}</p>
-                  <p style={{ fontFamily: mono, fontSize: 9, color: "#c0a0a8", letterSpacing: "0.12em", marginTop: 2 }}>{selectedRoseMsg.at}</p>
-                </div>
-                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                  {selectedRoseMsg.pw !== undefined && deleteId !== selectedRoseMsg.id && (
-                    <button
-                      onClick={() => { setDeleteId(selectedRoseMsg.id); setDeletePw(""); setDeleteErr(false); }}
-                      style={{ fontSize: 13, color: "#d0a0a8", background: "none", border: "none", cursor: "pointer" }}
-                    >
-                      🗑️
-                    </button>
-                  )}
-                  <button
-                    onClick={closeRoseModal}
-                    style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.10)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
-                  >
-                    <X size={13} color="#888" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Delete confirmation */}
-              {deleteId === selectedRoseMsg.id && (
-                <div style={{ width: "100%", marginTop: 12, display: "flex", gap: 8, alignItems: "center" }}>
-                  <input
-                    value={deletePw}
-                    onChange={(e) => { setDeletePw(e.target.value); setDeleteErr(false); }}
-                    placeholder={selectedRoseMsg.pw ? "비밀번호 입력" : "비밀번호 없이 삭제됩니다"}
-                    type="password"
-                    style={{ flex: 1, fontFamily: mono, fontSize: 11, padding: "7px 10px", border: `1px solid ${deleteErr ? "#e53e3e" : "#e0c8cc"}`, borderRadius: 8, outline: "none", color: "#3a2020" }}
-                  />
-                  <button
-                    onClick={() => handleDelete(selectedRoseMsg.id)}
-                    style={{ fontFamily: mono, fontSize: 10, padding: "7px 14px", background: "#c53030", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer" }}
-                  >
-                    삭제
-                  </button>
-                </div>
-              )}
-              {deleteErr && <p style={{ fontFamily: mono, fontSize: 10, color: "#e53e3e", marginTop: 6, width: "100%" }}>비밀번호가 맞지 않습니다.</p>}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
@@ -2023,45 +1869,26 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
         borderTop: `1px solid ${theme.sectionBorder}`,
         borderBottom: `1px solid ${theme.sectionBorder}`,
       }}>
-        {/* SVG 장식 먼저 */}
+        {/* 인트로 장식 이미지 (페이드인) */}
         {(() => {
-          const svgColor = LIGHT_BG_SET.has(bgColor.toLowerCase()) ? theme.flourishAccent : "#D4AF37";
           const shape = data.heroSvgShape || "heart";
-          const paths: Record<string, string> = {
-            heart:  "M44 18 C44 18 36 12 36 8 C36 5.8 37.8 4 40 4 C41.4 4 42.6 4.7 43.3 5.8 C43.5 6.1 43.8 6.3 44 6.3 C44.2 6.3 44.5 6.1 44.7 5.8 C45.4 4.7 46.6 4 48 4 C50.2 4 52 5.8 52 8 C52 12 44 18 44 18 Z",
-            laurel: "M44 20 C38 17 30 13 26 8 C24 4 27 2 30 4 C33 6 36 9 38 12 M44 20 C50 17 58 13 62 8 C64 4 61 2 58 4 C55 6 52 9 50 12 M38 12 C40 11 42 10 44 10 C46 10 48 11 50 12",
-            lace:   "M12 12 C14 7 18 4 22 7 C26 10 26 14 30 14 C34 14 34 10 38 7 C42 4 46 7 48 12 C50 17 54 20 58 17 C62 14 62 10 66 7 C70 4 74 7 76 12",
-            lark:   "M26 14 C30 9 36 8 44 11 M44 11 C52 8 58 9 62 14 M44 11 L44 20 M36 11 C38 9 41 9 44 10 M44 10 C47 9 50 9 52 11 M44 20 C42 18 40 17 38 16 M44 20 C46 18 48 17 50 16",
+          const decoImages: Record<string, string> = {
+            heart:  "/samples/deco-heart.png",
+            ribbon: "/samples/deco-ribbon.png",
+            lace:   "/samples/deco-lace.png",
+            lark:   "/samples/deco-lark.png",
           };
-          const isClosedShape = shape === "heart";
           return (
             <div style={{ margin: `0 auto ${preview ? 8 : 16}px`, width: preview ? 56 : 88, height: preview ? 18 : 28, position: "relative" }}>
-              <svg viewBox="0 0 88 24" width="100%" height="100%" fill="none">
-                <motion.path
-                  d={paths[shape]}
-                  stroke={svgColor}
-                  strokeWidth={isClosedShape ? "0" : "1.5"}
-                  fill={isClosedShape ? "none" : "none"}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  whileInView={{ pathLength: 1, opacity: 1 }}
-                  viewport={{ once: true, amount: 0.5 }}
-                  transition={{ duration: 1.6, ease: "easeInOut", delay: 0.3 }}
-                />
-                {isClosedShape && (
-                  <motion.path
-                    d={paths[shape]}
-                    stroke={svgColor}
-                    strokeWidth="1.2"
-                    fill="none"
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    whileInView={{ pathLength: 1, opacity: 1 }}
-                    viewport={{ once: true, amount: 0.5 }}
-                    transition={{ duration: 1.6, ease: "easeInOut", delay: 0.3 }}
-                  />
-                )}
-              </svg>
+              <motion.img
+                src={decoImages[shape] ?? decoImages.heart}
+                alt=""
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ duration: 1.2, ease: "easeInOut", delay: 0.3 }}
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
             </div>
           );
         })()}
@@ -2494,7 +2321,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
       <div style={{ order: orderOf("transport") }}>
         <section style={{ ...sp }}>
           <FadeIn>
-            <p style={{ ...slabel }}>오 시 는 길</p>
+            <p style={{ ...slabel, fontSize: preview ? 18 : 36 }}>오시는 길</p>
             <div
               style={{
                 display: "flex",
@@ -2662,7 +2489,7 @@ export default function FilmTheme({ data, preview = false }: FilmThemeProps) {
             <p
               style={{
                 ...slabel,
-                fontSize: preview ? 9 : 14,
+                fontSize: preview ? 18 : 36,
                 letterSpacing: "0.18em",
                 color: theme.textMuted,
                 marginBottom: preview ? 4 : 8,

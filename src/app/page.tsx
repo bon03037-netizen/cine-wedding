@@ -7,7 +7,7 @@ export default function Home() {
       <div className="text-center space-y-6 px-4">
         <div className="flex items-center justify-center gap-2 text-rose-400">
           <Heart className="w-8 h-8 fill-rose-400" />
-          <h1 className="text-4xl font-bold text-rose-500">Toast Wedding</h1>
+          <h1 className="text-4xl font-bold text-rose-500">Cine Wedding</h1>
           <Heart className="w-8 h-8 fill-rose-400" />
         </div>
         <p className="text-gray-500 text-lg max-w-md">

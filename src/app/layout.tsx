@@ -31,7 +31,7 @@ const nanumGothic = Nanum_Gothic({
 });
 
 export const metadata: Metadata = {
-  title: "Toast Wedding",
+  title: "Cine Wedding",
   description: "아름다운 모바일 청첩장을 간편하게",
 };
 
